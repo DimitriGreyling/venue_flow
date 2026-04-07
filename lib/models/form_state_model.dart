@@ -1,10 +1,10 @@
 class FormStateModel {
-  final Map<String, dynamic> values;
-  final Map<String, String?> errors;
+  Map<String, dynamic>? values;
+  Map<String, String?>? errors;
 
   FormStateModel({
-    required this.values,
-    required this.errors,
+     this.values,
+     this.errors,
   });
 
   FormStateModel copyWith({

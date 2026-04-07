@@ -1,12 +1,12 @@
 class VisibilityRule {
-  final String fieldId;
-  final String operator;
-  final dynamic value;
+  String? fieldId;
+  String? operator;
+  dynamic? value;
 
   VisibilityRule({
-    required this.fieldId,
-    required this.operator,
-    required this.value,
+    this.fieldId,
+    this.operator,
+    this.value,
   });
 
   factory VisibilityRule.fromJson(Map<String, dynamic> json) {

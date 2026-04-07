@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/repositories/repository_provider.dart';
 import '../theme/theme.dart';
 import '../theme/theme_provider.dart';
 import '../theme/components.dart';
@@ -22,6 +23,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final editorial = context.editorial;
+
+    final test = ref.watch(formRepositoryProvider).getForms();
     
     return Scaffold(
       backgroundColor: colorScheme.surface,

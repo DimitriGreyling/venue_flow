@@ -2,23 +2,23 @@ import 'package:venue_flow_app/models/validation_rule_model.dart';
 import 'package:venue_flow_app/models/visibility_rule_model.dart';
 
 class FormFieldModel {
-  final String id;
-  final String type;
-  final String label;
-  final String? placeholder;
+  String? id;
+  String? type;
+  String? label;
+  String?  placeholder;
 
-  final bool required;
-  final dynamic defaultValue;
+  bool? required;
+  dynamic defaultValue;
 
-  final List<String>? options; // dropdown, radio, etc.
+  List<String>? options; // dropdown, radio, etc.
 
-  final List<ValidationRule>? validations;
-  final VisibilityRule? visibility;
+  List<ValidationRule>? validations;
+  VisibilityRule? visibility;
 
   FormFieldModel({
-    required this.id,
-    required this.type,
-    required this.label,
+     this.id,
+     this.type,
+     this.label,
     this.placeholder,
     this.required = false,
     this.defaultValue,
@@ -36,9 +36,9 @@ class FormFieldModel {
       required: json['required'] ?? false,
       defaultValue: json['defaultValue'],
       options: (json['options'] as List?)?.map((e) => e.toString()).toList(),
-      validations: (json['validations'] as List?)
-          ?.map((e) => ValidationRule.fromJson(e))
-          .toList(),
+      // validations: (json['validations'] as List?)
+      //     ?.map((e) => ValidationRule.fromJson(e))
+      //     .toList(),
       visibility: json['visibility'] != null
           ? VisibilityRule.fromJson(json['visibility'])
           : null,

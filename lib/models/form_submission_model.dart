@@ -1,16 +1,16 @@
 class FormSubmission {
-  final String formId;
-  final String userId;
-  final int formVersion;
-  final Map<String, dynamic> data;
-  final DateTime createdAt;
+  String? formId;
+  String? userId;
+  int? formVersion;
+  Map<String, dynamic>? data;
+  DateTime? createdAt;
 
   FormSubmission({
-    required this.formId,
-    required this.userId,
-    required this.formVersion,
-    required this.data,
-    required this.createdAt,
+     this.formId,
+     this.userId,
+     this.formVersion,
+     this.data,
+     this.createdAt,
   });
 
   Map<String, dynamic> toJson() {
@@ -19,7 +19,7 @@ class FormSubmission {
       'user_id': userId,
       'form_version': formVersion,
       'data': data,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt?.toIso8601String(),
     };
   }
 }

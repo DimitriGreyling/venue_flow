@@ -1,10 +1,10 @@
 class ValidationRule {
-  final String type;
-  final dynamic value;
-  final String? message;
+  String? type;
+  dynamic? value;
+  String? message;
 
   ValidationRule({
-    required this.type,
+    this.type,
     this.value,
     this.message,
   });

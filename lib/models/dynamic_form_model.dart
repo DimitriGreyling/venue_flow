@@ -7,20 +7,22 @@ class DynamicFormModel {
   List<FormPageModel>? pages;
 
   DynamicFormModel({
-    required this.id,
-    required this.name,
-    required this.version,
-    required this.pages,
+    this.id,
+    this.name,
+    this.version,
+    this.pages,
   });
 
   factory DynamicFormModel.fromJson(Map<String, dynamic> json) {
-    return DynamicFormModel(
+    final resp = DynamicFormModel(
       id: json['id'],
       name: json['name'] ?? '',
       version: json['version'] ?? 1,
-      pages: (json['pages'] as List)
+      pages: (json['schema']['pages'] as List)
           .map((e) => FormPageModel.fromJson(e))
           .toList(),
     );
+
+    return resp;
   }
 }
