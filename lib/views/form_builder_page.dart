@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/models/form_field_model.dart';
+import 'package:venue_flow_app/providers/viewmodel_provider.dart';
+import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
 import '../theme/editorial_theme_data.dart';
 import '../theme/spacing.dart';
 
@@ -20,6 +23,10 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     final textTheme = Theme.of(context).textTheme;
     final editorial = context.editorial;
 
+    final formBuilderViewState = ref.watch(formBuilderViewModelProvider);
+    final formBuilderViewModel =
+        ref.watch(formBuilderViewModelProvider.notifier);
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: _buildAppBar(context, colorScheme, textTheme),
@@ -27,12 +34,18 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
         children: [
           // Left Sidebar - Form Elements
           _buildComponentSidebar(context, colorScheme, editorial),
-          
+
           // Center Canvas - Form Builder
           Expanded(
-            child: _buildFormCanvas(context, colorScheme, textTheme, editorial),
+            child: _buildFormCanvas(
+              context: context,
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+              editorial: editorial,
+              formBuilderState: formBuilderViewState,
+            ),
           ),
-          
+
           // Right Sidebar - Properties Panel
           _buildPropertiesPanel(context, colorScheme, textTheme, editorial),
         ],
@@ -40,7 +53,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, ColorScheme colorScheme, TextTheme textTheme) {
+  PreferredSizeWidget _buildAppBar(
+      BuildContext context, ColorScheme colorScheme, TextTheme textTheme) {
     return AppBar(
       backgroundColor: colorScheme.surface,
       elevation: 0,
@@ -88,10 +102,11 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-            color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
+            color:
+                isActive ? colorScheme.primary : colorScheme.onSurfaceVariant,
           ),
         ),
-        if (isActive) 
+        if (isActive)
           Container(
             height: 2,
             width: 40,
@@ -115,7 +130,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
           children: [
             IconButton(
               onPressed: () {},
-              icon: Icon(Icons.notifications_outlined, color: colorScheme.onSurfaceVariant),
+              icon: Icon(Icons.notifications_outlined,
+                  color: colorScheme.onSurfaceVariant),
             ),
             Positioned(
               right: 8,
@@ -135,14 +151,16 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
         CircleAvatar(
           radius: 16,
           backgroundColor: colorScheme.outlineVariant,
-          child: Icon(Icons.person, size: 18, color: colorScheme.onSurfaceVariant),
+          child:
+              Icon(Icons.person, size: 18, color: colorScheme.onSurfaceVariant),
         ),
         const SizedBox(width: 16),
       ],
     );
   }
 
-  Widget _buildComponentSidebar(BuildContext context, ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildComponentSidebar(BuildContext context, ColorScheme colorScheme,
+      EditorialThemeData editorial) {
     return Container(
       width: 288,
       color: colorScheme.surfaceContainerLow,
@@ -182,7 +200,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-  Widget _buildFormElements(ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildFormElements(
+      ColorScheme colorScheme, EditorialThemeData editorial) {
     final elements = [
       {'icon': Icons.short_text, 'title': 'Text Input'},
       {'icon': Icons.list, 'title': 'Select Menu'},
@@ -192,34 +211,39 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     ];
 
     return Column(
-      children: elements.map((element) => 
-        _buildDraggableElement(
-          element['icon'] as IconData,
-          element['title'] as String,
-          colorScheme.secondary,
-          colorScheme,
-          editorial,
-        ),
-      ).toList(),
+      children: elements
+          .map(
+            (element) => _buildDraggableElement(
+              element['icon'] as IconData,
+              element['title'] as String,
+              colorScheme.secondary,
+              colorScheme,
+              editorial,
+            ),
+          )
+          .toList(),
     );
   }
 
-  Widget _buildAdvancedElements(ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildAdvancedElements(
+      ColorScheme colorScheme, EditorialThemeData editorial) {
     final elements = [
       {'icon': Icons.draw, 'title': 'E-Signature'},
       {'icon': Icons.payments, 'title': 'Payment Link'},
     ];
 
     return Column(
-      children: elements.map((element) => 
-        _buildDraggableElement(
-          element['icon'] as IconData,
-          element['title'] as String,
-          colorScheme.tertiary,
-          colorScheme,
-          editorial,
-        ),
-      ).toList(),
+      children: elements
+          .map(
+            (element) => _buildDraggableElement(
+              element['icon'] as IconData,
+              element['title'] as String,
+              colorScheme.tertiary,
+              colorScheme,
+              editorial,
+            ),
+          )
+          .toList(),
     );
   }
 
@@ -238,9 +262,16 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            setState(() {
-              selectedFieldType = title;
-            });
+            ref.watch(formBuilderViewModelProvider.notifier).addFormField(
+                    formFieldModel: FormFieldModel(
+                  id: 'dfsdsd',
+                  label: 'sadasas',
+                  placeholder: 'dsasaas',
+                  required: true,
+                ));
+            // setState(() {
+            //   selectedFieldType = title;
+            // });
           },
           child: Container(
             padding: const EdgeInsets.all(12),
@@ -266,7 +297,17 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-  Widget _buildFormCanvas(BuildContext context, ColorScheme colorScheme, TextTheme textTheme, EditorialThemeData editorial) {
+  Widget _buildFormCanvas({
+    required BuildContext context,
+    required ColorScheme colorScheme,
+    required TextTheme textTheme,
+    required EditorialThemeData editorial,
+    required FormBuilderViewState formBuilderState,
+  }) {
+    if (formBuilderState.isLoading) {
+      return const CircularProgressIndicator();
+    }
+
     return Container(
       color: colorScheme.surface,
       child: Padding(
@@ -290,7 +331,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'VIP Wedding Package Form',
+                      formBuilderState.form?.first.name ?? '',
                       style: textTheme.headlineLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                         color: colorScheme.onSurface,
@@ -300,31 +341,50 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                 ),
                 Row(
                   children: [
-                    _buildActionButton('Preview', false, colorScheme, editorial),
+                    _buildActionButton(
+                        'Preview', false, colorScheme, editorial),
                     const SizedBox(width: 12),
-                    _buildActionButton('Save Draft', false, colorScheme, editorial),
+                    _buildActionButton(
+                        'Save Draft', false, colorScheme, editorial),
                     const SizedBox(width: 12),
-                    _buildActionButton('Publish Form', true, colorScheme, editorial),
+                    _buildActionButton(
+                        'Publish Form', true, colorScheme, editorial),
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 40),
-            
+
             // Canvas Area
             Expanded(
               child: Container(
                 constraints: const BoxConstraints(maxWidth: 768),
-                child: Column(
-                  children: [
-                    _buildSectionHeader(colorScheme, textTheme, editorial),
-                    const SizedBox(height: 24),
-                    _buildSelectedField(colorScheme, textTheme, editorial),
-                    const SizedBox(height: 24),
-                    _buildFormField('Preferred Wedding Date', 'Select Date...', Icons.calendar_today, false, colorScheme, textTheme, editorial),
-                    const SizedBox(height: 24),
-                    _buildDropZone(colorScheme, editorial),
-                  ],
+                child: PageView.builder(
+                  itemBuilder: (context, index) {
+                    final page = formBuilderState.form?.first.pages![index];
+                    return Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 8),
+                                Text(
+                                  page?.title ?? '',
+                                  style: textTheme.headlineMedium?.copyWith(
+                                    fontWeight: FontWeight.w900,
+                                    color: colorScheme.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -334,7 +394,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-  Widget _buildActionButton(String text, bool isPrimary, ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildActionButton(String text, bool isPrimary,
+      ColorScheme colorScheme, EditorialThemeData editorial) {
     return MaterialButton(
       onPressed: () {},
       padding: EdgeInsets.symmetric(
@@ -344,23 +405,23 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
-      color: isPrimary 
-          ? colorScheme.primaryContainer 
+      color: isPrimary
+          ? colorScheme.primaryContainer
           : colorScheme.surfaceContainerLowest,
       elevation: isPrimary ? 2 : 0,
       child: Text(
         text,
         style: editorial.buttonTextStyle.copyWith(
-          color: isPrimary 
-              ? colorScheme.onPrimary 
-              : colorScheme.onSurfaceVariant,
+          color:
+              isPrimary ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
           fontWeight: isPrimary ? FontWeight.w700 : FontWeight.w600,
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(ColorScheme colorScheme, TextTheme textTheme, EditorialThemeData editorial) {
+  Widget _buildSectionHeader(ColorScheme colorScheme, TextTheme textTheme,
+      EditorialThemeData editorial) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -398,7 +459,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-  Widget _buildSelectedField(ColorScheme colorScheme, TextTheme textTheme, EditorialThemeData editorial) {
+  Widget _buildSelectedField(ColorScheme colorScheme, TextTheme textTheme,
+      EditorialThemeData editorial) {
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
@@ -436,7 +498,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
               ),
             ),
           ),
-          
+
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -596,7 +658,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-  Widget _buildPropertiesPanel(BuildContext context, ColorScheme colorScheme, TextTheme textTheme, EditorialThemeData editorial) {
+  Widget _buildPropertiesPanel(BuildContext context, ColorScheme colorScheme,
+      TextTheme textTheme, EditorialThemeData editorial) {
     return Container(
       width: 320,
       color: colorScheme.surfaceContainerLow,
@@ -607,7 +670,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
           children: [
             Row(
               children: [
-                Icon(Icons.settings, size: 16, color: colorScheme.onSurfaceVariant),
+                Icon(Icons.settings,
+                    size: 16, color: colorScheme.onSurfaceVariant),
                 const SizedBox(width: 8),
                 Text(
                   'FIELD PROPERTIES',
@@ -619,7 +683,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
               ],
             ),
             const SizedBox(height: 32),
-            
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -638,7 +701,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     editorial,
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Validation Toggles
                   Container(
                     decoration: BoxDecoration(
@@ -651,15 +714,17 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     padding: const EdgeInsets.only(top: 24),
                     child: Column(
                       children: [
-                        _buildToggleOption('Required Field', true, colorScheme, editorial),
+                        _buildToggleOption(
+                            'Required Field', true, colorScheme, editorial),
                         const SizedBox(height: 16),
-                        _buildToggleOption('Unique Answer', false, colorScheme, editorial),
+                        _buildToggleOption(
+                            'Unique Answer', false, colorScheme, editorial),
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Conditional Logic
                   Text(
                     'CONDITIONAL LOGIC',
@@ -670,9 +735,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                   ),
                   const SizedBox(height: 16),
                   _buildAddRuleButton(colorScheme, editorial),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Helper Info
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -786,7 +851,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
             height: 20,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: value ? colorScheme.primaryContainer : colorScheme.outlineVariant,
+              color: value
+                  ? colorScheme.primaryContainer
+                  : colorScheme.outlineVariant,
             ),
             child: AnimatedAlign(
               alignment: value ? Alignment.centerRight : Alignment.centerLeft,
@@ -807,7 +874,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-  Widget _buildAddRuleButton(ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildAddRuleButton(
+      ColorScheme colorScheme, EditorialThemeData editorial) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),

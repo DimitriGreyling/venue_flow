@@ -25,4 +25,18 @@ class DynamicFormModel {
 
     return resp;
   }
+
+  DynamicFormModel copyWith({
+    String? id,
+    String? name,
+    int? version,
+    List<FormPageModel>? pages,
+  }) {
+    return DynamicFormModel(
+      id: id ?? this.id,
+      name: name?? this.name,
+      pages: pages ?? this.pages,
+      version: version ?? this.version,
+    );
+  }
 }

@@ -2,7 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/repositories/form_repository.dart';
-import 'package:venue_flow_app/viewmodels/repository_provider.dart';
+import 'package:venue_flow_app/providers/repository_provider.dart';
 
 class HomeViewState {
   final List<DynamicFormModel>? forms;
