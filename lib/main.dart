@@ -76,27 +76,5 @@ class EditorialConciergeApp extends ConsumerWidget {
         return child;
       },
     );
-
-    // MaterialApp(
-    //   title: 'Venue Flow - The Editorial Concierge',
-    //   debugShowCheckedModeBanner: false,
-
-    //   // Theme configuration
-    //   theme: editorialLightTheme,
-    //   darkTheme: editorialDarkTheme,
-    //   themeMode: themeMode,
-
-    //   // High performance settings
-    //   builder: (context, child) {
-    //     return MediaQuery(
-    //       data: MediaQuery.of(context).copyWith(
-    //         textScaler: TextScaler.noScaling, // Prevent text scaling issues
-    //       ),
-    //       child: child!,
-    //     );
-    //   },
-
-    //   home: const DashboardPage(),
-    // );
   }
 }
