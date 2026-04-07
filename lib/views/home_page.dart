@@ -1,559 +1,848 @@
-import 'dart:ui';
+// lib/views/dashboard_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:venue_flow_app/viewmodels/repository_provider.dart';
 import '../theme/theme.dart';
-import '../theme/theme_provider.dart';
-import '../theme/components.dart';
 import '../theme/spacing.dart';
+import '../theme/components.dart';
 import '../theme/elevation.dart';
 
-class HomePage extends ConsumerStatefulWidget {
-  const HomePage({super.key});
+class DashboardPage extends ConsumerStatefulWidget {
+  const DashboardPage({super.key});
 
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _HomePageState extends ConsumerState<HomePage> {
-  int _selectedBottomNavIndex = 2; // Events tab selected
+class _DashboardPageState extends ConsumerState<DashboardPage> {
+  String _selectedNavItem = 'Dashboard';
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final editorial = context.editorial;
 
-    final test = ref.watch(formRepositoryProvider).getForms();
-    
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: _buildAppBar(context, colorScheme, editorial),
-      // body: _buildBody(context, colorScheme, editorial),
-      bottomNavigationBar: _buildBottomNavigation(colorScheme),
-      floatingActionButton: _buildFloatingActionButton(colorScheme),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(
-    BuildContext context, 
-    ColorScheme colorScheme, 
-    EditorialThemeData editorial,
-  ) {
-    return AppBar(
-      backgroundColor: editorial.glassSurface,
-      elevation: 0,
-      systemOverlayStyle: colorScheme.brightness == Brightness.dark 
-          ? SystemUiOverlayStyle.light 
-          : SystemUiOverlayStyle.dark,
-      flexibleSpace: ClipRRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Container(color: Colors.transparent),
-        ),
-      ),
-      leading: Row(
+      body: Row(
         children: [
-          const SizedBox(width: EditorialSpacing.spacing6),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              Icons.business_outlined,
-              color: colorScheme.primary,
-              size: 20,
-            ),
-          ),
-        ],
-      ),
-      leadingWidth: 64,
-      title: Text(
-        'The Digital Curator',
-        style: editorial.venueNameStyle,
-      ),
-      actions: [
-        // Desktop Navigation
-        if (MediaQuery.of(context).size.width >= 768) ...[
-          _buildNavItem('Timeline', true, colorScheme, editorial),
-          _buildNavItem('Vendors', false, colorScheme, editorial),
-          _buildNavItem('Guests', false, colorScheme, editorial),
-          const SizedBox(width: EditorialSpacing.spacing8),
-        ],
-        // Theme Toggle
-        IconButton(
-          icon: Icon(
-            colorScheme.brightness == Brightness.dark 
-                ? Icons.light_mode_outlined 
-                : Icons.dark_mode_outlined,
-            color: colorScheme.primary,
-          ),
-          onPressed: () {
-            ref.read(themeModeProvider.notifier).toggleTheme();
-          },
-        ),
-        IconButton(
-          icon: Icon(
-            Icons.notifications_outlined,
-            color: colorScheme.primary,
-          ),
-          onPressed: () {},
-        ),
-        Container(
-          width: 32,
-          height: 32,
-          margin: const EdgeInsets.only(
-            right: EditorialSpacing.spacing6,
-            left: EditorialSpacing.spacing2,
-          ),
-          decoration: BoxDecoration(
-            color: colorScheme.secondaryContainer,
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNavItem(
-    String label, 
-    bool isSelected, 
-    ColorScheme colorScheme, 
-    EditorialThemeData editorial,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(right: EditorialSpacing.spacing8),
-      child: TextButton(
-        onPressed: () {},
-        style: TextButton.styleFrom(
-          foregroundColor: isSelected 
-              ? colorScheme.primary 
-              : colorScheme.onSurfaceVariant,
-        ),
-        child: Text(
-          label.toUpperCase(),
-          style: editorial.sectionHeaderStyle.copyWith(
-            color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBody(
-    BuildContext context, 
-    ColorScheme colorScheme, 
-    EditorialThemeData editorial,
-  ) {
-    return SingleChildScrollView(
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 1200),
-        margin: const EdgeInsets.symmetric(horizontal: EditorialSpacing.spacing6),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: EditorialSpacing.spacing12),
-            _buildHeader(colorScheme, editorial),
-            const SizedBox(height: EditorialSpacing.spacing16),
-            _buildTimelineContent(colorScheme, editorial),
-            const SizedBox(height: 100), // Space for bottom nav
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(ColorScheme colorScheme, EditorialThemeData editorial) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth >= 768;
-        return isDesktop
-            ? Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(child: _buildHeaderContent(colorScheme, editorial)),
-                  const SizedBox(width: EditorialSpacing.spacing6),
-                  _buildAddButton(colorScheme, editorial),
-                ],
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeaderContent(colorScheme, editorial),
-                  const SizedBox(height: EditorialSpacing.spacing6),
-                  _buildAddButton(colorScheme, editorial),
-                ],
-              );
-      },
-    );
-  }
-
-  Widget _buildHeaderContent(ColorScheme colorScheme, EditorialThemeData editorial) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'EVENT COORDINATION',
-          style: editorial.sectionHeaderStyle,
-        ),
-        const SizedBox(height: EditorialSpacing.spacing2),
-        Text(
-          'Timeline Builder',
-          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-            color: colorScheme.primary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: EditorialSpacing.spacing4),
-        Text(
-          'Curating the seamless flow of the Thompson-Chen Wedding at Grand Heritage Estate.',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAddButton(ColorScheme colorScheme, EditorialThemeData editorial) {
-    return ElevatedButton.icon(
-      onPressed: () {},
-      style: Theme.of(context).elevatedButtonTheme.style,
-      icon: const Icon(Icons.add, size: 20),
-      label: Text('Add Activity'),
-    );
-  }
-
-  Widget _buildTimelineContent(ColorScheme colorScheme, EditorialThemeData editorial) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth >= 1024;
-        return isDesktop
-            ? Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: constraints.maxWidth * 0.25,
-                    child: _buildSidebar(colorScheme, editorial),
-                  ),
-                  const SizedBox(width: EditorialSpacing.spacing12),
-                  Expanded(child: _buildTimeline(colorScheme, editorial)),
-                ],
-              )
-            : Column(
-                children: [
-                  _buildSidebar(colorScheme, editorial),
-                  const SizedBox(height: EditorialSpacing.spacing8),
-                  _buildTimeline(colorScheme, editorial),
-                ],
-              );
-      },
-    );
-  }
-
-  Widget _buildSidebar(ColorScheme colorScheme, EditorialThemeData editorial) {
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(EditorialSpacing.spacing8),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
-              begin: const Alignment(-1.0, -1.0),
-              end: const Alignment(0.707, 0.707),
-              colors: [
-                colorScheme.primary.withOpacity(0.05),
-                colorScheme.primaryContainer.withOpacity(0.2),
+          // Side Navigation
+          _buildSideNavigation(colorScheme, editorial),
+          // Main Content
+          Expanded(
+            child: Column(
+              children: [
+                // Top Navigation
+                _buildTopNavigation(colorScheme, editorial),
+                // Dashboard Content
+                Expanded(
+                  child: _buildDashboardContent(colorScheme, editorial),
+                ),
               ],
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Event Details',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.bold,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSideNavigation(ColorScheme colorScheme, EditorialThemeData editorial) {
+    return Container(
+      width: 256,
+      height: double.infinity,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withOpacity(0.04),
+            blurRadius: 32,
+            offset: const Offset(32, 0),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Logo Section
+          Container(
+            padding: const EdgeInsets.all(EditorialSpacing.spacing6),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        colorScheme.primaryContainer,
+                        colorScheme.primary,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.hub_outlined,
+                    color: colorScheme.onPrimary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: EditorialSpacing.spacing3),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Venue Flow',
+                        style: editorial.titleLarge.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        'MANAGEMENT PORTAL',
+                        style: editorial.metadataStyle.copyWith(
+                          fontSize: 8,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // New Event Button
+          Container(
+            margin: const EdgeInsets.symmetric(
+              horizontal: EditorialSpacing.spacing6,
+              vertical: EditorialSpacing.spacing4,
+            ),
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                elevation: 8,
+                shadowColor: colorScheme.primary.withOpacity(0.2),
+              ),
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('New Event'),
+            ),
+          ),
+
+          // Navigation Items
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: EditorialSpacing.spacing4),
+              child: Column(
+                children: [
+                  _buildNavItem(
+                    icon: Icons.dashboard_outlined,
+                    label: 'Dashboard',
+                    isSelected: _selectedNavItem == 'Dashboard',
+                    colorScheme: colorScheme,
+                    editorial: editorial,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.edit_note_outlined,
+                    label: 'Form Builder',
+                    isSelected: _selectedNavItem == 'Form Builder',
+                    colorScheme: colorScheme,
+                    editorial: editorial,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Events',
+                    isSelected: _selectedNavItem == 'Events',
+                    colorScheme: colorScheme,
+                    editorial: editorial,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.settings_outlined,
+                    label: 'Settings',
+                    isSelected: _selectedNavItem == 'Settings',
+                    colorScheme: colorScheme,
+                    editorial: editorial,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Bottom Section
+          Container(
+            padding: const EdgeInsets.all(EditorialSpacing.spacing6),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: colorScheme.outline.withOpacity(0.1),
+                  width: 1,
                 ),
               ),
-              const SizedBox(height: EditorialSpacing.spacing4),
-              _buildDetailItem('DATE', 'September 14, 2024', editorial),
-              const SizedBox(height: EditorialSpacing.spacing4),
-              _buildDetailItem('LOCATION', 'The Sunken Garden & Great Hall', editorial),
-              const SizedBox(height: EditorialSpacing.spacing4),
-              _buildDetailItem('MAIN COORDINATOR', '', editorial),
-              const SizedBox(height: EditorialSpacing.spacing1),
+            ),
+            child: Column(
+              children: [
+                _buildNavItem(
+                  icon: Icons.help_outline,
+                  label: 'Help Center',
+                  isSelected: false,
+                  colorScheme: colorScheme,
+                  editorial: editorial,
+                ),
+                _buildNavItem(
+                  icon: Icons.person_outline,
+                  label: 'Account',
+                  isSelected: false,
+                  colorScheme: colorScheme,
+                  editorial: editorial,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required ColorScheme colorScheme,
+    required EditorialThemeData editorial,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 2),
+      child: Material(
+        color: isSelected 
+          ? colorScheme.surfaceContainerHighest
+          : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: () {
+            setState(() {
+              _selectedNavItem = label;
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: EditorialSpacing.spacing4,
+              vertical: EditorialSpacing.spacing3,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 20,
+                  color: isSelected 
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: EditorialSpacing.spacing3),
+                Text(
+                  label,
+                  style: editorial.labelMedium.copyWith(
+                    color: isSelected 
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopNavigation(ColorScheme colorScheme, EditorialThemeData editorial) {
+    return Container(
+      height: 64,
+      padding: const EdgeInsets.symmetric(horizontal: EditorialSpacing.spacing8),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(
+          bottom: BorderSide(
+            color: colorScheme.outline.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Search Bar
+          Container(
+            width: 320,
+            height: 40,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search events, forms, or clients...',
+                hintStyle: editorial.captionStyle,
+                prefixIcon: Icon(
+                  Icons.search,
+                  size: 18,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: EditorialSpacing.spacing4,
+                  vertical: EditorialSpacing.spacing2,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(width: EditorialSpacing.spacing8),
+
+          // Top Navigation Links
+          Expanded(
+            child: Row(
+              children: [
+                _buildTopNavLink('Dashboard', true, colorScheme, editorial),
+                const SizedBox(width: EditorialSpacing.spacing8),
+                _buildTopNavLink('Forms', false, colorScheme, editorial),
+                const SizedBox(width: EditorialSpacing.spacing8),
+                _buildTopNavLink('Events', false, colorScheme, editorial),
+                const SizedBox(width: EditorialSpacing.spacing8),
+                _buildTopNavLink('Settings', false, colorScheme, editorial),
+              ],
+            ),
+          ),
+
+          // Right Section
+          Row(
+            children: [
+              // Notifications
+              Stack(
+                children: [
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.notifications_outlined,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: colorScheme.error,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colorScheme.surface,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(width: EditorialSpacing.spacing4),
+
+              // Divider
+              Container(
+                width: 1,
+                height: 32,
+                color: colorScheme.outline.withOpacity(0.2),
+              ),
+
+              const SizedBox(width: EditorialSpacing.spacing4),
+
+              // Profile Section
               Row(
                 children: [
                   Container(
-                    width: 24,
-                    height: 24,
+                    width: 32,
+                    height: 32,
                     decoration: BoxDecoration(
-                      color: colorScheme.outlineVariant,
-                      borderRadius: BorderRadius.circular(12),
+                      color: colorScheme.primaryContainer,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: colorScheme.primary.withOpacity(0.1),
+                        width: 2,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.person,
+                      size: 16,
+                      color: colorScheme.primary,
                     ),
                   ),
                   const SizedBox(width: EditorialSpacing.spacing2),
                   Text(
-                    'Elena Vance',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w500,
+                    'Alex Rivera',
+                    style: editorial.labelMedium.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-        ),
-        const SizedBox(height: EditorialSpacing.spacing8),
-        EditorialComponents.quoteContainer(
-          quote: "The beauty of the day lies in the precision of the plan.",
-          colorScheme: colorScheme,
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildDetailItem(String label, String value, EditorialThemeData editorial) {
+  Widget _buildTopNavLink(
+    String label,
+    bool isSelected,
+    ColorScheme colorScheme,
+    EditorialThemeData editorial,
+  ) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           label,
-          style: editorial.metadataStyle,
-        ),
-        if (value.isNotEmpty) ...[
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium,
+          style: editorial.labelMedium.copyWith(
+            color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
-        ],
+        ),
+        const SizedBox(height: 4),
+        if (isSelected)
+          Container(
+            width: 24,
+            height: 2,
+            decoration: BoxDecoration(
+              color: colorScheme.primary,
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
       ],
     );
   }
 
-  Widget _buildTimeline(ColorScheme colorScheme, EditorialThemeData editorial) {
-    final timelineItems = [
-      _TimelineItem(
-        time: '11:00',
-        period: 'AM',
-        title: 'Vendor Arrival & Setup',
-        category: 'Logistics',
-        status: VenueStatus.available,
-        assignees: [
-          _Assignee(Icons.room_service_outlined, 'Lush Florals Team'),
-          _Assignee(Icons.badge_outlined, 'Marcus (Venue Lead)'),
-        ],
-      ),
-      _TimelineItem(
-        time: '04:30',
-        period: 'PM',
-        title: 'Ceremony Begins',
-        description: 'Processional music by String Quartet. Guests to be seated 15 mins prior.',
-        category: 'High Priority',
-        status: VenueStatus.booked,
-        isHighlighted: true,
-        assignees: [
-          _Assignee(Icons.music_note_outlined, 'Vivaldi Strings'),
-          _Assignee(Icons.person_outline, 'Officiant Smith'),
-        ],
-      ),
-      _TimelineItem(
-        time: '05:30',
-        period: 'PM',
-        title: 'Cocktail Hour',
-        category: 'F&B',
-        status: VenueStatus.available,
-        assignees: [
-          _Assignee(Icons.local_bar_outlined, 'Estate Bar Team'),
-          _Assignee(Icons.restaurant_outlined, 'Chef Julian'),
-        ],
-      ),
-      _TimelineItem(
-        time: '07:00',
-        period: 'PM',
-        title: 'Grand Entrance & Dinner',
-        category: 'Event',
-        status: VenueStatus.available,
-        assignees: [
-          _Assignee(Icons.mic_outlined, 'DJ Sonic (MC)'),
-          _Assignee(Icons.groups_outlined, 'All Waitstaff'),
-        ],
-      ),
-    ];
+  Widget _buildDashboardContent(ColorScheme colorScheme, EditorialThemeData editorial) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(EditorialSpacing.spacing8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Section
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Coordinator Dashboard',
+                    style: editorial.displaySmall.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Welcome back, Alex. You have 4 meetings scheduled for today.',
+                    style: editorial.bodyLarge.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.description_outlined, size: 18),
+                    label: const Text('Create Form'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colorScheme.onSecondaryContainer,
+                      side: BorderSide(color: colorScheme.outline.withOpacity(0.1)),
+                    ),
+                  ),
+                  const SizedBox(width: EditorialSpacing.spacing3),
+                  ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.event, size: 18),
+                    label: const Text('New Event'),
+                  ),
+                ],
+              ),
+            ],
+          ),
 
-    return Column(
+          const SizedBox(height: EditorialSpacing.spacing8),
+
+          // Metrics Grid
+          _buildMetricsGrid(colorScheme, editorial),
+
+          const SizedBox(height: EditorialSpacing.spacing8),
+
+          // Main Content Grid
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Active Events Table
+              Expanded(
+                flex: 2,
+                child: _buildActiveEventsSection(colorScheme, editorial),
+              ),
+              const SizedBox(width: EditorialSpacing.spacing8),
+              // Recent Activity Feed
+              Expanded(
+                child: _buildRecentActivitySection(colorScheme, editorial),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: EditorialSpacing.spacing8),
+
+          // Bottom Insights Section
+          _buildInsightsSection(colorScheme, editorial),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricsGrid(ColorScheme colorScheme, EditorialThemeData editorial) {
+    return Row(
       children: [
-        Stack(
-          children: [
-            // Vertical line
-            Positioned(
-              left: 32,
-              top: 0,
-              bottom: 40,
-              child: Container(
-                width: 1,
-                color: colorScheme.outlineVariant.withOpacity(0.3),
+        // Portfolio Overview - Large Card
+        Expanded(
+          flex: 2,
+          child: Container(
+            padding: const EdgeInsets.all(EditorialSpacing.spacing6),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colorScheme.primaryContainer,
+                  colorScheme.primary,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: EditorialElevation.cardShadow(
+                colorScheme.brightness == Brightness.dark,
               ),
             ),
-            Column(
-              children: timelineItems
-                  .asMap()
-                  .entries
-                  .map((entry) => Padding(
-                        padding: EdgeInsets.only(
-                          bottom: entry.key < timelineItems.length - 1 
-                              ? EditorialSpacing.timelineItemSpacing 
-                              : 0,
-                        ),
-                        child: _buildTimelineItemWidget(entry.value, colorScheme, editorial),
-                      ))
-                  .toList(),
-            ),
-          ],
-        ),
-        const SizedBox(height: EditorialSpacing.spacing8),
-        _buildInsertButton(colorScheme, editorial),
-      ],
-    );
-  }
-
-  Widget _buildTimelineItemWidget(
-    _TimelineItem item, 
-    ColorScheme colorScheme, 
-    EditorialThemeData editorial,
-  ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Time
-        SizedBox(
-          width: 64,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 8),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.time,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
+                  'PORTFOLIO OVERVIEW',
+                  style: editorial.metadataStyle.copyWith(
+                    color: colorScheme.onPrimary.withOpacity(0.8),
+                    fontSize: 10,
+                    letterSpacing: 1.5,
                   ),
                 ),
-                Text(
-                  item.period,
-                  style: editorial.metadataStyle,
+                const SizedBox(height: EditorialSpacing.spacing4),
+                Row(
+                  children: [
+                    Text(
+                      '24',
+                      style: editorial.displaySmall.copyWith(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(width: EditorialSpacing.spacing2),
+                    Text(
+                      'Active Events',
+                      style: editorial.titleLarge.copyWith(
+                        color: colorScheme.onPrimary.withOpacity(0.9),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: EditorialSpacing.spacing6),
+                Row(
+                  children: [
+                    // Client avatars (placeholder)
+                    Row(
+                      children: List.generate(
+                        3,
+                        (index) => Container(
+                          margin: const EdgeInsets.only(right: 4),
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: colorScheme.onPrimary,
+                              width: 2,
+                            ),
+                          ),
+                          child: Icon(
+                            Icons.person,
+                            size: 16,
+                            color: colorScheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: colorScheme.onPrimary.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '+12',
+                          style: editorial.captionStyle.copyWith(
+                            color: colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: EditorialSpacing.spacing4),
+                    Text(
+                      'Managed by you this month',
+                      style: editorial.captionStyle.copyWith(
+                        color: colorScheme.onPrimary.withOpacity(0.9),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         ),
-        const SizedBox(width: EditorialSpacing.spacing8),
-        // Content
+
+        const SizedBox(width: EditorialSpacing.spacing6),
+
+        // Smaller metric cards
         Expanded(
-          child: Stack(
+          child: Column(
             children: [
-              // Timeline dot
-              Positioned(
-                left: -37,
-                top: 16,
-                child: Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(item.status, colorScheme),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: colorScheme.surface,
-                      width: 2,
-                    ),
-                    boxShadow: EditorialElevation.cardShadow(
-                      colorScheme.brightness == Brightness.dark,
+              _buildMetricCard(
+                icon: Icons.fact_check_outlined,
+                title: 'Pending Forms',
+                value: '08',
+                subtitle: 'Needs Review',
+                badgeColor: colorScheme.tertiary,
+                colorScheme: colorScheme,
+                editorial: editorial,
+              ),
+              const SizedBox(height: EditorialSpacing.spacing4),
+              _buildMetricCard(
+                icon: Icons.groups_outlined,
+                title: 'Meetings Today',
+                value: '04',
+                subtitle: 'Next: 2:30 PM - Tech Rehearsal',
+                colorScheme: colorScheme,
+                editorial: editorial,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetricCard({
+    required IconData icon,
+    required String title,
+    required String value,
+    required String subtitle,
+    Color? badgeColor,
+    required ColorScheme colorScheme,
+    required EditorialThemeData editorial,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(EditorialSpacing.spacing6),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.05),
+        ),
+        boxShadow: EditorialElevation.cardShadow(
+          colorScheme.brightness == Brightness.dark,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: badgeColor?.withOpacity(0.1) ?? colorScheme.secondaryContainer.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: badgeColor ?? colorScheme.secondary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(height: EditorialSpacing.spacing4),
+          Text(
+            title.toUpperCase(),
+            style: editorial.metadataStyle.copyWith(fontSize: 10),
+          ),
+          Text(
+            value,
+            style: editorial.displaySmall.copyWith(
+              fontWeight: FontWeight.w900,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          if (badgeColor != null) ...[
+            const SizedBox(height: EditorialSpacing.spacing4),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: EditorialSpacing.spacing2,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: badgeColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.priority_high,
+                    size: 12,
+                    color: badgeColor,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'NEEDS REVIEW',
+                    style: editorial.metadataStyle.copyWith(
+                      fontSize: 8,
+                      color: badgeColor,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                ],
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: EditorialSpacing.spacing2),
+            Text(
+              subtitle,
+              style: editorial.captionStyle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActiveEventsSection(ColorScheme colorScheme, EditorialThemeData editorial) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Active Events',
+              style: editorial.headlineSmall.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            TextButton(
+              onPressed: () {},
+              child: Text(
+                'View all schedules',
+                style: editorial.labelMedium.copyWith(
+                  color: colorScheme.secondary,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              // Card
-              EditorialComponents.editorialCard(
-                colorScheme: colorScheme,
-                onTap: () {},
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          ],
+        ),
+        const SizedBox(height: EditorialSpacing.spacing6),
+        Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: colorScheme.outline.withOpacity(0.05),
+            ),
+            boxShadow: EditorialElevation.cardShadow(
+              colorScheme.brightness == Brightness.dark,
+            ),
+          ),
+          child: Column(
+            children: [
+              // Table Header
+              Container(
+                padding: const EdgeInsets.all(EditorialSpacing.spacing6),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerLow,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
+                ),
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.drag_indicator,
-                          color: colorScheme.outlineVariant,
-                          size: 20,
-                        ),
-                        const SizedBox(width: EditorialSpacing.spacing4),
-                        Expanded(
-                          child: Text(
-                            item.title,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                        ),
-                        EditorialComponents.statusChip(
-                          label: item.category,
-                          status: item.status,
-                          colorScheme: colorScheme,
-                        ),
-                      ],
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        'EVENT NAME',
+                        style: editorial.metadataStyle.copyWith(fontSize: 10),
+                      ),
                     ),
-                    if (item.description != null) ...[
-                      const SizedBox(height: EditorialSpacing.spacing4),
-                      Text(
-                        item.description!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        'CLIENT',
+                        style: editorial.metadataStyle.copyWith(fontSize: 10),
                       ),
-                    ],
-                    if (item.assignees.isNotEmpty) ...[
-                      const SizedBox(height: EditorialSpacing.spacing6),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              color: editorial.ghostBorder,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        padding: const EdgeInsets.only(top: EditorialSpacing.spacing6),
-                        child: Wrap(
-                          spacing: EditorialSpacing.spacing6,
-                          runSpacing: EditorialSpacing.spacing2,
-                          children: item.assignees
-                              .map((assignee) => Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        assignee.icon,
-                                        size: 16,
-                                        color: colorScheme.secondary,
-                                      ),
-                                      const SizedBox(width: EditorialSpacing.spacing1),
-                                      Text(
-                                        assignee.name,
-                                        style: editorial.captionStyle,
-                                      ),
-                                    ],
-                                  ))
-                              .toList(),
-                        ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'DATE',
+                        style: editorial.metadataStyle.copyWith(fontSize: 10),
                       ),
-                    ],
+                    ),
+                    Expanded(
+                      child: Text(
+                        'STATUS',
+                        style: editorial.metadataStyle.copyWith(fontSize: 10),
+                      ),
+                    ),
+                    const SizedBox(width: 40),
                   ],
+                ),
+              ),
+              // Table Rows
+              ...List.generate(
+                3,
+                (index) => _buildEventRow(
+                  index,
+                  colorScheme,
+                  editorial,
                 ),
               ),
             ],
@@ -563,32 +852,128 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildInsertButton(ColorScheme colorScheme, EditorialThemeData editorial) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 96),
-      child: Center(
-        child: OutlinedButton.icon(
-          onPressed: () {},
-          style: OutlinedButton.styleFrom(
-            foregroundColor: colorScheme.secondary,
-            side: BorderSide(
-              color: colorScheme.outlineVariant.withOpacity(0.3),
-              style: BorderStyle.solid,
-              width: 2,
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: EditorialSpacing.spacing12,
-              vertical: EditorialSpacing.spacing4,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+  Widget _buildEventRow(int index, ColorScheme colorScheme, EditorialThemeData editorial) {
+    final events = [
+      {
+        'name': 'Annual Tech Gala',
+        'client': 'Lumina Global',
+        'date': 'Oct 12, 2023',
+        'status': 'Confirmed',
+        'statusColor': colorScheme.primary,
+      },
+      {
+        'name': 'Miller-Smith Wedding',
+        'client': 'Sarah Miller',
+        'date': 'Oct 15, 2023',
+        'status': 'Planning',
+        'statusColor': colorScheme.secondary,
+      },
+      {
+        'name': 'Summit 2024 Launch',
+        'client': 'NexGen Corp',
+        'date': 'Nov 02, 2023',
+        'status': 'Pending',
+        'statusColor': colorScheme.tertiary,
+      },
+    ];
+
+    final event = events[index];
+    
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: colorScheme.outline.withOpacity(0.1),
+            width: 1,
           ),
-          icon: const Icon(Icons.add_circle_outline, size: 24),
-          label: Text(
-            'Insert Activity',
-            style: editorial.buttonTextStyle.copyWith(
-              fontSize: 14,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.all(EditorialSpacing.spacing6),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainer,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          index == 0 ? Icons.celebration_outlined :
+                          index == 1 ? Icons.favorite_outline :
+                          Icons.business_outlined,
+                          size: 20,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: EditorialSpacing.spacing3),
+                      Text(
+                        event['name'] as String,
+                        style: editorial.titleMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    event['client'] as String,
+                    style: editorial.bodyMedium.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    event['date'] as String,
+                    style: editorial.bodyMedium.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: EditorialSpacing.spacing3,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: (event['statusColor'] as Color).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      event['status'] as String,
+                      style: editorial.metadataStyle.copyWith(
+                        color: event['statusColor'] as Color,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 40,
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: colorScheme.onSurfaceVariant,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -596,116 +981,215 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildBottomNavigation(ColorScheme colorScheme) {
-    if (MediaQuery.of(context).size.width >= 768) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: colorScheme.primary.withOpacity(0.1),
-            width: 1,
+  Widget _buildRecentActivitySection(ColorScheme colorScheme, EditorialThemeData editorial) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Recent Activity',
+          style: editorial.headlineSmall.copyWith(
+            fontWeight: FontWeight.w900,
           ),
         ),
-        boxShadow: EditorialElevation.navigationShadow(
+        const SizedBox(height: EditorialSpacing.spacing6),
+        ...List.generate(
+          3,
+          (index) => _buildActivityItem(index, colorScheme, editorial),
+        ),
+        const SizedBox(height: EditorialSpacing.spacing4),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(EditorialSpacing.spacing4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: colorScheme.outline.withOpacity(0.3),
+              style: BorderStyle.solid,
+              width: 2,
+            ),
+          ),
+          child: TextButton(
+            onPressed: () {},
+            child: Text(
+              'VIEW ALL NOTIFICATIONS',
+              style: editorial.metadataStyle.copyWith(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActivityItem(int index, ColorScheme colorScheme, EditorialThemeData editorial) {
+    final activities = [
+      {
+        'icon': Icons.description_outlined,
+        'title': 'New Form Submission',
+        'description': 'Lumina Global submitted Catering Requirements',
+        'time': '12 minutes ago',
+        'iconColor': colorScheme.primary,
+      },
+      {
+        'icon': Icons.update,
+        'title': 'Event Status Changed',
+        'description': 'Miller-Smith Wedding moved to Planning',
+        'time': '2 hours ago',
+        'iconColor': colorScheme.secondary,
+      },
+      {
+        'icon': Icons.chat_outlined,
+        'title': 'New Message',
+        'description': 'Client "NexGen Corp" sent a message regarding AV setup',
+        'time': 'Yesterday, 4:45 PM',
+        'iconColor': colorScheme.tertiary,
+      },
+    ];
+
+    final activity = activities[index];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: EditorialSpacing.spacing4),
+      padding: const EdgeInsets.all(EditorialSpacing.spacing5),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.05),
+        ),
+        boxShadow: EditorialElevation.cardShadow(
           colorScheme.brightness == Brightness.dark,
         ),
       ),
-      child: BottomNavigationBar(
-        currentIndex: _selectedBottomNavIndex,
-        onTap: (index) => setState(() => _selectedBottomNavIndex = index),
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        selectedItemColor: colorScheme.primary,
-        unselectedItemColor: colorScheme.onSurfaceVariant,
-        selectedLabelStyle: context.editorial.metadataStyle,
-        unselectedLabelStyle: context.editorial.metadataStyle,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined),
-            activeIcon: Icon(Icons.dashboard),
-            label: 'DASHBOARD',
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: (activity['iconColor'] as Color).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              activity['icon'] as IconData,
+              size: 20,
+              color: activity['iconColor'] as Color,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined),
-            activeIcon: Icon(Icons.calendar_month),
-            label: 'CALENDAR',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event_seat_outlined),
-            activeIcon: Icon(Icons.event_seat),
-            label: 'EVENTS',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.group_outlined),
-            activeIcon: Icon(Icons.group),
-            label: 'CLIENTS',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.checklist_outlined),
-            activeIcon: Icon(Icons.checklist),
-            label: 'TASKS',
+          const SizedBox(width: EditorialSpacing.spacing4),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  activity['title'] as String,
+                  style: editorial.titleSmall.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  activity['description'] as String,
+                  style: editorial.captionStyle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  activity['time'] as String,
+                  style: editorial.metadataStyle.copyWith(
+                    fontSize: 10,
+                    color: colorScheme.outline,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFloatingActionButton(ColorScheme colorScheme) {
-    if (MediaQuery.of(context).size.width >= 768) {
-      return const SizedBox.shrink();
-    }
-
+  Widget _buildInsightsSection(ColorScheme colorScheme, EditorialThemeData editorial) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 80),
-      child: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add),
+      padding: const EdgeInsets.all(EditorialSpacing.spacing8),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceVariant.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.1),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Venue Occupancy Analysis',
+                  style: editorial.headlineMedium.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: EditorialSpacing.spacing2),
+                Text(
+                  'Your current venue booking rate is 15% higher than last quarter. Consider opening more weekend slots for Q4.',
+                  style: editorial.bodyLarge.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: EditorialSpacing.spacing12),
+          Row(
+            children: [
+              _buildStatColumn('88%', 'OCCUPANCY', colorScheme, editorial),
+              Container(
+                width: 1,
+                height: 48,
+                margin: const EdgeInsets.symmetric(horizontal: EditorialSpacing.spacing8),
+                color: colorScheme.outline.withOpacity(0.2),
+              ),
+              _buildStatColumn('12k', 'ATTENDEES', colorScheme, editorial),
+              Container(
+                width: 1,
+                height: 48,
+                margin: const EdgeInsets.symmetric(horizontal: EditorialSpacing.spacing8),
+                color: colorScheme.outline.withOpacity(0.2),
+              ),
+              _buildStatColumn('4.9', 'RATING', colorScheme, editorial),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  Color _getStatusColor(VenueStatus status, ColorScheme colorScheme) {
-    switch (status) {
-      case VenueStatus.available:
-        return colorScheme.primary;
-      case VenueStatus.hold:
-        return colorScheme.tertiary;
-      case VenueStatus.booked:
-        return colorScheme.secondary;
-    }
+  Widget _buildStatColumn(
+    String value,
+    String label,
+    ColorScheme colorScheme,
+    EditorialThemeData editorial,
+  ) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: editorial.displayMedium.copyWith(
+            fontWeight: FontWeight.w900,
+            color: colorScheme.primary,
+          ),
+        ),
+        Text(
+          label,
+          style: editorial.metadataStyle.copyWith(fontSize: 10),
+        ),
+      ],
+    );
   }
-}
-
-class _TimelineItem {
-  final String time;
-  final String period;
-  final String title;
-  final String? description;
-  final String category;
-  final VenueStatus status;
-  final bool isHighlighted;
-  final List<_Assignee> assignees;
-
-  _TimelineItem({
-    required this.time,
-    required this.period,
-    required this.title,
-    this.description,
-    required this.category,
-    required this.status,
-    this.isHighlighted = false,
-    required this.assignees,
-  });
-}
-
-class _Assignee {
-  final IconData icon;
-  final String name;
-
-  _Assignee(this.icon, this.name);
 }
