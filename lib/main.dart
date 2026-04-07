@@ -3,17 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:venue_flow_app/routing/app_router.dart';
 import 'theme/theme.dart';
 import 'theme/theme_provider.dart';
 import 'views/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(lightSystemUiStyle);
 
-    await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: ".env");
 
   final supabaseUrl = dotenv.env['SUPABASE_URL'];
   if (supabaseUrl == null) {
@@ -29,7 +30,7 @@ void main() async {
     url: supabaseUrl,
     anonKey: supabaseAnonKey,
   );
-  
+
   runApp(
     const ProviderScope(
       child: EditorialConciergeApp(),
@@ -43,32 +44,59 @@ class EditorialConciergeApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
-    
+
     // Update system UI overlay style when theme changes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SystemChrome.setSystemUIOverlayStyle(getSystemUiStyle(themeMode));
     });
 
-    return MaterialApp(
-      title: 'Venue Flow - The Editorial Concierge',
+    return MaterialApp.router(
+      restorationScopeId: 'app',
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+          //TODO:: add ack for mobil devices
+
+          // dragDevices: {
+          //   PointerDeviceKind.mouse,
+          //   PointerDeviceKind.touch,
+          //   PointerDeviceKind.trackpad,
+          //   PointerDeviceKind.stylus,
+          //   PointerDeviceKind.unknown,
+          // },
+          ),
       debugShowCheckedModeBanner: false,
-      
+      routerConfig: appRouter,
+      title: 'Venue Flow',
       // Theme configuration
       theme: editorialLightTheme,
       darkTheme: editorialDarkTheme,
       themeMode: themeMode,
-      
-      // High performance settings
       builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.noScaling, // Prevent text scaling issues
-          ),
-          child: child!,
-        );
+        if (child == null) return const SizedBox.shrink();
+
+        return child;
       },
-      
-      home: const DashboardPage(),
     );
+
+    // MaterialApp(
+    //   title: 'Venue Flow - The Editorial Concierge',
+    //   debugShowCheckedModeBanner: false,
+
+    //   // Theme configuration
+    //   theme: editorialLightTheme,
+    //   darkTheme: editorialDarkTheme,
+    //   themeMode: themeMode,
+
+    //   // High performance settings
+    //   builder: (context, child) {
+    //     return MediaQuery(
+    //       data: MediaQuery.of(context).copyWith(
+    //         textScaler: TextScaler.noScaling, // Prevent text scaling issues
+    //       ),
+    //       child: child!,
+    //     );
+    //   },
+
+    //   home: const DashboardPage(),
+    // );
   }
 }
