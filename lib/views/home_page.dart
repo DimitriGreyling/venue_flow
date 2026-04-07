@@ -26,7 +26,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: _buildAppBar(context, colorScheme, editorial),
-      body: _buildBody(context, colorScheme, editorial),
+      // body: _buildBody(context, colorScheme, editorial),
       bottomNavigationBar: _buildBottomNavigation(colorScheme),
       floatingActionButton: _buildFloatingActionButton(colorScheme),
     );
