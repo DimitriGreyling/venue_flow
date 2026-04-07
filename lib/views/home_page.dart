@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:venue_flow_app/repositories/repository_provider.dart';
+import 'package:venue_flow_app/viewmodels/repository_provider.dart';
 import '../theme/theme.dart';
 import '../theme/theme_provider.dart';
 import '../theme/components.dart';
