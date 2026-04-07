@@ -36,7 +36,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       body: Row(
         children: [
           // Left Sidebar - Form Elements
-          _buildComponentSidebar(context, colorScheme, editorial),
+          // _buildComponentSidebar(context, colorScheme, editorial),
 
           // Center Canvas - Form Builder
           Expanded(
@@ -270,22 +270,40 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
             final result = await showDialog(
               context: context,
               builder: (context) {
+                final screenSize = MediaQuery.of(context).size;
+                final dialogWidth = screenSize.width > 768
+                    ? screenSize.width * 0.7
+                    : screenSize.width * 0.9;
+                final dialogHeight = screenSize.height * 0.8;
+
                 return Dialog(
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: nameController,
-                        decoration: InputDecoration(
-                          hintText: 'Name',
-                          label: Text('Name'),
-                        ),
+                  child: SizedBox(
+                    width: dialogWidth,
+                    height: dialogHeight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Add New Field',
+                            style: editorial.labelBold,
+                          ),
+                          const Divider(),
+                          TextFormField(
+                            controller: nameController,
+                            decoration: const InputDecoration(
+                              hintText: 'Name',
+                              label: Text('Name'),
+                            ),
+                          ),
+                          ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text('Submit')),
+                        ],
                       ),
-                      ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text('Submit')),
-                    ],
+                    ),
                   ),
                 );
               },
@@ -371,13 +389,85 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                 Row(
                   children: [
                     _buildActionButton(
-                        'Preview', false, colorScheme, editorial),
-                    const SizedBox(width: 12),
+                      text: 'Add Field',
+                      isPrimary: true,
+                      colorScheme: colorScheme,
+                      editorial: editorial,
+                      callback: () async {
+                        TextEditingController nameController =
+                            TextEditingController();
+
+                        final result = await showDialog(
+                          context: context,
+                          builder: (context) {
+                            final screenSize = MediaQuery.of(context).size;
+                            final dialogWidth = screenSize.width > 768
+                                ? screenSize.width * 0.7
+                                : screenSize.width * 0.9;
+                            final dialogHeight = screenSize.height * 0.8;
+
+                            return Dialog(
+                              child: SizedBox(
+                                width: dialogWidth,
+                                height: dialogHeight,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        'Add New Field',
+                                        style: editorial.labelBold,
+                                      ),
+                                      const Divider(),
+                                      TextFormField(
+                                        controller: nameController,
+                                        decoration: const InputDecoration(
+                                          hintText: 'Name',
+                                          label: Text('Name'),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text('Submit')),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+
+                        ref
+                            .watch(formBuilderViewModelProvider.notifier)
+                            .addFormField(
+                                formFieldModel: FormFieldModel(
+                              label: nameController.text,
+                              placeholder: nameController.text,
+                              required: true,
+                              type: FieldType.text,
+                            ));
+                        // setState(() {
+                        //   selectedFieldType = title;
+                        // });
+                      },
+                    ),
+                    const SizedBox(
+                      width: 12,
+                    ),
+                    // _buildActionButton(
+                    //     'Preview', false, colorScheme, editorial),
+                    // const SizedBox(width: 12),
                     _buildActionButton(
-                        'Save Draft', false, colorScheme, editorial),
-                    const SizedBox(width: 12),
-                    _buildActionButton(
-                        'Publish Form', true, colorScheme, editorial),
+                      text: 'Save Draft',
+                      isPrimary: false,
+                      colorScheme: colorScheme,
+                      editorial: editorial,
+                    ),
+                    // const SizedBox(width: 12),
+                    // _buildActionButton(
+                    //     'Publish Form', true, colorScheme, editorial),
                   ],
                 ),
               ],
@@ -443,10 +533,15 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-  Widget _buildActionButton(String text, bool isPrimary,
-      ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildActionButton({
+    required String text,
+    required bool isPrimary,
+    required ColorScheme colorScheme,
+    required EditorialThemeData editorial,
+    void Function()? callback,
+  }) {
     return MaterialButton(
-      onPressed: () {},
+      onPressed: () => callback?.call(),
       padding: EdgeInsets.symmetric(
         horizontal: isPrimary ? 24 : 20,
         vertical: 12,
