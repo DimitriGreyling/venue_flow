@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
+import 'package:venue_flow_app/theme/components.dart';
 import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
+import 'package:venue_flow_app/views/reordeable_form_fields_list.dart';
 import '../theme/editorial_theme_data.dart';
 import '../theme/spacing.dart';
 
@@ -261,13 +264,39 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: () {
+          onTap: () async {
+            TextEditingController nameController = TextEditingController();
+
+            final result = await showDialog(
+              context: context,
+              builder: (context) {
+                return Dialog(
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          hintText: 'Name',
+                          label: Text('Name'),
+                        ),
+                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('Submit')),
+                    ],
+                  ),
+                );
+              },
+            );
+
             ref.watch(formBuilderViewModelProvider.notifier).addFormField(
                     formFieldModel: FormFieldModel(
-                  id: 'dfsdsd',
-                  label: 'sadasas',
-                  placeholder: 'dsasaas',
+                  label: nameController.text,
+                  placeholder: nameController.text,
                   required: true,
+                  type: FieldType.text,
                 ));
             // setState(() {
             //   selectedFieldType = title;
@@ -381,6 +410,26 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                               ],
                             ),
                           ],
+                        ),
+                        // Reorderable Form Fields List
+                        ReorderableFormFieldsList(
+                          fields: page?.fields ??
+                              [], //_getFormFields(formBuilderState),
+                          // selectedFieldId: selectedFieldId,
+                          colorScheme: colorScheme,
+                          editorial: editorial,
+                          onReorder: (oldIndex, newIndex) {
+                            // _handleFieldReorder(oldIndex, newIndex);
+                          },
+                          onFieldSelected: (field) {
+                            // _handleFieldSelection(field);
+                          },
+                          onFieldDeleted: (field) {
+                            // _handleFieldDeletion(field);
+                          },
+                          onFieldDuplicated: (field) {
+                            // _handleFieldDuplication(field);
+                          },
                         ),
                       ],
                     );

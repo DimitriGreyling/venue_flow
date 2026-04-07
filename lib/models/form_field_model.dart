@@ -1,11 +1,12 @@
+import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/validation_rule_model.dart';
 import 'package:venue_flow_app/models/visibility_rule_model.dart';
 
 class FormFieldModel {
   String? id;
-  String? type;
+  FieldType? type;
   String? label;
-  String?  placeholder;
+  String? placeholder;
 
   bool? required;
   dynamic defaultValue;
@@ -16,9 +17,9 @@ class FormFieldModel {
   VisibilityRule? visibility;
 
   FormFieldModel({
-     this.id,
-     this.type,
-     this.label,
+    this.id,
+    this.type,
+    this.label,
     this.placeholder,
     this.required = false,
     this.defaultValue,
