@@ -1,53 +1,55 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
 
-/// Editorial Concierge Elevation & Shadow System
-/// "Shadows are light, borders are invisible" - implements the luxury aesthetic
+/// The Architectural Flow Elevation & Tonal Layering System
+/// "Shadows are light, borders are invisible" - implements tonal depth
+/// Rejects standard drop shadow approach for atmospheric tonal layering
 class EditorialElevation {
   EditorialElevation._();
 
-  // AMBIENT SHADOWS
-  /// "For floating elements (modals, dropdowns), use 32px blur with 4% opacity, 
-  /// tinted with primary color. This mimics natural light through a window."
+  // TONAL LAYERING LEVELS
+  /// Surface elevation levels for tonal architecture
+  static const double level0 = 0; // Base layer - background (#f8f9ff)
+  static const double level1 = 1; // Mid layer - surface-container (#e5eeff)
+  static const double level2 = 2; // Top layer - surface-container-lowest (#ffffff)
+  static const double level3 = 4; // Floating elements when absolutely necessary
+
+  // AMBIENT SHADOWS - Deep Blue Tinted
+  /// "For floating elements (modals, dropdowns), use 32px blur with 6% opacity, 
+  /// tinted with atmospheric blue rgba(11, 28, 48, 0.06). Mimics natural light."
   
-  /// Primary ambient shadow for floating elements
+  /// Primary ambient shadow for floating elements - Deep Blue Tinted
   static List<BoxShadow> ambientShadow(bool isDark) => [
     BoxShadow(
       color: isDark 
-          ? EditorialColors.darkAmbientShadow
-          : EditorialColors.lightAmbientShadow,
-      offset: const Offset(0, 10),
-      blurRadius: 32,
-      spreadRadius: -2,
+          ? Colors.black.withOpacity(0.12)
+          : const Color(0xFF0b1c30).withOpacity(0.06), // Deep blue tint
+      offset: const Offset(0, 8), // 8px Y-offset as specified
+      blurRadius: 32, // 32px blur
+      spreadRadius: 0,
     ),
   ];
 
-  /// Subtle card elevation - barely perceptible but creates depth
+  /// Minimal card elevation - barely perceptible tonal shift
+  /// Uses tonal layering instead of shadows
   static List<BoxShadow> cardShadow(bool isDark) => [
-    BoxShadow(
-      color: isDark 
-          ? Colors.black.withOpacity(0.08)
-          : EditorialColors.lightPrimary.withOpacity(0.02),
-      offset: const Offset(0, 2),
-      blurRadius: 8,
-      spreadRadius: -1,
-    ),
+    // Minimal shadow for floating feel only when absolutely necessary
     BoxShadow(
       color: isDark 
           ? Colors.black.withOpacity(0.04)
-          : EditorialColors.lightPrimary.withOpacity(0.01),
-      offset: const Offset(0, 4),
-      blurRadius: 16,
-      spreadRadius: -2,
+          : const Color(0xFF0b1c30).withOpacity(0.02), // Atmospheric blue tint
+      offset: const Offset(0, 1),
+      blurRadius: 3,
+      spreadRadius: 0,
     ),
   ];
 
-  /// Interactive element shadow - responds to user interaction
+  /// Interactive element shadow - minimal response to user interaction
   static List<BoxShadow> interactiveShadow(bool isDark) => [
     BoxShadow(
       color: isDark 
-          ? Colors.black.withOpacity(0.12)
-          : EditorialColors.lightPrimary.withOpacity(0.06),
+          ? Colors.black.withOpacity(0.08)
+          : const Color(0xFF0b1c30).withOpacity(0.04), // Atmospheric blue tint
       offset: const Offset(0, 4),
       blurRadius: 16,
       spreadRadius: -1,
@@ -134,18 +136,6 @@ class EditorialElevation {
   // MATERIAL 3 ELEVATION MAPPING
   /// Custom elevation values that align with Editorial Concierge aesthetic
   /// while remaining compatible with Material 3
-
-  /// Level 0 - Surface level, no elevation
-  static const double level0 = 0.0;
-
-  /// Level 1 - Subtle card elevation
-  static const double level1 = 2.0;
-
-  /// Level 2 - Interactive elements
-  static const double level2 = 4.0;
-
-  /// Level 3 - Navigation and persistent elements  
-  static const double level3 = 6.0;
 
   /// Level 4 - Menu and dropdown overlays
   static const double level4 = 8.0;

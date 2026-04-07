@@ -1,157 +1,84 @@
-# Design System Document: The Editorial Concierge
+# Design System Specification: The Architectural Flow
 
+## 1. Overview & Creative North Star
+**Creative North Star: "The Orchestrated Atmosphere"**
 
+In venue management, the magic happens when complex logistics feel effortless to the guest. This design system moves away from the "data-entry" aesthetic of traditional B2B SaaS. Instead, it adopts an **Editorial High-End** approach. We treat every dashboard like a curated floor plan and every data point like a VIP invitation.
 
-This design system is crafted for a premium Wedding Venue Management System, where the user experience must mirror the high-touch, white-glove service of the industry itself. We are moving away from the "software" look and toward a "digital atelier" aesthetic.
+To break the "template" look, we utilize **Intentional Asymmetry** and **Tonal Depth**. By avoiding rigid, boxy grids and instead using layered surfaces and expansive whitespace, we create a sense of "Air"—giving the user the mental room to manage high-pressure events with calm authority.
 
+---
 
-
-## 1. Overview & Creative North Star: "The Digital Curator"
-
-The Creative North Star for this system is **The Digital Curator**. Unlike standard management tools that feel like spreadsheets, this system should feel like a high-end wedding planner’s physical portfolio.
-
-
-
-To achieve this, we break the "template" look through:
-
-* **Intentional Asymmetry:** Using the `Spacing Scale` (specifically shifts between `16` and `20`) to create offset layouts that feel editorial rather than industrial.
-
-* **Tonal Breathability:** Utilizing the `surface` and `ivory` tones to create expansive whitespace, ensuring the interface never feels "busy" despite the complexity of venue logistics.
-
-* **Layered Sophistication:** Overlapping image containers with text blocks to create a sense of depth and curated intent.
-
-
-
-## 2. Colors
-
-Our palette balances the warmth of `champagne` and `ivory` with the authoritative weight of `deep slate`.
-
-
-
-* **Primary (`#446464`):** Our "Deep Slate" anchor. Used for primary actions and deep navigation elements to provide a sense of grounded professionalism.
-
-* **Secondary (`#685d4a`):** A muted, sophisticated earth tone that bridges the gap between slate and champagne.
-
-* **Tertiary (`#735c00`):** The "Gold" accent. Reserved for high-importance highlights, "Booked" statuses, or premium milestones.
-
-* **Surface & Neutrals:** We rely on `surface-container-lowest` (#ffffff) to `surface-dim` (#dbdbcd) to build our hierarchy.
-
-
+## 2. Colors: Tonal Architecture
+The palette is built on a foundation of "Atmospheric Blues" and "Architectural Greens." We do not use color just to decorate; we use it to define space.
 
 ### The "No-Line" Rule
-
-**Explicit Instruction:** Do not use 1px solid borders to section content. Boundaries must be defined solely through background color shifts. For example, a sidebar in `surface-container-low` should sit against a main content area of `surface`. If you feel the need for a line, use whitespace (`spacing-8` or higher) instead.
-
-
+**Borders are prohibited for sectioning.** To separate a sidebar from a main content area, do not draw a 1px line. Instead, use a background shift:
+* **Main Canvas:** `surface` (#f8f9ff)
+* **Sidebar/Navigation:** `surface-container-low` (#eff4ff)
+* **Active Interaction Areas:** `surface-container-high` (#dce9ff)
 
 ### Surface Hierarchy & Nesting
+Treat the UI as a physical stack of materials.
+1. **Base Layer:** `background` (#f8f9ff) - The floor of the application.
+2. **Mid Layer:** `surface-container` (#e5eeff) - Grouping related content blocks.
+3. **Top Layer:** `surface-container-lowest` (#ffffff) - High-priority cards that should "pop" against the tinted background.
 
-Treat the UI as a series of physical layers—like stacked sheets of fine vellum paper.
+### The "Glass & Gradient" Rule
+For primary actions and high-level summaries, use **Signature Textures**.
+* **Primary CTAs:** Apply a subtle linear gradient from `primary_container` (#004a31) to `primary` (#00311f) at a 135-degree angle. This adds "soul" and weight to the emerald accent.
+* **Floating Modals:** Use `surface_container_lowest` with a 85% opacity and a `24px` backdrop-blur to create a "frosted glass" effect, ensuring the venue data beneath stays visible but non-distracting.
 
-* **Base:** `surface` (#fafaeb).
+---
 
-* **Sectioning:** `surface-container-low` (#f4f5e6).
+## 3. Typography: Editorial Authority
+We utilize two distinct typefaces to balance character with utility.
 
-* **Interactive Cards:** `surface-container-lowest` (#ffffff).
+* **Display & Headlines (Manrope):** Chosen for its geometric precision and modern "tech-boutique" feel. Use `display-lg` to `headline-sm` for page titles and key metrics. This is your "Editorial" voice.
+* **Body & Labels (Inter):** Chosen for its unparalleled legibility in data-heavy views. Use `body-md` for general content and `label-sm` for micro-data.
 
-This nesting creates a soft, "pillowy" depth that feels expensive and intentional.
+**Hierarchy Strategy:**
+Use `on_surface_variant` (#444651) for secondary labels to create a soft contrast against the high-contrast `on_surface` (#0b1c30) headlines. This "muted-to-bold" transition guides the eye naturally through complex booking forms.
 
+---
 
+## 4. Elevation & Depth: Tonal Layering
+We reject the standard "Drop Shadow" approach. Depth is a result of light and material, not black ink.
 
-### Signature Textures
+* **The Layering Principle:** A card should never have a border. If you place a `surface-container-lowest` (#ffffff) card on a `surface-container-low` (#eff4ff) background, the 2% shift in brightness is enough to define the boundary.
+* **Ambient Shadows:** If an element must float (like a dropdown or a "New Event" FAB), use a shadow color tinted with the brand: `rgba(11, 28, 48, 0.06)` (a deep blue tint) with a `32px` blur and `8px` Y-offset.
+* **The "Ghost Border" Fallback:** In extreme high-density data tables where separation is mandatory, use a "Ghost Border": `outline-variant` (#c5c5d3) at 15% opacity.
 
-Use a subtle linear gradient for hero areas or primary CTAs:
-
-* `linear-gradient(135deg, primary (#446464) 0%, primary-container (#cdf0ef) 100%)` at low opacity. This adds a "silk sheen" effect that flat color cannot replicate.
-
-
-
-## 3. Typography
-
-We utilize a high-contrast pairing to evoke the feeling of a luxury wedding invitation.
-
-
-
-* **Display & Headlines (Noto Serif):** These are our "Editorial Voice." Use `display-lg` for dashboard welcomes and venue names. The serif evokes tradition, elegance, and timelessness.
-
-* **Body & Labels (Manrope):** Our "Functional Voice." Manrope provides a clean, modern counterpoint to the serif. It ensures high legibility for contract details, guest counts, and scheduling data.
-
-* **Scale Usage:** Always use `label-md` or `label-sm` for metadata, ensuring they are in `on-surface-variant` to keep the visual hierarchy focused on the `headline` elements.
-
-
-
-## 4. Elevation & Depth
-
-In this design system, shadows are light, and borders are invisible.
-
-
-
-* **The Layering Principle:** Depth is achieved by stacking. Place a `surface-container-lowest` card on a `surface-container-high` background. This creates a natural "lift."
-
-* **Ambient Shadows:** For floating elements (like modals or dropdowns), use a 32px blur with 4% opacity, tinted with the `primary` color: `box-shadow: 0 10px 32px rgba(68, 100, 100, 0.04)`. This mimics natural light through a window.
-
-* **The "Ghost Border" Fallback:** If a divider is functionally required, use the `outline-variant` token at **15% opacity**. It should be felt, not seen.
-
-* **Glassmorphism:** For top navigation bars or floating action buttons, use `surface` at 80% opacity with a `backdrop-blur(12px)`. This keeps the venue's imagery (the "romance") visible even as the user navigates the "logistics."
-
-
+---
 
 ## 5. Components
 
-
-
-### Buttons
-
-* **Primary:** Solid `primary` with `on-primary` text. Corners use `rounded-md` (0.375rem).
-
-* **Secondary:** `surface-container-highest` background with `primary` text. No border.
-
-* **Tertiary:** Text-only in `primary`, using `title-sm` typography with an underline on hover only.
-
-
-
-### Cards & Lists
-
-* **Rule:** Forbid the use of divider lines between list items. Use `spacing-4` (1.4rem) of vertical whitespace to separate items.
-
-* **Interaction:** On hover, a card should shift from `surface-container-low` to `surface-container-lowest`.
-
-
+### Buttons & Chips
+* **Primary Button:** Gradient fill (`primary_container` to `primary`), `8px` (DEFAULT) corner radius. Use `on_primary` (#ffffff) text.
+* **Action Chips:** Use `secondary_container` (#8fa7fe) with `on_secondary_container` (#1d3989) text. Shape should be `full` (pill-shaped) to contrast against the architectural squareness of the cards.
 
 ### Input Fields
+* **Style:** Minimalist. No background fill; only a `surface-variant` bottom-stroke or a `Ghost Border`.
+* **Focus State:** Transition the border to `secondary` (#4059aa) and add a soft `secondary_fixed` glow (4px spread).
 
-* **Aesthetic:** Fields should use `surface-container-low` as a background with a bottom-only "Ghost Border" (10% opacity `outline`). This mimics the look of a high-end paper form.
+### Cards & Lists
+* **The Divider Ban:** Never use horizontal lines to separate list items. Use vertical padding (`16px` from the spacing scale) and a subtle hover state change to `surface_container_low`.
+* **Venue Cards:** Use `xl` (1.5rem) corner radius for image containers within cards to give them a premium, mobile-app-like feel.
 
-* **Focus:** Transition the bottom border to 100% opacity `primary`.
+### Specialized Venue Components
+* **Occupancy Gauges:** Use a thick `primary_fixed` track with a `primary` indicator.
+* **Timeline Scrubber:** A semi-transparent `glass` overlay that moves across the event schedule, blurring the "past" and highlighting the "present."
 
-
-
-### Specialized Components
-
-* **Availability Calendar:** Use `tertiary-container` (#ffe7a8) for "Hold" dates and `secondary` (#685d4a) for "Booked" dates. The contrast between the warm gold and slate provides an immediate status read.
-
-* **Venue Status Chip:** Use `rounded-full` for chips, using `secondary-container` for a soft, pillowy look that doesn't feel like a harsh "alert."
-
-
+---
 
 ## 6. Do's and Don'ts
 
-
-
 ### Do:
-
-* **Do** use asymmetrical margins (e.g., 8.5rem on the left, 5.5rem on the right) for hero sections to create an editorial feel.
-
-* **Do** prioritize `notoSerif` for any text that is meant to be read as a "statement."
-
-* **Do** use the `surface-tint` to subtly colorize backgrounds of empty states.
-
-
+* **Do** use `surface_container_highest` (#d3e4fe) for "Destructive" or "Alert" background areas to keep the palette harmonious even in error states.
+* **Do** embrace extreme whitespace. If you think there is enough margin, add 8px more.
+* **Do** use `manrope` for numbers. Its geometric nature makes revenue and occupancy figures look "designed."
 
 ### Don't:
-
-* **Don't** use 100% black (#000000) for text. Always use `on-surface` (#1b1c14) or `on-surface-variant` (#4b463d) to maintain the soft, champagne-toned aesthetic.
-
-* **Don't** use `rounded-none`. Everything in the wedding industry has a soft edge; stick to `rounded-md` or `rounded-lg`.
-
-* **Don't** crowd the interface. If a screen feels full, increase the container size rather than shrinking the typography.
+* **Don't** use pure black (#000000). Always use `on_surface` (#0b1c30) for text to maintain the deep-blue professional tone.
+* **Don't** use 1px solid borders to define the layout. Let the background colors do the heavy lifting.
+* **Don't** use "Alert Red" for everything. Use the `tertiary` (#4b1c00) tones for warnings that require attention but aren't system-critical, reserving `error` (#ba1a1a) for data loss.

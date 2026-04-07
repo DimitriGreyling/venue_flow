@@ -101,7 +101,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     children: [
                       Text(
                         'Venue Flow',
-                        style: editorial.titleLarge.copyWith(
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                           color: colorScheme.onSurface,
                         ),
@@ -253,7 +253,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 const SizedBox(width: EditorialSpacing.spacing3),
                 Text(
                   label,
-                  style: editorial.labelMedium.copyWith(
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: isSelected 
                       ? colorScheme.primary
                       : colorScheme.onSurfaceVariant,
@@ -393,7 +393,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   const SizedBox(width: EditorialSpacing.spacing2),
                   Text(
                     'Alex Rivera',
-                    style: editorial.labelMedium.copyWith(
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -417,7 +417,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       children: [
         Text(
           label,
-          style: editorial.labelMedium.copyWith(
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
             color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
@@ -451,7 +451,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 children: [
                   Text(
                     'Coordinator Dashboard',
-                    style: editorial.displaySmall.copyWith(
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
                       fontWeight: FontWeight.w900,
                       color: colorScheme.onSurface,
                     ),
@@ -459,7 +459,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   const SizedBox(height: 4),
                   Text(
                     'Welcome back, Alex. You have 4 meetings scheduled for today.',
-                    style: editorial.bodyLarge.copyWith(
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -558,7 +558,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   children: [
                     Text(
                       '24',
-                      style: editorial.displaySmall.copyWith(
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         color: colorScheme.onPrimary,
                         fontWeight: FontWeight.w900,
                       ),
@@ -566,7 +566,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     const SizedBox(width: EditorialSpacing.spacing2),
                     Text(
                       'Active Events',
-                      style: editorial.titleLarge.copyWith(
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: colorScheme.onPrimary.withOpacity(0.9),
                       ),
                     ),
@@ -706,7 +706,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           ),
           Text(
             value,
-            style: editorial.displaySmall.copyWith(
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
               fontWeight: FontWeight.w900,
               color: colorScheme.onSurface,
             ),
@@ -765,7 +765,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           children: [
             Text(
               'Active Events',
-              style: editorial.headlineSmall.copyWith(
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -773,7 +773,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               onPressed: () {},
               child: Text(
                 'View all schedules',
-                style: editorial.labelMedium.copyWith(
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: colorScheme.secondary,
                   fontWeight: FontWeight.bold,
                 ),
@@ -918,7 +918,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       const SizedBox(width: EditorialSpacing.spacing3),
                       Text(
                         event['name'] as String,
-                        style: editorial.titleMedium.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -929,7 +929,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   flex: 2,
                   child: Text(
                     event['client'] as String,
-                    style: editorial.bodyMedium.copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -937,7 +937,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 Expanded(
                   child: Text(
                     event['date'] as String,
-                    style: editorial.bodyMedium.copyWith(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -987,7 +987,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       children: [
         Text(
           'Recent Activity',
-          style: editorial.headlineSmall.copyWith(
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -1086,7 +1086,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               children: [
                 Text(
                   activity['title'] as String,
-                  style: editorial.titleSmall.copyWith(
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -1131,14 +1131,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               children: [
                 Text(
                   'Venue Occupancy Analysis',
-                  style: editorial.headlineMedium.copyWith(
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: EditorialSpacing.spacing2),
                 Text(
                   'Your current venue booking rate is 15% higher than last quarter. Consider opening more weekend slots for Q4.',
-                  style: editorial.bodyLarge.copyWith(
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -1180,7 +1180,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       children: [
         Text(
           value,
-          style: editorial.displayMedium.copyWith(
+          style: Theme.of(context).textTheme.displayMedium?.copyWith(
             fontWeight: FontWeight.w900,
             color: colorScheme.primary,
           ),

@@ -20,6 +20,12 @@ class EditorialSpacing {
   static const double spacing20 = 80.0; // 5rem
   static const double spacing24 = 96.0; // 6rem
 
+  // ARCHITECTURAL CORNER RADII - \"8px (DEFAULT) corner radius\" from design.md
+  static const double defaultRadius = 8.0;     // DEFAULT - buttons, basic elements
+  static const double cardRadius = 12.0;       // Cards - premium feel  
+  static const double venueCardRadius = 24.0;  // XL - venue cards (1.5rem)
+  static const double pillRadius = 9999.0;     // Action chips - pill shaped
+
   // INTENTIONAL ASYMMETRY - Editorial Layout Spacing
   /// "Use asymmetrical margins (e.g., 8.5rem on the left, 5.5rem on the right) for hero sections"
   /// These create the "digital atelier" rather than "spreadsheet" feel

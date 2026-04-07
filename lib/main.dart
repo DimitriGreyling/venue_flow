@@ -68,7 +68,7 @@ class EditorialConciergeApp extends ConsumerWidget {
         );
       },
       
-      home: const HomePage(),
+      home: const DashboardPage(),
     );
   }
 }

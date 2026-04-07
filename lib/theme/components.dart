@@ -4,19 +4,21 @@ import 'typography.dart';
 import 'spacing.dart';
 import 'elevation.dart';
 
-/// Editorial Concierge Component Themes
-/// Implements the "No-Line" rule and luxury wedding aesthetic
+/// The Architectural Flow Component System
+/// Implements the "No-Line" rule and "Glass & Gradient" effects
+/// "Primary CTAs use gradient, Action Chips are pill-shaped, No borders for sectioning"
 class EditorialComponents {
   EditorialComponents._();
 
   // BUTTON THEMES
-  /// Primary: Solid primary with on-primary text. Corners use rounded-md (0.375rem)
+  /// Primary: Gradient from primary_container to primary at 135°, 8px corners
   static ButtonStyle primaryButton(ColorScheme colorScheme) => ElevatedButton.styleFrom(
-    backgroundColor: colorScheme.primary,
+    // Use gradient decoration via container - Flutter doesn't support gradient directly
+    backgroundColor: colorScheme.primary, // Fallback
     foregroundColor: colorScheme.onPrimary,
     textStyle: EditorialTypography.buttonTextStyle(colorScheme),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(6), // rounded-md
+      borderRadius: BorderRadius.circular(8), // 8px as specified in design.md
     ),
     padding: const EdgeInsets.symmetric(
       horizontal: EditorialSpacing.buttonPadding,
@@ -25,7 +27,7 @@ class EditorialComponents {
     elevation: EditorialElevation.level2,
     shadowColor: colorScheme.brightness == Brightness.dark 
         ? Colors.transparent 
-        : colorScheme.primary.withOpacity(0.2),
+        : const Color(0xFF0b1c30).withOpacity(0.06), // Deep blue tint
   );
 
   /// Secondary: surface-container-highest background with primary text. No border.
@@ -34,7 +36,7 @@ class EditorialComponents {
     foregroundColor: colorScheme.primary,
     textStyle: EditorialTypography.buttonTextStyle(colorScheme),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(8), // 8px consistency
     ),
     padding: const EdgeInsets.symmetric(
       horizontal: EditorialSpacing.buttonPadding,
@@ -43,7 +45,22 @@ class EditorialComponents {
     elevation: 0,
   );
 
-  /// Tertiary: Text-only in primary, using title-sm typography with underline on hover
+  /// Action Chips: Pill-shaped (full radius) to contrast architectural squareness
+  static ButtonStyle actionChipButton(ColorScheme colorScheme) => ElevatedButton.styleFrom(
+    backgroundColor: colorScheme.secondaryContainer,
+    foregroundColor: colorScheme.onSecondaryContainer,
+    textStyle: EditorialTypography.buttonTextStyle(colorScheme),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(9999), // Pill-shaped
+    ),
+    padding: const EdgeInsets.symmetric(
+      horizontal: EditorialSpacing.spacing4,
+      vertical: EditorialSpacing.spacing2,
+    ),
+    elevation: 0,
+  );
+
+  /// Tertiary: Text-only in primary, clean and minimal
   static ButtonStyle tertiaryButton(ColorScheme colorScheme) => TextButton.styleFrom(
     foregroundColor: colorScheme.primary,
     textStyle: EditorialTypography.titleSmall(colorScheme),
@@ -52,63 +69,50 @@ class EditorialComponents {
       vertical: EditorialSpacing.spacing2,
     ),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(8),
     ),
   );
 
-  // CARD THEMES
-  /// Implements "Soft, pillowy depth" with hover state changes
-  /// "On hover, a card should shift from surface-container-low to surface-container-lowest"
+  // CARD THEMES - Tonal Layering System
+  /// "A card should never have a border. Use tonal shift for boundaries."
+  /// "On hover, shift from surface-container-low to surface-container-lowest"
   static CardTheme cardTheme(ColorScheme colorScheme) => CardTheme(
-    color: colorScheme.surfaceContainerLowest,
-    shadowColor: colorScheme.brightness == Brightness.dark 
-        ? Colors.transparent 
-        : colorScheme.primary.withOpacity(0.04),
-    elevation: EditorialElevation.level1,
+    color: colorScheme.surfaceContainerLowest, // Top layer - high priority
+    shadowColor: Colors.transparent, // No shadows - use tonal layering
+    elevation: 0, // Tonal depth, not physical elevation
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(EditorialSpacing.cardBorderRadius),
+      borderRadius: BorderRadius.circular(12), // Premium feel
     ),
     margin: const EdgeInsets.symmetric(
       vertical: EditorialSpacing.spacing2,
     ),
   );
 
-  // INPUT DECORATION THEMES
-  /// "Fields should use surface-container-low as background with bottom-only 'Ghost Border'"
-  /// "This mimics the look of a high-end paper form"
+  // INPUT DECORATION THEMES - "No-Line" Rule
+  /// "Minimalist. No background fill; only surface-variant bottom-stroke or Ghost Border"
+  /// "Focus State: Transition border to secondary with soft secondary_fixed glow"
   static InputDecorationTheme inputDecorationTheme(ColorScheme colorScheme) => InputDecorationTheme(
-    filled: true,
-    fillColor: colorScheme.surfaceContainerLow,
+    filled: false, // No background fill as specified
     
-    // No borders except bottom ghost border
+    // Only bottom stroke - Ghost Border approach
     border: UnderlineInputBorder(
       borderSide: BorderSide(
-        color: colorScheme.outline.withOpacity(0.1), // 10% opacity ghost border
+        color: colorScheme.outline.withOpacity(0.15), // Ghost border at 15%
         width: 1,
-      ),
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(6),
       ),
     ),
     
     enabledBorder: UnderlineInputBorder(
       borderSide: BorderSide(
-        color: colorScheme.outline.withOpacity(0.1),
+        color: colorScheme.outline.withOpacity(0.15), // Ghost border
         width: 1,
-      ),
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(6),
       ),
     ),
     
-    // Focus: Transition bottom border to 100% opacity primary
     focusedBorder: UnderlineInputBorder(
       borderSide: BorderSide(
-        color: colorScheme.primary,
+        color: colorScheme.secondary, // Transition to secondary on focus
         width: 2,
-      ),
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(6),
       ),
     ),
     
@@ -117,9 +121,6 @@ class EditorialComponents {
         color: colorScheme.error,
         width: 1,
       ),
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(6),
-      ),
     ),
     
     focusedErrorBorder: UnderlineInputBorder(
@@ -127,14 +128,11 @@ class EditorialComponents {
         color: colorScheme.error,
         width: 2,
       ),
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(6),
-      ),
     ),
     
     contentPadding: const EdgeInsets.symmetric(
       horizontal: EditorialSpacing.formFieldPadding,
-      vertical: EditorialSpacing.formFieldPadding,
+      vertical: EditorialSpacing.spacing3,
     ),
     
     labelStyle: EditorialTypography.formFieldStyle(colorScheme),
@@ -344,6 +342,136 @@ class EditorialComponents {
             ),
           ),
           child: child,
+        ),
+      ),
+    );
+  }
+
+  // SIGNATURE ARCHITECTURAL FLOW COMPONENTS
+
+  /// Primary CTA Button with Gradient - \"Glass & Gradient\" Rule Implementation
+  static Widget primaryCtaButton({
+    required String text,
+    VoidCallback? onPressed,
+    required ColorScheme colorScheme,
+    Widget? icon,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: EditorialColors.primaryCtaGradient, // 135-degree gradient
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0b1c30).withOpacity(0.06),
+            offset: const Offset(0, 8),
+            blurRadius: 32,
+          ),
+        ],
+      ),
+      child: ElevatedButton.icon(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          foregroundColor: colorScheme.onPrimary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        icon: icon ?? const SizedBox.shrink(),
+        label: Text(text, style: EditorialTypography.buttonTextStyle(colorScheme)),
+      ),
+    );
+  }
+
+  /// Glass Panel with Backdrop Blur - For Floating Modals
+  static Widget glassPanel({
+    required Widget child,
+    required ColorScheme colorScheme,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: EditorialColors.lightGlassSurface, // 85% opacity
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      // Note: BackdropFilter with 24px blur should be implemented by parent
+      child: child,
+    );
+  }
+
+  /// Tonal Card - No borders, uses background shifts for boundaries
+  static Widget tonalCard({
+    required Widget child,
+    required ColorScheme colorScheme,
+    VoidCallback? onTap,
+    EdgeInsets? padding,
+  }) {
+    return Container(
+      padding: padding ?? const EdgeInsets.all(EditorialSpacing.spacing6),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLowest, // Top layer
+        borderRadius: BorderRadius.circular(12),
+        // No shadows - pure tonal layering
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  /// Ghost Border Divider - 15% opacity outline-variant (fallback only)
+  static Widget ghostDivider(ColorScheme colorScheme) {
+    return Container(
+      height: 1,
+      color: colorScheme.outline.withOpacity(0.15), // Ghost border
+    );
+  }
+
+  /// Venue Card with XL corner radius for premium feel
+  static Widget venueCard({
+    required Widget child,
+    required ColorScheme colorScheme,
+    String? imageUrl,
+    VoidCallback? onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(24), // XL radius for premium feel
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(24),
+          child: Column(
+            children: [
+              if (imageUrl != null)
+                Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
+                    color: colorScheme.surfaceContainer,
+                  ),
+                  // Image would go here
+                ),
+              Padding(
+                padding: const EdgeInsets.all(EditorialSpacing.spacing6),
+                child: child,
+              ),
+            ],
+          ),
         ),
       ),
     );
