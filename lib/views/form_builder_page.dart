@@ -5,6 +5,7 @@ import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
 import 'package:venue_flow_app/views/reordeable_form_fields_list.dart';
+import 'package:venue_flow_app/views/tooltip_widget.dart';
 import '../theme/editorial_theme_data.dart';
 
 class FormBuilderPage extends ConsumerStatefulWidget {
@@ -16,6 +17,9 @@ class FormBuilderPage extends ConsumerStatefulWidget {
 
 class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
   String selectedFieldType = 'Text Input';
+  bool editFormName = false;
+  TextEditingController formNameController = TextEditingController();
+
   bool isFieldSelected = true;
   final List<PopupMenuItem> fieldTypeMenuItems = [
     const PopupMenuItem(
@@ -702,12 +706,67 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      formBuilderState.form?.first.name ?? '',
-                      style: textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: colorScheme.onSurface,
-                      ),
+                    Row(
+                      children: [
+                        if (!editFormName)
+                          Text(
+                            formBuilderState.form.first.name ?? '',
+                            style: textTheme.headlineLarge?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        if (editFormName)
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            child: _buildTextField(
+                              context,
+                              label: 'Form Name',
+                              controller: formNameController,
+                              focusNode: FocusNode(),
+                              hint: 'e.g. Meal Options',
+                              enabled: true,
+                              textInputAction: TextInputAction.done,
+                              validator: (value) => null,
+                            ),
+                          ),
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        TooltipWidget(
+                          message: 'Change form name',
+                          child: IconButton(
+                              onPressed: !editFormName
+                                  ? () {
+                                      setState(() {
+                                        editFormName = true;
+                                      });
+                                    }
+                                  : () {
+                                      setState(() {
+                                        editFormName = false;
+                                      });
+                                    },
+                              icon: editFormName
+                                  ? const Icon(Icons.close)
+                                  : const Icon(Icons.edit)),
+                        ),
+                        if (editFormName)
+                          TooltipWidget(
+                            message: 'Save form name',
+                            child: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    formBuilderState.form.first.name =
+                                        formNameController.text;
+                                    editFormName = false;
+                                  });
+                                },
+                                icon: editFormName
+                                    ? const Icon(Icons.check)
+                                    : const Icon(Icons.check)),
+                          ),
+                      ],
                     ),
                   ],
                 ),
