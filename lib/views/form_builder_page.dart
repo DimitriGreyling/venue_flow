@@ -19,6 +19,15 @@ class FormBuilderPage extends ConsumerStatefulWidget {
 class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
   String selectedFieldType = 'Text Input';
   bool isFieldSelected = true;
+  final List<PopupMenuItem> fieldTypeMenuItems = [
+    const PopupMenuItem(
+      child: Text('Text Input'),
+      value: FieldType.text,
+    ),
+    const PopupMenuItem(child: Text('Dropdown'), value: FieldType.dropdown),
+    const PopupMenuItem(child: Text('Checkbox'), value: FieldType.checkbox),
+    const PopupMenuItem(child: Text('Radio Button'), value: FieldType.radio),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +43,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       backgroundColor: colorScheme.surface,
       appBar: _buildAppBar(context, colorScheme, textTheme),
       body: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Left Sidebar - Form Elements
           // _buildComponentSidebar(context, colorScheme, editorial),
@@ -50,7 +60,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
           ),
 
           // Right Sidebar - Properties Panel
-          _buildPropertiesPanel(context, colorScheme, textTheme, editorial),
+          //TODO implement hide and show when field is selected
+          // _buildPropertiesPanel(context, colorScheme, textTheme, editorial),
         ],
       ),
     );
@@ -344,6 +355,350 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
+
+
+  Future<Map<String, dynamic>?> _showAddFieldDialog({
+    required BuildContext context,
+    required EditorialThemeData editorial,
+    required FieldType fieldType,
+  }) async {
+    final nameController = TextEditingController();
+    final placeholderController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    bool isRequired = false;
+    List<String> dropDownOptions = [];
+
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      barrierDismissible: false, // Prevent dismiss by tapping outside
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final screenSize = MediaQuery.of(context).size;
+            final dialogWidth = screenSize.width > 768
+                ? screenSize.width * 0.4
+                : screenSize.width * 0.9;
+            final dialogHeight = screenSize.height * 0.6;
+
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Container(
+                width: dialogWidth,
+                height: dialogHeight,
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Row(
+                        children: [
+                          Icon(
+                            _getIconForFieldType(fieldType),
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Add $fieldType',
+                            style: editorial.labelBold.copyWith(fontSize: 18),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            onPressed: () =>
+                                Navigator.pop(dialogContext), // Cancel
+                            icon: const Icon(Icons.close),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 32),
+
+                      // Form Fields
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              // Field Name
+                              _buildTextField(
+                                context,
+                                label: 'Field Label',
+                                controller: nameController,
+                                focusNode: FocusNode(),
+                                hint: 'e.g., First Name',
+                                enabled: true,
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value?.trim().isEmpty ?? true) {
+                                    return 'Field label is required';
+                                  }
+                                  return null;
+                                },
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Placeholder Text
+                              _buildTextField(
+                                context,
+                                label: 'Placeholder Text',
+                                controller: placeholderController,
+                                focusNode: FocusNode(),
+                                hint: 'e.g., Enter your first name',
+                                enabled: true,
+                                textInputAction: TextInputAction.done,
+                                validator: (value) {
+                                  // Optional field
+                                  return null;
+                                },
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              // Required Toggle
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerLowest,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.star,
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        'Required Field',
+                                        style: editorial.labelSubtle.copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                    Switch(
+                                      value: isRequired,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          isRequired = value;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Action Buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(
+                                  dialogContext), // Return null (cancel)
+                              style: OutlinedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: editorial.buttonTextStyle,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Validate form
+                                if (formKey.currentState?.validate() ?? false) {
+                                  // Return the form data
+                                  Navigator.pop(dialogContext, {
+                                    'name': nameController.text.trim(),
+                                    'placeholder':
+                                        placeholderController.text.trim(),
+                                    'required': isRequired,
+                                    'fieldType': fieldType,
+                                  });
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onPrimary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Add Field',
+                                style: editorial.buttonTextStyle.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    //TODO :: dispose controllers properly
+    // Dispose controllers
+    // nameController.dispose();
+    // placeholderController.dispose();
+
+    return result; // This will be null if canceled, or Map<String, dynamic> if submitted
+  }
+
+  IconData _getIconForFieldType(FieldType fieldType) {
+    switch (fieldType) {
+      case FieldType.text:
+        return Icons.short_text;
+      // case FieldType.text:
+      //   return Icons.list;
+      case FieldType.checkbox:
+        return Icons.check_box_outlined;
+      case FieldType.date:
+        return Icons.calendar_month;
+      // case 'File Upload':
+      //   return Icons.upload_file;
+      // case 'E-Signature':
+      //   return Icons.draw;
+      // case 'Payment Link':
+      //   return Icons.payments;
+      default:
+        return Icons.help;
+    }
+  }
+
+  Widget _buildTextField(
+    BuildContext context, {
+    required String label,
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String hint,
+    IconData? icon,
+    required bool enabled,
+    bool obscureText = false,
+    Widget? suffix,
+    TextInputAction? textInputAction,
+    void Function(String)? onFieldSubmitted,
+    String? Function(String?)? validator,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: scheme.outline,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.3,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          focusNode: focusNode,
+          enabled: enabled,
+          obscureText: obscureText,
+          textInputAction: textInputAction,
+          onFieldSubmitted: onFieldSubmitted,
+          validator: validator,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: scheme.onSurface,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: icon != null
+                ? Icon(
+                    icon,
+                    color: scheme.onSurfaceVariant,
+                    size: 20,
+                  )
+                : null,
+            suffixIcon: suffix,
+            filled: true,
+            fillColor: scheme.surfaceContainerLowest,
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+            errorMaxLines: 2,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 18,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.primaryContainer.withOpacity(0.50),
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.error.withOpacity(0.80),
+                width: 1.5,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.error,
+                width: 2,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildFormCanvas({
     required BuildContext context,
     required ColorScheme colorScheme,
@@ -358,7 +713,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     return Container(
       color: colorScheme.surface,
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -367,7 +722,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       'INTAKE DESIGNER',
@@ -388,69 +743,34 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                 ),
                 Row(
                   children: [
-                    _buildActionButton(
-                      text: 'Add Field',
-                      isPrimary: true,
-                      colorScheme: colorScheme,
-                      editorial: editorial,
-                      callback: () async {
-                        TextEditingController nameController =
-                            TextEditingController();
-
-                        final result = await showDialog(
+                    PopupMenuButton(
+                      tooltip:
+                          'Add new fields to your form for clients to fill in.',
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: const BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.all(Radius.circular(8))),
+                        child: const Text('Add a field'),
+                      ),
+                      onSelected: (value) async {
+                        final result = await _showAddFieldDialog(
                           context: context,
-                          builder: (context) {
-                            final screenSize = MediaQuery.of(context).size;
-                            final dialogWidth = screenSize.width > 768
-                                ? screenSize.width * 0.7
-                                : screenSize.width * 0.9;
-                            final dialogHeight = screenSize.height * 0.8;
-
-                            return Dialog(
-                              child: SizedBox(
-                                width: dialogWidth,
-                                height: dialogHeight,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'Add New Field',
-                                        style: editorial.labelBold,
-                                      ),
-                                      const Divider(),
-                                      TextFormField(
-                                        controller: nameController,
-                                        decoration: const InputDecoration(
-                                          hintText: 'Name',
-                                          label: Text('Name'),
-                                        ),
-                                      ),
-                                      ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Text('Submit')),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
+                          editorial: editorial,
+                          fieldType: value,
                         );
 
                         ref
                             .watch(formBuilderViewModelProvider.notifier)
                             .addFormField(
                                 formFieldModel: FormFieldModel(
-                              label: nameController.text,
-                              placeholder: nameController.text,
-                              required: true,
-                              type: FieldType.text,
+                              label: result!['name'],
+                              placeholder: result!['placeholder'],
+                              type: result['fieldType'],
                             ));
-                        // setState(() {
-                        //   selectedFieldType = title;
-                        // });
+                      },
+                      itemBuilder: (context) {
+                        return fieldTypeMenuItems;
                       },
                     ),
                     const SizedBox(
@@ -477,7 +797,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
             // Canvas Area
             Expanded(
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 768),
+                // constraints: const BoxConstraints(maxWidth: 768),
                 child: PageView.builder(
                   itemBuilder: (context, index) {
                     final page = formBuilderState.form?.first.pages![index];
@@ -514,7 +834,13 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                           onFieldSelected: (field) {
                             // _handleFieldSelection(field);
                           },
-                          onFieldDeleted: (field) {
+                          onFieldDeleted: (field, fieldIndex) {
+                            ref
+                                .watch(formBuilderViewModelProvider.notifier)
+                                .removeField(
+                                  formFieldModel: field,
+                                  index: fieldIndex,
+                                );
                             // _handleFieldDeletion(field);
                           },
                           onFieldDuplicated: (field) {

@@ -3,4 +3,6 @@ enum FieldType {
   dropdown,
   checkbox,
   textarea,
+  radio,
+  date,
 }

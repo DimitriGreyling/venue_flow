@@ -64,7 +64,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // If you're adding a field to an existing form, you'd need to specify which form
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
-        updatedForms[0].pages?.first.fields ??=[];
+        updatedForms[0].pages?.first.fields ??= [];
         updatedForms[0].pages?.first.fields?.add(formFieldModel);
       } else {
         updatedForms.add(
@@ -115,6 +115,33 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
             ],
           ),
         );
+      }
+
+      state = state.copyWith(
+        forms: updatedForms,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      // Handle error
+    }
+  }
+
+  //REMOVE FIELD FROM PAGE
+  void removeField({
+    required FormFieldModel formFieldModel,
+    required int index,
+  }) {
+    try {
+      state = state.copyWith(isLoading: true);
+      // Create a new list with the existing forms plus the new field
+      final currentForms = state.form ?? [];
+      final updatedForms = [...currentForms];
+
+      // If you're adding a field to an existing form, you'd need to specify which form
+      // For example, adding to the first form:
+      if (updatedForms.isNotEmpty) {
+        updatedForms[0].pages?.first.fields?.removeAt(index);
       }
 
       state = state.copyWith(

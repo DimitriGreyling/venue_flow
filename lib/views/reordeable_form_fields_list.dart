@@ -8,7 +8,7 @@ class ReorderableFormFieldsList extends StatefulWidget {
   final String? selectedFieldId;
   final Function(int oldIndex, int newIndex)? onReorder;
   final Function(FormFieldModel field)? onFieldSelected;
-  final Function(FormFieldModel field)? onFieldDeleted;
+  final Function(FormFieldModel field, int index)? onFieldDeleted;
   final Function(FormFieldModel field)? onFieldDuplicated;
   final ColorScheme colorScheme;
   final EditorialThemeData editorial;
@@ -26,7 +26,8 @@ class ReorderableFormFieldsList extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ReorderableFormFieldsList> createState() => _ReorderableFormFieldsListState();
+  State<ReorderableFormFieldsList> createState() =>
+      _ReorderableFormFieldsListState();
 }
 
 class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
@@ -41,9 +42,9 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
   @override
   void didUpdateWidget(ReorderableFormFieldsList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.fields != oldWidget.fields) {
-      _fields = List.from(widget.fields);
-    }
+    // if (widget.fields != oldWidget.fields) {
+    _fields = List.from(widget.fields);
+    // }
   }
 
   void _handleReorder(int oldIndex, int newIndex) {
@@ -55,7 +56,7 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
       final item = _fields.removeAt(oldIndex);
       _fields.insert(newIndex, item);
     });
-    
+
     // Call the callback
     widget.onReorder?.call(oldIndex, newIndex);
   }
@@ -76,9 +77,10 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
       itemBuilder: (context, index) {
         final field = _fields[index];
         final isSelected = field.id == widget.selectedFieldId;
-        
+
         return ReorderableDelayedDragStartListener(
-          key: Key(field.id ?? 'dsafds'),
+          key:
+              Key('${field.id ?? field.label ?? field.type.toString()}-$index'),
           index: index,
           child: ReorderableFormFieldTile(
             field: field,
@@ -86,7 +88,7 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
             colorScheme: widget.colorScheme,
             editorial: widget.editorial,
             onTap: () => widget.onFieldSelected?.call(field),
-            onDelete: () => widget.onFieldDeleted?.call(field),
+            onDelete: () => widget.onFieldDeleted?.call(field, index),
             onDuplicate: () => widget.onFieldDuplicated?.call(field),
           ),
         );
