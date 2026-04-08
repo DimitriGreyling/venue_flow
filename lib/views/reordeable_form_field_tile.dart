@@ -171,6 +171,8 @@ class ReorderableFormFieldTile extends StatelessWidget {
     switch (field.type) {
       case FieldType.text:
         return colorScheme.primary;
+      case FieldType.dropdown:
+        return colorScheme.primary;
       // case 'email':
       //   return colorScheme.secondary;
       // case 'date':
@@ -190,6 +192,8 @@ class ReorderableFormFieldTile extends StatelessWidget {
     switch (field.type) {
       case FieldType.text:
         return Icons.short_text;
+      case FieldType.dropdown:
+        return Icons.drafts;
       // case 'email':
       //   return Icons.email;
       // case 'date':

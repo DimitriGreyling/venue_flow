@@ -361,7 +361,14 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-
+// Helper method to safely dispose controllers
+  void _safeDispose(TextEditingController? controller) {
+    try {
+      if (controller != null) {
+        controller.dispose();
+      }
+    } catch (e) {}
+  }
 
   Future<Map<String, dynamic>?> _showAddFieldDialog({
     required BuildContext context,
@@ -372,37 +379,37 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     final placeholderController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     bool isRequired = false;
-    
-    // Dropdown/Radio options management
+
+    // Simple approach - track only what's needed for UI
     List<String> fieldOptions = [''];
     List<TextEditingController> optionControllers = [TextEditingController()];
-    
-    bool needsOptions = fieldType == FieldType.dropdown || fieldType == FieldType.radio;
+
+    bool needsOptions =
+        fieldType == FieldType.dropdown || fieldType == FieldType.radio;
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      barrierDismissible: false, // Prevent dismiss by tapping outside
+      barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(
           builder: (context, setState) {
-            
             void addOption() {
               setState(() {
                 fieldOptions.add('');
                 optionControllers.add(TextEditingController());
               });
             }
-            
+
             void removeOption(int index) {
               if (optionControllers.length > 1) {
                 setState(() {
-                  optionControllers[index].dispose();
+                  // Don't dispose - just remove from list
                   optionControllers.removeAt(index);
                   fieldOptions.removeAt(index);
                 });
               }
             }
-            
+
             final screenSize = MediaQuery.of(context).size;
             final dialogWidth = screenSize.width > 768
                 ? screenSize.width * 0.4
@@ -437,8 +444,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                           ),
                           const Spacer(),
                           IconButton(
-                            onPressed: () =>
-                                Navigator.pop(dialogContext), // Cancel
+                            onPressed: () => Navigator.pop(dialogContext),
                             icon: const Icon(Icons.close),
                           ),
                         ],
@@ -479,10 +485,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                   hint: 'e.g., Enter your first name',
                                   enabled: true,
                                   textInputAction: TextInputAction.done,
-                                  validator: (value) {
-                                    // Optional field
-                                    return null;
-                                  },
+                                  validator: (value) => null,
                                 ),
                                 const SizedBox(height: 24),
                               ],
@@ -493,57 +496,73 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           '${fieldType.name.toUpperCase()} Options',
-                                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                            color: Theme.of(context).colorScheme.outline,
-                                            fontWeight: FontWeight.w900,
-                                            letterSpacing: 1.3,
-                                          ),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium
+                                              ?.copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .outline,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 1.3,
+                                              ),
                                         ),
                                         TextButton.icon(
-                                          onPressed: () {
-                                            setState(() {
-                                              addOption();
-                                            });
-                                          },
-                                          icon: Icon(Icons.add, size: 16),
-                                          label: Text('Add Option'),
+                                          onPressed: addOption,
+                                          icon: const Icon(Icons.add, size: 16),
+                                          label: const Text('Add Option'),
                                           style: TextButton.styleFrom(
-                                            foregroundColor: Theme.of(context).colorScheme.primary,
+                                            foregroundColor: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
                                           ),
                                         ),
                                       ],
                                     ),
                                     const SizedBox(height: 12),
-                                    ...optionControllers.asMap().entries.map((entry) {
+                                    ...optionControllers
+                                        .asMap()
+                                        .entries
+                                        .map((entry) {
                                       final index = entry.key;
                                       final controller = entry.value;
-                                      
+
                                       return Padding(
-                                        padding: const EdgeInsets.only(bottom: 8),
+                                        padding:
+                                            const EdgeInsets.only(bottom: 8),
                                         child: Row(
                                           children: [
                                             Expanded(
                                               child: TextFormField(
                                                 controller: controller,
                                                 decoration: InputDecoration(
-                                                  hintText: 'Option ${index + 1}',
+                                                  hintText:
+                                                      'Option ${index + 1}',
                                                   filled: true,
-                                                  fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+                                                  fillColor: Theme.of(context)
+                                                      .colorScheme
+                                                      .surfaceContainerLowest,
                                                   border: OutlineInputBorder(
-                                                    borderRadius: BorderRadius.circular(12),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
                                                     borderSide: BorderSide.none,
                                                   ),
-                                                  contentPadding: const EdgeInsets.symmetric(
+                                                  contentPadding:
+                                                      const EdgeInsets
+                                                          .symmetric(
                                                     horizontal: 12,
                                                     vertical: 12,
                                                   ),
                                                 ),
                                                 validator: (value) {
-                                                  if (value?.trim().isEmpty ?? true) {
+                                                  if (value?.trim().isEmpty ??
+                                                      true) {
                                                     return 'Option cannot be empty';
                                                   }
                                                   return null;
@@ -555,9 +574,13 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                             ),
                                             if (optionControllers.length > 1)
                                               IconButton(
-                                                onPressed: () => removeOption(index),
-                                                icon: Icon(Icons.remove_circle_outline),
-                                                color: Theme.of(context).colorScheme.error,
+                                                onPressed: () =>
+                                                    removeOption(index),
+                                                icon: const Icon(Icons
+                                                    .remove_circle_outline),
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .error,
                                               ),
                                           ],
                                         ),
@@ -621,8 +644,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () => Navigator.pop(
-                                  dialogContext), // Return null (cancel)
+                              onPressed: () => Navigator.pop(dialogContext),
                               style: OutlinedButton.styleFrom(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 16),
@@ -630,48 +652,50 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: Text(
-                                'Cancel',
-                                style: editorial.buttonTextStyle,
-                              ),
+                              child: Text('Cancel',
+                                  style: editorial.buttonTextStyle),
                             ),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () {
-                                // Validate form
                                 if (formKey.currentState?.validate() ?? false) {
-                                  // Additional validation for options
                                   if (needsOptions) {
                                     final validOptions = optionControllers
-                                        .map((controller) => controller.text.trim())
+                                        .map((controller) =>
+                                            controller.text.trim())
                                         .where((option) => option.isNotEmpty)
                                         .toList();
-                                    
+
                                     if (validOptions.isEmpty) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
                                         SnackBar(
-                                          content: Text('Please add at least one option'),
-                                          backgroundColor: Theme.of(context).colorScheme.error,
+                                          content: const Text(
+                                              'Please add at least one option'),
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .error,
                                         ),
                                       );
                                       return;
                                     }
                                   }
-                                  
-                                  // Return the form data
+
                                   Navigator.pop(dialogContext, {
                                     'name': nameController.text.trim(),
-                                    'placeholder': needsOptions 
-                                        ? null 
+                                    'placeholder': needsOptions
+                                        ? null
                                         : placeholderController.text.trim(),
                                     'required': isRequired,
                                     'fieldType': fieldType,
-                                    'options': needsOptions 
+                                    'options': needsOptions
                                         ? optionControllers
-                                            .map((controller) => controller.text.trim())
-                                            .where((option) => option.isNotEmpty)
+                                            .map((controller) =>
+                                                controller.text.trim())
+                                            .where(
+                                                (option) => option.isNotEmpty)
                                             .toList()
                                         : null,
                                   });
@@ -710,16 +734,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       },
     );
 
-    // Dispose controllers
-    nameController.dispose();
-    if (!needsOptions) {
-      placeholderController.dispose();
-    }
-    for (final controller in optionControllers) {
-      controller.dispose();
-    }
-
-    return result; // This will be null if canceled, or Map<String, dynamic> if submitted
+    return result;
+    // NO finally block - let Flutter handle garbage collection
   }
 
   IconData _getIconForFieldType(FieldType fieldType) {
