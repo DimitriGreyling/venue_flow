@@ -3,11 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
-import 'package:venue_flow_app/theme/components.dart';
 import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
 import 'package:venue_flow_app/views/reordeable_form_fields_list.dart';
 import '../theme/editorial_theme_data.dart';
-import '../theme/spacing.dart';
 
 class FormBuilderPage extends ConsumerStatefulWidget {
   const FormBuilderPage({super.key});
@@ -21,12 +19,21 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
   bool isFieldSelected = true;
   final List<PopupMenuItem> fieldTypeMenuItems = [
     const PopupMenuItem(
-      child: Text('Text Input'),
       value: FieldType.text,
+      child: Text('Text Input'),
     ),
-    const PopupMenuItem(child: Text('Dropdown'), value: FieldType.dropdown),
-    const PopupMenuItem(child: Text('Checkbox'), value: FieldType.checkbox),
-    const PopupMenuItem(child: Text('Radio Button'), value: FieldType.radio),
+    const PopupMenuItem(
+      value: FieldType.dropdown,
+      child: Text('Dropdown'),
+    ),
+    const PopupMenuItem(
+      value: FieldType.radio,
+      child: Text('Radio Button'),
+    ),
+    const PopupMenuItem(
+      value: FieldType.checkbox,
+      child: Text('Checkbox'),
+    ),
   ];
 
   @override
@@ -36,8 +43,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     final editorial = context.editorial;
 
     final formBuilderViewState = ref.watch(formBuilderViewModelProvider);
-    final formBuilderViewModel =
-        ref.watch(formBuilderViewModelProvider.notifier);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -278,7 +283,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
           onTap: () async {
             TextEditingController nameController = TextEditingController();
 
-            final result = await showDialog(
+            showDialog(
               context: context,
               builder: (context) {
                 final screenSize = MediaQuery.of(context).size;
@@ -326,6 +331,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                   placeholder: nameController.text,
                   required: true,
                   type: FieldType.text,
+                  options: null,
                 ));
             // setState(() {
             //   selectedFieldType = title;
@@ -366,7 +372,12 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     final placeholderController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     bool isRequired = false;
-    List<String> dropDownOptions = [];
+    
+    // Dropdown/Radio options management
+    List<String> fieldOptions = [''];
+    List<TextEditingController> optionControllers = [TextEditingController()];
+    
+    bool needsOptions = fieldType == FieldType.dropdown || fieldType == FieldType.radio;
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -374,6 +385,24 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(
           builder: (context, setState) {
+            
+            void addOption() {
+              setState(() {
+                fieldOptions.add('');
+                optionControllers.add(TextEditingController());
+              });
+            }
+            
+            void removeOption(int index) {
+              if (optionControllers.length > 1) {
+                setState(() {
+                  optionControllers[index].dispose();
+                  optionControllers.removeAt(index);
+                  fieldOptions.removeAt(index);
+                });
+              }
+            }
+            
             final screenSize = MediaQuery.of(context).size;
             final dialogWidth = screenSize.width > 768
                 ? screenSize.width * 0.4
@@ -440,22 +469,106 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
 
                               const SizedBox(height: 16),
 
-                              // Placeholder Text
-                              _buildTextField(
-                                context,
-                                label: 'Placeholder Text',
-                                controller: placeholderController,
-                                focusNode: FocusNode(),
-                                hint: 'e.g., Enter your first name',
-                                enabled: true,
-                                textInputAction: TextInputAction.done,
-                                validator: (value) {
-                                  // Optional field
-                                  return null;
-                                },
-                              ),
+                              // Placeholder Text (only for non-option fields)
+                              if (!needsOptions) ...[
+                                _buildTextField(
+                                  context,
+                                  label: 'Placeholder Text',
+                                  controller: placeholderController,
+                                  focusNode: FocusNode(),
+                                  hint: 'e.g., Enter your first name',
+                                  enabled: true,
+                                  textInputAction: TextInputAction.done,
+                                  validator: (value) {
+                                    // Optional field
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 24),
+                              ],
 
-                              const SizedBox(height: 24),
+                              // Options Management (for dropdown/radio)
+                              if (needsOptions) ...[
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          '${fieldType.name.toUpperCase()} Options',
+                                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                            color: Theme.of(context).colorScheme.outline,
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: 1.3,
+                                          ),
+                                        ),
+                                        TextButton.icon(
+                                          onPressed: () {
+                                            setState(() {
+                                              addOption();
+                                            });
+                                          },
+                                          icon: Icon(Icons.add, size: 16),
+                                          label: Text('Add Option'),
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: Theme.of(context).colorScheme.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    ...optionControllers.asMap().entries.map((entry) {
+                                      final index = entry.key;
+                                      final controller = entry.value;
+                                      
+                                      return Padding(
+                                        padding: const EdgeInsets.only(bottom: 8),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: TextFormField(
+                                                controller: controller,
+                                                decoration: InputDecoration(
+                                                  hintText: 'Option ${index + 1}',
+                                                  filled: true,
+                                                  fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+                                                  border: OutlineInputBorder(
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    borderSide: BorderSide.none,
+                                                  ),
+                                                  contentPadding: const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 12,
+                                                  ),
+                                                ),
+                                                validator: (value) {
+                                                  if (value?.trim().isEmpty ?? true) {
+                                                    return 'Option cannot be empty';
+                                                  }
+                                                  return null;
+                                                },
+                                                onChanged: (value) {
+                                                  fieldOptions[index] = value;
+                                                },
+                                              ),
+                                            ),
+                                            if (optionControllers.length > 1)
+                                              IconButton(
+                                                onPressed: () => removeOption(index),
+                                                icon: Icon(Icons.remove_circle_outline),
+                                                color: Theme.of(context).colorScheme.error,
+                                              ),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                              ],
+
+                              const SizedBox(height: 8),
 
                               // Required Toggle
                               Container(
@@ -529,13 +642,38 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                               onPressed: () {
                                 // Validate form
                                 if (formKey.currentState?.validate() ?? false) {
+                                  // Additional validation for options
+                                  if (needsOptions) {
+                                    final validOptions = optionControllers
+                                        .map((controller) => controller.text.trim())
+                                        .where((option) => option.isNotEmpty)
+                                        .toList();
+                                    
+                                    if (validOptions.isEmpty) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Please add at least one option'),
+                                          backgroundColor: Theme.of(context).colorScheme.error,
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                  }
+                                  
                                   // Return the form data
                                   Navigator.pop(dialogContext, {
                                     'name': nameController.text.trim(),
-                                    'placeholder':
-                                        placeholderController.text.trim(),
+                                    'placeholder': needsOptions 
+                                        ? null 
+                                        : placeholderController.text.trim(),
                                     'required': isRequired,
                                     'fieldType': fieldType,
+                                    'options': needsOptions 
+                                        ? optionControllers
+                                            .map((controller) => controller.text.trim())
+                                            .where((option) => option.isNotEmpty)
+                                            .toList()
+                                        : null,
                                   });
                                 }
                               },
@@ -572,10 +710,14 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       },
     );
 
-    //TODO :: dispose controllers properly
     // Dispose controllers
-    // nameController.dispose();
-    // placeholderController.dispose();
+    nameController.dispose();
+    if (!needsOptions) {
+      placeholderController.dispose();
+    }
+    for (final controller in optionControllers) {
+      controller.dispose();
+    }
 
     return result; // This will be null if canceled, or Map<String, dynamic> if submitted
   }
@@ -584,8 +726,12 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     switch (fieldType) {
       case FieldType.text:
         return Icons.short_text;
-      // case FieldType.text:
-      //   return Icons.list;
+      case FieldType.textarea:
+        return Icons.notes;
+      case FieldType.dropdown:
+        return Icons.arrow_drop_down_circle;
+      case FieldType.radio:
+        return Icons.radio_button_checked;
       case FieldType.checkbox:
         return Icons.check_box_outlined;
       case FieldType.date:
@@ -765,8 +911,10 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                             .addFormField(
                                 formFieldModel: FormFieldModel(
                               label: result!['name'],
-                              placeholder: result!['placeholder'],
+                              placeholder: result['placeholder'],
                               type: result['fieldType'],
+                              required: result['required'] ?? false,
+                              options: result['options'],
                             ));
                       },
                       itemBuilder: (context) {
