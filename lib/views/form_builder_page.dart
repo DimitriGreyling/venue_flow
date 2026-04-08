@@ -361,15 +361,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-// Helper method to safely dispose controllers
-  void _safeDispose(TextEditingController? controller) {
-    try {
-      if (controller != null) {
-        controller.dispose();
-      }
-    } catch (e) {}
-  }
-
   Future<Map<String, dynamic>?> _showAddFieldDialog({
     required BuildContext context,
     required EditorialThemeData editorial,

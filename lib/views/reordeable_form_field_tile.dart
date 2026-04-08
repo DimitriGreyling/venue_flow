@@ -58,43 +58,44 @@ class ReorderableFormFieldTile extends StatelessWidget {
                 Row(
                   children: [
                     // Field type icon
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: _getFieldTypeColor().withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        _getFieldTypeIcon(),
-                        size: 16,
-                        color: _getFieldTypeColor(),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                    // Container(
+                    //   padding: const EdgeInsets.all(8),
+                    //   decoration: BoxDecoration(
+                    //     color: _getFieldTypeColor().withOpacity(0.1),
+                    //     borderRadius: BorderRadius.circular(8),
+                    //   ),
+                    //   child: Icon(
+                    //     _getFieldTypeIcon(),
+                    //     size: 16,
+                    //     color: _getFieldTypeColor(),
+                    //   ),
+                    // ),
+                    // const SizedBox(width: 12),
 
                     // Field label
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            field.label ?? '',
-                            style: editorial.labelBold.copyWith(
-                              color: colorScheme.onSurface,
-                              fontSize: 15,
-                            ),
-                          ),
-                          if (field.required ?? false)
-                            Text(
-                              'Required',
-                              style: editorial.labelSubtle.copyWith(
-                                color: colorScheme.error,
-                                fontSize: 12,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
+                    // Expanded(
+                    //   child: Column(
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       Text(
+                    //         field.label ?? '',
+                    //         style: editorial.labelBold.copyWith(
+                    //           color: colorScheme.onSurface,
+                    //           fontSize: 15,
+                    //         ),
+                    //       ),
+                    //       if (field.required ?? false)
+                    //         Text(
+                    //           'Required',
+                    //           style: editorial.labelSubtle.copyWith(
+                    //             color: colorScheme.error,
+                    //             fontSize: 12,
+                    //           ),
+                    //         ),
+                    //     ],
+                    //   ),
+                    // ),
+                   const  Spacer(),
 
                     // Action buttons (show only when selected)
                     if (isSelected) ...[
@@ -142,13 +143,16 @@ class ReorderableFormFieldTile extends StatelessWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          field.placeholder ?? 'No placeholder...',
-                          style: editorial.placeholderStyle.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                            fontStyle: FontStyle.italic,
-                          ),
+                        child: _determinFieldToShow(
+                          context: context,
                         ),
+                        //  Text(
+                        //   field.placeholder ?? '',
+                        //   style: editorial.placeholderStyle.copyWith(
+                        //     color: colorScheme.onSurfaceVariant,
+                        //     fontStyle: FontStyle.italic,
+                        //   ),
+                        // ),
                       ),
                       if (_hasTrailingIcon())
                         Icon(
@@ -228,5 +232,115 @@ class ReorderableFormFieldTile extends StatelessWidget {
       default:
         return Icons.help;
     }
+  }
+
+  Widget _determinFieldToShow({
+    required BuildContext context,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+
+    switch (field.type) {
+      case FieldType.text:
+        return _buildTextField(context);
+      default:
+        return Text('No field to show');
+    }
+  }
+
+  Widget _buildTextField(
+    BuildContext context, {
+    TextEditingController? controller,
+    FocusNode? focusNode,
+    String? hint,
+    IconData? icon,
+    bool? enabled,
+    bool obscureText = false,
+    Widget? suffix,
+    TextInputAction? textInputAction,
+    void Function(String)? onFieldSubmitted,
+    String? Function(String?)? validator,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            field.label ?? '',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: scheme.outline,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.3,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          focusNode: focusNode,
+          enabled: enabled,
+          obscureText: obscureText,
+          textInputAction: textInputAction,
+          onFieldSubmitted: onFieldSubmitted,
+          validator: validator,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: scheme.onSurface,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: icon != null
+                ? Icon(
+                    icon,
+                    color: scheme.onSurfaceVariant,
+                    size: 20,
+                  )
+                : null,
+            suffixIcon: suffix,
+            filled: true,
+            fillColor: scheme.surfaceContainerLowest,
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+            errorMaxLines: 2,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 18,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.primaryContainer.withOpacity(0.50),
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.error.withOpacity(0.80),
+                width: 1.5,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.error,
+                width: 2,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
