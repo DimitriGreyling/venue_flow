@@ -18,7 +18,9 @@ class FormBuilderPage extends ConsumerStatefulWidget {
 class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
   String selectedFieldType = 'Text Input';
   bool editFormName = false;
+  bool editPageName = false;
   TextEditingController formNameController = TextEditingController();
+  TextEditingController pageNameNameController = TextEditingController();
 
   bool isFieldSelected = true;
   final List<PopupMenuItem> fieldTypeMenuItems = [
@@ -837,17 +839,69 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
+                            Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 8),
-                                Text(
-                                  page?.title ?? '',
-                                  style: textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    color: colorScheme.onSurface,
+                                if (!editPageName)
+                                  Text(
+                                    page?.title ?? '',
+                                    style: textTheme.headlineMedium?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                      color: colorScheme.onSurface,
+                                    ),
                                   ),
+                                if (editPageName)
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.4,
+                                    child: _buildTextField(
+                                      context,
+                                      label: 'Page Name',
+                                      controller: pageNameNameController,
+                                      focusNode: FocusNode(),
+                                      hint: 'e.g. Starch Options',
+                                      enabled: true,
+                                      textInputAction: TextInputAction.done,
+                                      validator: (value) => null,
+                                    ),
+                                  ),
+                                const SizedBox(
+                                  width: 15,
                                 ),
+                                TooltipWidget(
+                                  message: 'Change page name',
+                                  child: IconButton(
+                                      onPressed: !editPageName
+                                          ? () {
+                                              setState(() {
+                                                editPageName = true;
+                                              });
+                                            }
+                                          : () {
+                                              setState(() {
+                                                editPageName = false;
+                                              });
+                                            },
+                                      icon: editPageName
+                                          ? const Icon(Icons.close)
+                                          : const Icon(Icons.edit)),
+                                ),
+                                if (editPageName)
+                                  TooltipWidget(
+                                    message: 'Save form name',
+                                    child: IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            page?.title =
+                                                pageNameNameController.text;
+                                            editPageName = false;
+                                          });
+                                        },
+                                        icon: editFormName
+                                            ? const Icon(Icons.check)
+                                            : const Icon(Icons.check)),
+                                  ),
                               ],
                             ),
                           ],
