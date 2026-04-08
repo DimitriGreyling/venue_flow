@@ -755,7 +755,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         ),
                         if (editFormName)
                           TooltipWidget(
-                            message: 'Save form name',
+                            message: 'Update form name',
                             child: IconButton(
                                 onPressed: () {
                                   setState(() {
@@ -889,7 +889,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                 ),
                                 if (editPageName)
                                   TooltipWidget(
-                                    message: 'Save form name',
+                                    message: 'Update page name',
                                     child: IconButton(
                                         onPressed: () {
                                           setState(() {
