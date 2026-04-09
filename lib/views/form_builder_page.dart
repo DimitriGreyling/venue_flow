@@ -20,7 +20,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
   bool editFormName = false;
   bool editPageName = false;
   TextEditingController formNameController = TextEditingController();
-  TextEditingController pageNameNameController = TextEditingController();
+  TextEditingController pageNameController = TextEditingController();
 
   bool isFieldSelected = true;
   final List<PopupMenuItem> fieldTypeMenuItems = [
@@ -758,11 +758,16 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                             message: 'Update form name',
                             child: IconButton(
                                 onPressed: () {
-                                  setState(() {
-                                    formBuilderState.form.first.name =
-                                        formNameController.text;
-                                    editFormName = false;
-                                  });
+                                  // setState(() {
+                                  //   formBuilderState.form.first.name =
+                                  //       formNameController.text;
+                                  editFormName = false;
+                                  // });
+                                  ref
+                                      .watch(
+                                          formBuilderViewModelProvider.notifier)
+                                      .updateFormName(
+                                          formNameController.text, 0);
                                 },
                                 icon: editFormName
                                     ? const Icon(Icons.check)
@@ -858,7 +863,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                     child: _buildTextField(
                                       context,
                                       label: 'Page Name',
-                                      controller: pageNameNameController,
+                                      controller: pageNameController,
                                       focusNode: FocusNode(),
                                       hint: 'e.g. Starch Options',
                                       enabled: true,
@@ -892,11 +897,20 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                     message: 'Update page name',
                                     child: IconButton(
                                         onPressed: () {
-                                          setState(() {
-                                            page?.title =
-                                                pageNameNameController.text;
-                                            editPageName = false;
-                                          });
+                                          // setState(() {
+                                          //   page?.title =
+                                          //       pageNameNameController.text;
+                                          editPageName = false;
+                                          // });
+
+                                          ref
+                                              .watch(
+                                                  formBuilderViewModelProvider
+                                                      .notifier)
+                                              .updatePageName(
+                                                pageNameController.text,
+                                                index,
+                                              );
                                         },
                                         icon: editFormName
                                             ? const Icon(Icons.check)

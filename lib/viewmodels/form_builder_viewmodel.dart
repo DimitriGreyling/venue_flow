@@ -76,7 +76,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
   }
 
   Future<List<DynamicFormModel>> loadValuesFromPreferences() async {
-    try {      
+    try {
       final loadedForm = await _storageHelper.loadForm();
 
       if (loadedForm != null && loadedForm.isNotEmpty) {
@@ -205,6 +205,56 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
         updatedForms[0].pages?.first.fields?.removeAt(index);
+      }
+
+      await _storageHelper.saveForm(state.form.first);
+
+      state = state.copyWith(
+        forms: updatedForms,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      // Handle error
+    }
+  }
+
+  void updateFormName(String newName, int index) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      // Create a new list with the existing forms plus the new field
+      final currentForms = state.form ?? [];
+      final updatedForms = [...currentForms];
+
+      // If you're adding a field to an existing form, you'd need to specify which form
+      // For example, adding to the first form:
+      if (updatedForms.isNotEmpty) {
+        updatedForms[0].name = newName;
+      }
+
+      await _storageHelper.saveForm(state.form.first);
+
+      state = state.copyWith(
+        forms: updatedForms,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      // Handle error
+    }
+  }
+
+  void updatePageName(String newName, int index) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      // Create a new list with the existing forms plus the new field
+      final currentForms = state.form ?? [];
+      final updatedForms = [...currentForms];
+
+      // If you're adding a field to an existing form, you'd need to specify which form
+      // For example, adding to the first form:
+      if (updatedForms.isNotEmpty) {
+        updatedForms[0].pages![index].title = newName;
       }
 
       await _storageHelper.saveForm(state.form.first);
