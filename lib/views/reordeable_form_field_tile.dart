@@ -182,17 +182,15 @@ class ReorderableFormFieldTile extends StatelessWidget {
       case FieldType.text:
         return colorScheme.primary;
       case FieldType.dropdown:
-        return colorScheme.primary;
-      // case 'email':
-      //   return colorScheme.secondary;
-      // case 'date':
-      //   return colorScheme.tertiary;
-      // case 'select':
-      //   return Colors.purple;
-      // case 'checkbox':
-      //   return Colors.green;
-      // case 'file':
-      //   return Colors.orange;
+        return Colors.purple;
+      case FieldType.checkbox:
+        return Colors.green;
+      case FieldType.date:
+        return colorScheme.tertiary;
+      case FieldType.textarea:
+        return colorScheme.secondary;
+      case FieldType.radio:
+        return Colors.orange;
       default:
         return colorScheme.primary;
     }
@@ -203,17 +201,15 @@ class ReorderableFormFieldTile extends StatelessWidget {
       case FieldType.text:
         return Icons.short_text;
       case FieldType.dropdown:
-        return Icons.drafts;
-      // case 'email':
-      //   return Icons.email;
-      // case 'date':
-      //   return Icons.calendar_month;
-      // case 'select':
-      //   return Icons.list;
-      // case 'checkbox':
-      //   return Icons.check_box_outlined;
-      // case 'file':
-      //   return Icons.upload_file;
+        return Icons.arrow_drop_down_circle;
+      case FieldType.checkbox:
+        return Icons.check_box_outlined;
+      case FieldType.date:
+        return Icons.calendar_month;
+      case FieldType.textarea:
+        return Icons.text_fields;
+      case FieldType.radio:
+        return Icons.radio_button_checked;
       default:
         return Icons.short_text;
     }
@@ -221,8 +217,8 @@ class ReorderableFormFieldTile extends StatelessWidget {
 
   bool _hasTrailingIcon() {
     switch (field.type) {
-      case 'date':
-      case 'select':
+      case FieldType.date:
+      case FieldType.dropdown:
         return true;
       default:
         return false;
@@ -231,9 +227,9 @@ class ReorderableFormFieldTile extends StatelessWidget {
 
   IconData _getTrailingIcon() {
     switch (field.type) {
-      case 'date':
+      case FieldType.date:
         return Icons.calendar_today;
-      case 'select':
+      case FieldType.dropdown:
         return Icons.arrow_drop_down;
       default:
         return Icons.help;
@@ -248,8 +244,24 @@ class ReorderableFormFieldTile extends StatelessWidget {
     switch (field.type) {
       case FieldType.text:
         return _buildTextField(context);
+      case FieldType.dropdown:
+        return _buildDropDownField(context);
+      case FieldType.checkbox:
+        return _buildCheckboxField(context);
+      case FieldType.date:
+        return _buildDateField(context);
+      case FieldType.textarea:
+        return _buildTextAreaField(context);
+      case FieldType.radio:
+        return _buildRadioField(context);
       default:
-        return Text('No field to show');
+        return Text(
+          'Unsupported field type: ${field.type}',
+          style: textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontStyle: FontStyle.italic,
+          ),
+        );
     }
   }
 
@@ -344,6 +356,391 @@ class ReorderableFormFieldTile extends StatelessWidget {
                 width: 2,
               ),
             ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropDownField(
+    BuildContext context, {
+    String? selectedValue,
+    List<String>? options,
+    ValueChanged<String?>? onChanged,
+    String? Function(String?)? validator,
+    bool enabled = true,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    // Get options from field.options or use default
+    final dropdownOptions = field.options ?? ['Option 1', 'Option 2', 'Option 3'];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            field.label ?? '',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: scheme.outline,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.3,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: selectedValue,
+          onChanged: enabled ? onChanged : null,
+          validator: validator,
+          items: dropdownOptions.map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: scheme.onSurface,
+                ),
+              ),
+            );
+          }).toList(),
+          decoration: InputDecoration(
+            hintText: field.placeholder ?? 'Select an option',
+            filled: true,
+            fillColor: scheme.surfaceContainerLowest,
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+            errorMaxLines: 2,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 18,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.primaryContainer.withOpacity(0.50),
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.error.withOpacity(0.80),
+                width: 1.5,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.error,
+                width: 2,
+              ),
+            ),
+          ),
+          icon: Icon(
+            Icons.arrow_drop_down,
+            color: scheme.onSurfaceVariant,
+          ),
+          dropdownColor: scheme.surfaceContainer,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCheckboxField(
+    BuildContext context, {
+    bool? value,
+    ValueChanged<bool?>? onChanged,
+    bool enabled = true,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              Checkbox(
+                value: value ?? false,
+                onChanged: enabled ? onChanged : null,
+                activeColor: scheme.primary,
+                checkColor: scheme.onPrimary,
+                side: BorderSide(
+                  color: scheme.outline,
+                  width: 2,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  field.label ?? '',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: scheme.onSurface,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (field.placeholder != null && field.placeholder!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 16, top: 4),
+            child: Text(
+              field.placeholder!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDateField(
+    BuildContext context, {
+    DateTime? selectedDate,
+    ValueChanged<DateTime?>? onChanged,
+    String? Function(DateTime?)? validator,
+    bool enabled = true,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            field.label ?? '',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: scheme.outline,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.3,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: enabled
+              ? () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate ?? DateTime.now(),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime(2100),
+                    builder: (context, child) {
+                      return Theme(
+                        data: theme.copyWith(
+                          colorScheme: scheme,
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (date != null && onChanged != null) {
+                    onChanged(date);
+                  }
+                }
+              : null,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 18,
+            ),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  color: scheme.onSurfaceVariant,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    selectedDate != null
+                        ? '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}'
+                        : field.placeholder ?? 'Select date',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: selectedDate != null
+                          ? scheme.onSurface
+                          : scheme.onSurfaceVariant,
+                      fontStyle: selectedDate != null
+                          ? FontStyle.normal
+                          : FontStyle.italic,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextAreaField(
+    BuildContext context, {
+    TextEditingController? controller,
+    FocusNode? focusNode,
+    String? Function(String?)? validator,
+    bool enabled = true,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            field.label ?? '',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: scheme.outline,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.3,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          focusNode: focusNode,
+          enabled: enabled,
+          maxLines: 4,
+          minLines: 3,
+          validator: validator,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: scheme.onSurface,
+          ),
+          decoration: InputDecoration(
+            hintText: field.placeholder ?? 'Enter text...',
+            filled: true,
+            fillColor: scheme.surfaceContainerLowest,
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+            errorMaxLines: 2,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 18,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.primaryContainer.withOpacity(0.50),
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.error.withOpacity(0.80),
+                width: 1.5,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: BorderSide(
+                color: scheme.error,
+                width: 2,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRadioField(
+    BuildContext context, {
+    String? selectedValue,
+    List<String>? options,
+    ValueChanged<String?>? onChanged,
+    bool enabled = true,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    // Get options from field.options or use default
+    final radioOptions = field.options ?? ['Option 1', 'Option 2', 'Option 3'];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            field.label ?? '',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: scheme.outline,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.3,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Column(
+            children: radioOptions.map((String option) {
+              return RadioListTile<String>(
+                value: option,
+                groupValue: selectedValue,
+                onChanged: enabled ? onChanged : null,
+                title: Text(
+                  option,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurface,
+                  ),
+                ),
+                activeColor: scheme.primary,
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+              );
+            }).toList(),
           ),
         ),
       ],
