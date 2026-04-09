@@ -141,10 +141,36 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
             },
       icon: const Icon(Icons.add),
       label: const Text('Add Field'),
-      backgroundColor: colorScheme.primary,
-      foregroundColor: colorScheme.onPrimary,
+      backgroundColor: colorScheme.secondary,
+      foregroundColor: colorScheme.onSecondary,
       tooltip: 'Add a new field to the current page',
       elevation: 6,
+      heroTag: "addField", // Unique hero tag to avoid conflicts
+    );
+  }
+
+  Widget _buildButton({
+    required BuildContext context,
+    required ColorScheme colorScheme,
+    required EditorialThemeData editorial,
+    required FormBuilderViewState formBuilderState,
+  }) {
+    return FloatingActionButton.extended(
+      onPressed: formBuilderState.isLoading
+          ? null
+          : () {
+              _showFieldTypeBottomSheet(
+                context: context,
+                colorScheme: colorScheme,
+                editorial: editorial,
+              );
+            },
+      icon: const Icon(Icons.add),
+      label: const Text('Add Field'),
+      backgroundColor: colorScheme.secondary,
+      foregroundColor: colorScheme.onSecondary,
+      tooltip: 'Add a new field to the current page',
+      elevation: 0,
       heroTag: "addField", // Unique hero tag to avoid conflicts
     );
   }
@@ -162,71 +188,76 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
       builder: (BuildContext context) {
         return Container(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+          child: Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.add_circle_outline,
-                    color: colorScheme.primary,
-                    size: 28,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.add_circle_outline,
+                        color: colorScheme.primary,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Select Field Type',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Select Field Type',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
+                  const SizedBox(height: 20),
+                  ...fieldTypeMenuItems.map((item) {
+                    final fieldType = item.value as FieldType;
+                    final title = (item.child as Text).data ?? '';
+                    return ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                  ),
+                        child: Icon(
+                          _getIconForFieldType(fieldType),
+                          color: colorScheme.primary,
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(
+                        title,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: colorScheme.onSurface,
+                            ),
+                      ),
+                      subtitle: Text(
+                        _getFieldDescription(fieldType),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context, fieldType);
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                    );
+                  }).toList(),
+                  const SizedBox(height: 10),
                 ],
               ),
-              const SizedBox(height: 20),
-              ...fieldTypeMenuItems.map((item) {
-                final fieldType = item.value as FieldType;
-                final title = (item.child as Text).data ?? '';
-                return ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      _getIconForFieldType(fieldType),
-                      color: colorScheme.primary,
-                      size: 20,
-                    ),
-                  ),
-                  title: Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: colorScheme.onSurface,
-                        ),
-                  ),
-                  subtitle: Text(
-                    _getFieldDescription(fieldType),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(context, fieldType);
-                  },
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                );
-              }).toList(),
-              const SizedBox(height: 10),
-            ],
+            ),
           ),
         );
       },
@@ -1162,8 +1193,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                           Text(
                             _buildLoadingString(
                                 isLoading: formBuilderState.isLoading,
-                                actualLabel:
-                                    page.title ?? 'Page ${index + 1}'),
+                                actualLabel: page.title ?? 'Page ${index + 1}'),
                           ),
                           const SizedBox(width: 8),
                           if (formBuilderState.form.first.schema!.length > 1)
@@ -1200,8 +1230,10 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children:
-                formBuilderState.form.first.schema!.asMap().entries.map((entry) {
+            children: formBuilderState.form.first.schema!
+                .asMap()
+                .entries
+                .map((entry) {
               final index = entry.key;
               final page = entry.value;
 
@@ -1290,7 +1322,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                                                         }
                                                       : () {
                                                           setState(() {
-                                                            editPageName = false;
+                                                            editPageName =
+                                                                false;
                                                           });
                                                         },
                                               icon: editPageName
@@ -1326,53 +1359,11 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                                         ],
                                       ),
                                     ),
-                                    PopupMenuButton(
-                                      enabled: !formBuilderState.isLoading,
-                                      tooltip:
-                                          'Add new fields to your form for clients to fill in.',
-                                      child: Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: const BoxDecoration(
-                                            color: Colors.green,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(8))),
-                                        child: Text(_buildLoadingString(
-                                            isLoading: ref
-                                                .watch(
-                                                    formBuilderViewModelProvider)
-                                                .isLoading,
-                                            actualLabel: 'Add Field')),
-                                      ),
-                                      onSelected: (value) async {
-                                        final result = await _showAddFieldDialog(
-                                          context: context,
-                                          editorial: editorial,
-                                          fieldType: value,
-                                        );
-
-                                        if (result != null) {
-                                          ref
-                                              .watch(formBuilderViewModelProvider
-                                                  .notifier)
-                                              .addFormField(
-                                                  formFieldModel:
-                                                      FormFieldModel(
-                                                    label: result['name'],
-                                                    placeholder:
-                                                        result['placeholder'],
-                                                    type: result['fieldType'],
-                                                    required:
-                                                        result['required'] ??
-                                                            false,
-                                                    options: result['options'],
-                                                  ),
-                                                  index: index);
-                                        }
-                                      },
-                                      itemBuilder: (context) {
-                                        return fieldTypeMenuItems;
-                                      },
-                                    ),
+                                    _buildButton(
+                                        context: context,
+                                        colorScheme: colorScheme,
+                                        editorial: editorial,
+                                        formBuilderState: formBuilderState),
                                   ],
                                 ),
                               ),
@@ -1461,9 +1452,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
-      color: isPrimary
-          ? colorScheme.primaryContainer
-          : colorScheme.surfaceContainerLowest,
+      color: isPrimary ? colorScheme.primaryContainer : colorScheme.surface,
       elevation: isPrimary ? 2 : 0,
       child: Text(
         text,
