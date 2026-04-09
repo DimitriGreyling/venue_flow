@@ -383,6 +383,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       DynamicFormModel? result;
 
       if (state.form.first.id == null) {
+        state.form.first.isActive = true;
         result = await _formRepository.addForm(formModel: state.form.first);
       } else {
         result = await _formRepository.updateForm(formModel: state.form.first);

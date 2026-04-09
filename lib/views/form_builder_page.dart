@@ -860,6 +860,28 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         },
                       ),
                     ),
+                    const SizedBox(
+                      width: 12,
+                    ),
+                    TooltipWidget(
+                      message: TooltipMessageConstants.saveDraftMessage,
+                      child: _buildActionButton(
+                        isLoading: formBuilderState.isLoading,
+                        text: _buildLoadingString(
+                            isLoading: formBuilderState.isLoading,
+                            actualLabel: 'Pubish'),
+                        isPrimary: true,
+                        colorScheme: colorScheme,
+                        editorial: editorial,
+                        callback: () {
+                          ref
+                              .watch(formBuilderViewModelProvider.notifier)
+                              .saveForm(
+                                formStatus: FormStatus.active,
+                              );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -883,7 +905,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         children: [
                           // TAB BAR
                           IgnorePointer(
-                            ignoring: ref.watch(formBuilderViewModelProvider).isLoading,
+                            ignoring: ref
+                                .watch(formBuilderViewModelProvider)
+                                .isLoading,
                             child: Container(
                               alignment: Alignment.centerLeft,
                               height: 50,
@@ -892,7 +916,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 16),
                                 child: TabBar(
-                                  
                                   isScrollable: true,
                                   tabAlignment: TabAlignment.start,
                                   indicatorColor: colorScheme.primary,
@@ -906,8 +929,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                       textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w500,
                                   ),
-                                  labelPadding:
-                                      const EdgeInsets.symmetric(horizontal: 16),
+                                  labelPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
                                   indicatorPadding:
                                       const EdgeInsets.symmetric(horizontal: 8),
                                   tabs: formBuilderState.form.first.schema!
@@ -921,7 +944,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 12, vertical: 8),
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                           border: Border.all(
                                             color: colorScheme.outlineVariant
                                                 .withOpacity(0.5),
@@ -932,8 +956,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                           children: [
                                             Text(
                                               _buildLoadingString(
-                                                  isLoading:
-                                                      formBuilderState.isLoading,
+                                                  isLoading: formBuilderState
+                                                      .isLoading,
                                                   actualLabel: page.title ??
                                                       'Page ${index + 1}'),
                                             ),
@@ -942,12 +966,13 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                     .form.first.schema!.length >
                                                 1)
                                               GestureDetector(
-                                                onTap: formBuilderState.isLoading
-                                                    ? null
-                                                    : () {
-                                                        _showDeletePageDialog(
-                                                            context, index);
-                                                      },
+                                                onTap:
+                                                    formBuilderState.isLoading
+                                                        ? null
+                                                        : () {
+                                                            _showDeletePageDialog(
+                                                                context, index);
+                                                          },
                                                 child: Container(
                                                   padding:
                                                       const EdgeInsets.all(2),
@@ -956,7 +981,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                         .errorContainer
                                                         .withOpacity(0.8),
                                                     borderRadius:
-                                                        BorderRadius.circular(12),
+                                                        BorderRadius.circular(
+                                                            12),
                                                   ),
                                                   child: Icon(
                                                     Icons.close,
