@@ -530,7 +530,11 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                 ),
                               ),
                               child: Text(
-                                'Add Field',
+                                _buildLoadingString(
+                                    isLoading: ref
+                                        .watch(formBuilderViewModelProvider)
+                                        .isLoading,
+                                    actualLabel: 'Add Field'),
                                 style: editorial.buttonTextStyle.copyWith(
                                   color:
                                       Theme.of(context).colorScheme.onPrimary,
@@ -716,10 +720,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     required EditorialThemeData editorial,
     required FormBuilderViewState formBuilderState,
   }) {
-    if (formBuilderState.isLoading) {
-      return const CircularProgressIndicator();
-    }
-
     return Container(
       color: colorScheme.surface,
       child: Padding(
@@ -746,7 +746,10 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                       children: [
                         if (!editFormName)
                           Text(
-                            formBuilderState.form.first.name ?? '',
+                            _buildLoadingString(
+                                isLoading: formBuilderState.isLoading,
+                                actualLabel:
+                                    formBuilderState.form.first.name ?? ''),
                             style: textTheme.headlineLarge?.copyWith(
                               fontWeight: FontWeight.w900,
                               color: colorScheme.onSurface,
@@ -757,7 +760,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                             width: MediaQuery.of(context).size.width * 0.4,
                             child: _buildTextField(
                               context,
-                              label: 'Form Name',
+                              label: _buildLoadingString(
+                                  isLoading: formBuilderState.isLoading,
+                                  actualLabel: 'Form Name'),
                               controller: formNameController,
                               focusNode: FocusNode(),
                               hint: 'e.g. Meal Options',
@@ -819,7 +824,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     TooltipWidget(
                       message: TooltipMessageConstants.addPageMessage,
                       child: _buildActionButton(
-                        text: 'Add Page',
+                        text: _buildLoadingString(
+                            isLoading: formBuilderState.isLoading,
+                            actualLabel: 'Add Page'),
                         isPrimary: false,
                         colorScheme: colorScheme,
                         editorial: editorial,
@@ -836,7 +843,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     TooltipWidget(
                       message: TooltipMessageConstants.saveDraftMessage,
                       child: _buildActionButton(
-                        text: 'Save Draft',
+                        text: _buildLoadingString(
+                            isLoading: formBuilderState.isLoading,
+                            actualLabel: 'Save Draft'),
                         isPrimary: false,
                         colorScheme: colorScheme,
                         editorial: editorial,
@@ -916,8 +925,13 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Text(page.title ??
-                                              'Page ${index + 1}'),
+                                          Text(
+                                            _buildLoadingString(
+                                                isLoading:
+                                                    formBuilderState.isLoading,
+                                                actualLabel: page.title ??
+                                                    'Page ${index + 1}'),
+                                          ),
                                           const SizedBox(width: 8),
                                           if (formBuilderState
                                                   .form.first.schema!.length >
@@ -954,7 +968,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                             ),
                           ),
 
-// 2. IMPROVED CANVAS SCROLLING - Replace TabBarView content with CustomScrollView
                           Expanded(
                             child: TabBarView(
                               children: formBuilderState.form.first.schema!
@@ -991,8 +1004,13 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                             if (!editPageName)
                                                               Flexible(
                                                                 child: Text(
-                                                                  page.title ??
-                                                                      'Page ${index + 1}',
+                                                                  _buildLoadingString(
+                                                                      isLoading:
+                                                                          formBuilderState
+                                                                              .isLoading,
+                                                                      actualLabel:
+                                                                          page.title ??
+                                                                              'Page ${index + 1}'),
                                                                   style: textTheme
                                                                       .headlineMedium
                                                                       ?.copyWith(
@@ -1018,8 +1036,12 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                                   child:
                                                                       _buildTextField(
                                                                     context,
-                                                                    label:
-                                                                        'Page Name',
+                                                                    label: _buildLoadingString(
+                                                                        isLoading:
+                                                                            formBuilderState
+                                                                                .isLoading,
+                                                                        actualLabel:
+                                                                            'Page Name'),
                                                                     controller:
                                                                         pageNameController,
                                                                     focusNode:
@@ -1114,8 +1136,13 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                                   .all(Radius
                                                                       .circular(
                                                                           8))),
-                                                          child: const Text(
-                                                              'Add a field'),
+                                                          child: Text(_buildLoadingString(
+                                                              isLoading: ref
+                                                                  .watch(
+                                                                      formBuilderViewModelProvider)
+                                                                  .isLoading,
+                                                              actualLabel:
+                                                                  'Add Field')),
                                                         ),
                                                         onSelected:
                                                             (value) async {
@@ -1269,5 +1296,10 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
         ),
       ),
     );
+  }
+
+  String _buildLoadingString(
+      {required bool isLoading, required String actualLabel}) {
+    return isLoading ? 'Loading...' : actualLabel;
   }
 }
