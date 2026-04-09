@@ -828,6 +828,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                             isLoading: formBuilderState.isLoading,
                             actualLabel: 'Add Page'),
                         isPrimary: false,
+                        isLoading: formBuilderState.isLoading,
                         colorScheme: colorScheme,
                         editorial: editorial,
                         callback: () {
@@ -843,6 +844,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     TooltipWidget(
                       message: TooltipMessageConstants.saveDraftMessage,
                       child: _buildActionButton(
+                        isLoading: formBuilderState.isLoading,
                         text: _buildLoadingString(
                             isLoading: formBuilderState.isLoading,
                             actualLabel: 'Save Draft'),
@@ -880,90 +882,96 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                       child: Column(
                         children: [
                           // TAB BAR
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            height: 50,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: TabBar(
-                                isScrollable: true,
-                                tabAlignment: TabAlignment.start,
-                                indicatorColor: colorScheme.primary,
-                                labelColor: colorScheme.primary,
-                                unselectedLabelColor:
-                                    colorScheme.onSurfaceVariant,
-                                labelStyle: textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                unselectedLabelStyle:
-                                    textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                labelPadding:
+                          IgnorePointer(
+                            ignoring: ref.watch(formBuilderViewModelProvider).isLoading,
+                            child: Container(
+                              alignment: Alignment.centerLeft,
+                              height: 50,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                padding:
                                     const EdgeInsets.symmetric(horizontal: 16),
-                                indicatorPadding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                tabs: formBuilderState.form.first.schema!
-                                    .asMap()
-                                    .entries
-                                    .map((entry) {
-                                  final index = entry.key;
-                                  final page = entry.value;
-                                  return Tab(
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 8),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: colorScheme.outlineVariant
-                                              .withOpacity(0.5),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            _buildLoadingString(
-                                                isLoading:
-                                                    formBuilderState.isLoading,
-                                                actualLabel: page.title ??
-                                                    'Page ${index + 1}'),
+                                child: TabBar(
+                                  
+                                  isScrollable: true,
+                                  tabAlignment: TabAlignment.start,
+                                  indicatorColor: colorScheme.primary,
+                                  labelColor: colorScheme.primary,
+                                  unselectedLabelColor:
+                                      colorScheme.onSurfaceVariant,
+                                  labelStyle: textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  unselectedLabelStyle:
+                                      textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  labelPadding:
+                                      const EdgeInsets.symmetric(horizontal: 16),
+                                  indicatorPadding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  tabs: formBuilderState.form.first.schema!
+                                      .asMap()
+                                      .entries
+                                      .map((entry) {
+                                    final index = entry.key;
+                                    final page = entry.value;
+                                    return Tab(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 8),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: colorScheme.outlineVariant
+                                                .withOpacity(0.5),
                                           ),
-                                          const SizedBox(width: 8),
-                                          if (formBuilderState
-                                                  .form.first.schema!.length >
-                                              1)
-                                            GestureDetector(
-                                              onTap: () {
-                                                _showDeletePageDialog(
-                                                    context, index);
-                                              },
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.all(2),
-                                                decoration: BoxDecoration(
-                                                  color: colorScheme
-                                                      .errorContainer
-                                                      .withOpacity(0.8),
-                                                  borderRadius:
-                                                      BorderRadius.circular(12),
-                                                ),
-                                                child: Icon(
-                                                  Icons.close,
-                                                  size: 14,
-                                                  color: colorScheme
-                                                      .onErrorContainer,
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              _buildLoadingString(
+                                                  isLoading:
+                                                      formBuilderState.isLoading,
+                                                  actualLabel: page.title ??
+                                                      'Page ${index + 1}'),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            if (formBuilderState
+                                                    .form.first.schema!.length >
+                                                1)
+                                              GestureDetector(
+                                                onTap: formBuilderState.isLoading
+                                                    ? null
+                                                    : () {
+                                                        _showDeletePageDialog(
+                                                            context, index);
+                                                      },
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(2),
+                                                  decoration: BoxDecoration(
+                                                    color: colorScheme
+                                                        .errorContainer
+                                                        .withOpacity(0.8),
+                                                    borderRadius:
+                                                        BorderRadius.circular(12),
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.close,
+                                                    size: 14,
+                                                    color: colorScheme
+                                                        .onErrorContainer,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                }).toList(),
+                                    );
+                                  }).toList(),
+                                ),
                               ),
                             ),
                           ),
@@ -1068,8 +1076,10 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                                   : TooltipMessageConstants
                                                                       .editPageNameMessage,
                                                               child: IconButton(
-                                                                onPressed:
-                                                                    !editPageName
+                                                                onPressed: formBuilderState
+                                                                        .isLoading
+                                                                    ? null
+                                                                    : !editPageName
                                                                         ? () {
                                                                             pageNameController.text =
                                                                                 page.title ?? '';
@@ -1099,21 +1109,18 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                                 child:
                                                                     IconButton(
                                                                   onPressed:
-                                                                      () {
-                                                                    ref
-                                                                        .watch(formBuilderViewModelProvider
-                                                                            .notifier)
-                                                                        .updatePageName(
-                                                                          pageNameController
-                                                                              .text,
-                                                                          index,
-                                                                        );
-                                                                    setState(
-                                                                        () {
-                                                                      editPageName =
-                                                                          false;
-                                                                    });
-                                                                  },
+                                                                      formBuilderState
+                                                                              .isLoading
+                                                                          ? null
+                                                                          : () {
+                                                                              ref.watch(formBuilderViewModelProvider.notifier).updatePageName(
+                                                                                    pageNameController.text,
+                                                                                    index,
+                                                                                  );
+                                                                              setState(() {
+                                                                                editPageName = false;
+                                                                              });
+                                                                            },
                                                                   icon: const Icon(
                                                                       Icons
                                                                           .check),
@@ -1123,6 +1130,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                         ),
                                                       ),
                                                       PopupMenuButton(
+                                                        enabled:
+                                                            !formBuilderState
+                                                                .isLoading,
                                                         tooltip:
                                                             'Add new fields to your form for clients to fill in.',
                                                         child: Container(
@@ -1273,9 +1283,10 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     required ColorScheme colorScheme,
     required EditorialThemeData editorial,
     void Function()? callback,
+    bool isLoading = false,
   }) {
     return MaterialButton(
-      onPressed: () => callback?.call(),
+      onPressed: isLoading ? null : () => callback?.call(),
       padding: EdgeInsets.symmetric(
         horizontal: isPrimary ? 24 : 20,
         vertical: 12,
