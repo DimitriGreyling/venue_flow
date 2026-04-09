@@ -1172,8 +1172,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                               editorial: editorial,
                                               onReorder: (oldIndex, newIndex) {
                                                 // Handle field reordering within this page
+
                                               },
-                                              onFieldSelected: (field) {
+                                              onEditClicked: (field) {
                                                 // Handle field selection
                                               },
                                               onFieldDeleted:

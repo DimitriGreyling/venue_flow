@@ -7,7 +7,7 @@ class ReorderableFormFieldsList extends StatefulWidget {
   final List<FormFieldModel> fields;
   final String? selectedFieldId;
   final Function(int oldIndex, int newIndex)? onReorder;
-  final Function(FormFieldModel field)? onFieldSelected;
+  final Function(FormFieldModel field)? onEditClicked;
   final Function(FormFieldModel field, int index)? onFieldDeleted;
   final Function(FormFieldModel field)? onFieldDuplicated;
   final ColorScheme colorScheme;
@@ -20,7 +20,7 @@ class ReorderableFormFieldsList extends StatefulWidget {
     required this.editorial,
     this.selectedFieldId,
     this.onReorder,
-    this.onFieldSelected,
+    this.onEditClicked,
     this.onFieldDeleted,
     this.onFieldDuplicated,
   }) : super(key: key);
@@ -87,7 +87,7 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
             isSelected: isSelected,
             colorScheme: widget.colorScheme,
             editorial: widget.editorial,
-            onTap: () => widget.onFieldSelected?.call(field),
+            onEditClicked: () => widget.onEditClicked?.call(field),
             onDelete: () => widget.onFieldDeleted?.call(field, index),
             onDuplicate: () => widget.onFieldDuplicated?.call(field),
           ),

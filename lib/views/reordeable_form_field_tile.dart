@@ -6,7 +6,7 @@ import '../theme/editorial_theme_data.dart';
 class ReorderableFormFieldTile extends StatelessWidget {
   final FormFieldModel field;
   final bool isSelected;
-  final VoidCallback? onTap;
+  final VoidCallback? onEditClicked;
   final VoidCallback? onDelete;
   final VoidCallback? onDuplicate;
   final ColorScheme colorScheme;
@@ -18,7 +18,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
     required this.isSelected,
     required this.colorScheme,
     required this.editorial,
-    this.onTap,
+    this.onEditClicked,
     this.onDelete,
     this.onDuplicate,
   }) : super(key: key);
@@ -31,7 +31,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
+          // onTap: onTap,
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -95,10 +95,16 @@ class ReorderableFormFieldTile extends StatelessWidget {
                     //     ],
                     //   ),
                     // ),
-                   const  Spacer(),
+                    const Spacer(),
 
                     // Action buttons (show only when selected)
                     if (isSelected) ...[
+                      IconButton(
+                        onPressed: onEditClicked,
+                        icon: const Icon(Icons.edit, size: 18),
+                        color: colorScheme.outline,
+                        tooltip: 'Edit',
+                      ),
                       IconButton(
                         onPressed: onDuplicate,
                         icon: const Icon(Icons.content_copy, size: 18),
