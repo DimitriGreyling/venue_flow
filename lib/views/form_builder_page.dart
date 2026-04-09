@@ -552,6 +552,37 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     // NO finally block - let Flutter handle garbage collection
   }
 
+  Future<void> _showDeletePageDialog(
+      BuildContext context, int pageIndex) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Page'),
+          content: const Text(
+              'Are you sure you want to delete this page? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      ref.watch(formBuilderViewModelProvider.notifier).removePage(pageIndex);
+    }
+  }
+
   IconData _getIconForFieldType(FieldType fieldType) {
     switch (fieldType) {
       case FieldType.text:
@@ -814,18 +845,26 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     const SizedBox(
                       width: 12,
                     ),
-                    // _buildActionButton(
-                    //     'Preview', false, colorScheme, editorial),
-                    // const SizedBox(width: 12),
+                    _buildActionButton(
+                      text: 'Add Page',
+                      isPrimary: false,
+                      colorScheme: colorScheme,
+                      editorial: editorial,
+                      callback: () {
+                        ref
+                            .watch(formBuilderViewModelProvider.notifier)
+                            .addFormPage();
+                      },
+                    ),
+                    const SizedBox(
+                      width: 12,
+                    ),
                     _buildActionButton(
                       text: 'Save Draft',
                       isPrimary: false,
                       colorScheme: colorScheme,
                       editorial: editorial,
                     ),
-                    // const SizedBox(width: 12),
-                    // _buildActionButton(
-                    //     'Publish Form', true, colorScheme, editorial),
                   ],
                 ),
               ],
@@ -833,124 +872,335 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
             const SizedBox(height: 40),
 
             // Canvas Area
-            Expanded(
-              child: Container(
-                // constraints: const BoxConstraints(maxWidth: 768),
-                child: PageView.builder(
-                  itemBuilder: (context, index) {
-                    final page = formBuilderState.form?.first.pages![index];
-                    return Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 8),
-                                if (!editPageName)
-                                  Text(
-                                    page?.title ?? '',
-                                    style: textTheme.headlineMedium?.copyWith(
-                                      fontWeight: FontWeight.w900,
-                                      color: colorScheme.onSurface,
-                                    ),
-                                  ),
-                                if (editPageName)
-                                  SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.4,
-                                    child: _buildTextField(
-                                      context,
-                                      label: 'Page Name',
-                                      controller: pageNameController,
-                                      focusNode: FocusNode(),
-                                      hint: 'e.g. Starch Options',
-                                      enabled: true,
-                                      textInputAction: TextInputAction.done,
-                                      validator: (value) => null,
-                                    ),
-                                  ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                TooltipWidget(
-                                  message: 'Change page name',
-                                  child: IconButton(
-                                      onPressed: !editPageName
-                                          ? () {
-                                              setState(() {
-                                                editPageName = true;
-                                              });
-                                            }
-                                          : () {
-                                              setState(() {
-                                                editPageName = false;
-                                              });
-                                            },
-                                      icon: editPageName
-                                          ? const Icon(Icons.close)
-                                          : const Icon(Icons.edit)),
-                                ),
-                                if (editPageName)
-                                  TooltipWidget(
-                                    message: 'Update page name',
-                                    child: IconButton(
-                                        onPressed: () {
-                                          // setState(() {
-                                          //   page?.title =
-                                          //       pageNameNameController.text;
-                                          editPageName = false;
-                                          // });
+            // Expanded(
+            //   child: Container(
+            //     // constraints: const BoxConstraints(maxWidth: 768),
+            //     child: PageView.builder(
+            //       itemBuilder: (context, index) {
+            //         final page = formBuilderState.form.first.pages![index];
+            //         return Column(
+            //           children: [
+            //             Row(
+            //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //               children: [
+            //                 Row(
+            //                   crossAxisAlignment: CrossAxisAlignment.start,
+            //                   children: [
+            //                     const SizedBox(height: 8),
+            //                     if (!editPageName)
+            //                       Text(
+            //                         page?.title ?? '',
+            //                         style: textTheme.headlineMedium?.copyWith(
+            //                           fontWeight: FontWeight.w900,
+            //                           color: colorScheme.onSurface,
+            //                         ),
+            //                       ),
+            //                     if (editPageName)
+            //                       SizedBox(
+            //                         width:
+            //                             MediaQuery.of(context).size.width * 0.4,
+            //                         child: _buildTextField(
+            //                           context,
+            //                           label: 'Page Name',
+            //                           controller: pageNameController,
+            //                           focusNode: FocusNode(),
+            //                           hint: 'e.g. Starch Options',
+            //                           enabled: true,
+            //                           textInputAction: TextInputAction.done,
+            //                           validator: (value) => null,
+            //                         ),
+            //                       ),
+            //                     const SizedBox(
+            //                       width: 15,
+            //                     ),
+            //                     TooltipWidget(
+            //                       message: 'Change page name',
+            //                       child: IconButton(
+            //                           onPressed: !editPageName
+            //                               ? () {
+            //                                   setState(() {
+            //                                     editPageName = true;
+            //                                   });
+            //                                 }
+            //                               : () {
+            //                                   setState(() {
+            //                                     editPageName = false;
+            //                                   });
+            //                                 },
+            //                           icon: editPageName
+            //                               ? const Icon(Icons.close)
+            //                               : const Icon(Icons.edit)),
+            //                     ),
+            //                     if (editPageName)
+            //                       TooltipWidget(
+            //                         message: 'Update page name',
+            //                         child: IconButton(
+            //                             onPressed: () {
+            //                               // setState(() {
+            //                               //   page?.title =
+            //                               //       pageNameNameController.text;
+            //                               editPageName = false;
+            //                               // });
 
+            //                               ref
+            //                                   .watch(
+            //                                       formBuilderViewModelProvider
+            //                                           .notifier)
+            //                                   .updatePageName(
+            //                                     pageNameController.text,
+            //                                     index,
+            //                                   );
+            //                             },
+            //                             icon: editFormName
+            //                                 ? const Icon(Icons.check)
+            //                                 : const Icon(Icons.check)),
+            //                       ),
+            //                   ],
+            //                 ),
+            //               ],
+            //             ),
+            //             // Reorderable Form Fields List
+            //             ReorderableFormFieldsList(
+            //               fields: page?.fields ??
+            //                   [], //_getFormFields(formBuilderState),
+            //               // selectedFieldId: selectedFieldId,
+            //               colorScheme: colorScheme,
+            //               editorial: editorial,
+            //               onReorder: (oldIndex, newIndex) {
+            //                 // _handleFieldReorder(oldIndex, newIndex);
+            //               },
+            //               onFieldSelected: (field) {
+            //                 // _handleFieldSelection(field);
+            //               },
+            //               onFieldDeleted: (field, fieldIndex) {
+            //                 ref
+            //                     .watch(formBuilderViewModelProvider.notifier)
+            //                     .removeField(
+            //                       formFieldModel: field,
+            //                       index: fieldIndex,
+            //                     );
+            //                 // _handleFieldDeletion(field);
+            //               },
+            //               onFieldDuplicated: (field) {
+            //                 // _handleFieldDuplication(field);
+            //               },
+            //             ),
+            //           ],
+            //         );
+            //       },
+            //     ),
+            //   ),
+            // ),
+
+            // Replace the PageView section in your _buildFormCanvas method
+
+// Canvas Area
+            Expanded(
+              child: formBuilderState.form.first.pages?.isEmpty ?? true
+                  ? Center(
+                      child: Text(
+                        'No pages available',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    )
+                  : DefaultTabController(
+                      length: formBuilderState.form.first.pages!.length,
+                      child: Column(
+                        children: [
+                          // Tab Bar
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            child: TabBar(
+                              isScrollable: true,
+                              indicatorColor: colorScheme.primary,
+                              labelColor: colorScheme.primary,
+                              unselectedLabelColor:
+                                  colorScheme.onSurfaceVariant,
+                              labelStyle: textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              unselectedLabelStyle:
+                                  textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                              tabs: formBuilderState.form.first.pages!
+                                  .asMap()
+                                  .entries
+                                  .map((entry) {
+                                final index = entry.key;
+                                final page = entry.value;
+                                return Tab(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(page.title ?? 'Page ${index + 1}'),
+                                      const SizedBox(width: 8),
+                                      if (formBuilderState
+                                              .form.first.pages!.length >
+                                          1)
+                                        InkWell(
+                                          onTap: () {
+                                            _showDeletePageDialog(
+                                                context, index);
+                                          },
+                                          child: Icon(
+                                            Icons.close,
+                                            size: 16,
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Tab Bar View
+                          Expanded(
+                            child: TabBarView(
+                              children: formBuilderState.form.first.pages!
+                                  .asMap()
+                                  .entries
+                                  .map((entry) {
+                                final index = entry.key;
+                                final page = entry.value;
+
+                                return SingleChildScrollView(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Page Header with Edit Functionality
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              if (!editPageName)
+                                                Text(
+                                                  page.title ??
+                                                      'Page ${index + 1}',
+                                                  style: textTheme
+                                                      .headlineMedium
+                                                      ?.copyWith(
+                                                    fontWeight: FontWeight.w900,
+                                                    color:
+                                                        colorScheme.onSurface,
+                                                  ),
+                                                ),
+                                              if (editPageName)
+                                                SizedBox(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width *
+                                                      0.4,
+                                                  child: _buildTextField(
+                                                    context,
+                                                    label: 'Page Name',
+                                                    controller:
+                                                        pageNameController,
+                                                    focusNode: FocusNode(),
+                                                    hint:
+                                                        'e.g. Contact Information',
+                                                    enabled: true,
+                                                    textInputAction:
+                                                        TextInputAction.done,
+                                                    validator: (value) => null,
+                                                  ),
+                                                ),
+                                              const SizedBox(width: 15),
+                                              TooltipWidget(
+                                                message: 'Edit page name',
+                                                child: IconButton(
+                                                  onPressed: !editPageName
+                                                      ? () {
+                                                          pageNameController
+                                                                  .text =
+                                                              page.title ?? '';
+                                                          setState(() {
+                                                            editPageName = true;
+                                                          });
+                                                        }
+                                                      : () {
+                                                          setState(() {
+                                                            editPageName =
+                                                                false;
+                                                          });
+                                                        },
+                                                  icon: editPageName
+                                                      ? const Icon(Icons.close)
+                                                      : const Icon(Icons.edit),
+                                                ),
+                                              ),
+                                              if (editPageName)
+                                                TooltipWidget(
+                                                  message: 'Save page name',
+                                                  child: IconButton(
+                                                    onPressed: () {
+                                                      ref
+                                                          .watch(
+                                                              formBuilderViewModelProvider
+                                                                  .notifier)
+                                                          .updatePageName(
+                                                            pageNameController
+                                                                .text,
+                                                            index,
+                                                          );
+                                                      setState(() {
+                                                        editPageName = false;
+                                                      });
+                                                    },
+                                                    icon:
+                                                        const Icon(Icons.check),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 24),
+
+                                      // Form Fields for this page
+                                      ReorderableFormFieldsList(
+                                        fields: page.fields ?? [],
+                                        colorScheme: colorScheme,
+                                        editorial: editorial,
+                                        onReorder: (oldIndex, newIndex) {
+                                          // Handle field reordering within this page
+                                        },
+                                        onFieldSelected: (field) {
+                                          // Handle field selection
+                                        },
+                                        onFieldDeleted: (field, fieldIndex) {
                                           ref
                                               .watch(
                                                   formBuilderViewModelProvider
                                                       .notifier)
-                                              .updatePageName(
-                                                pageNameController.text,
-                                                index,
+                                              .removeField(
+                                                formFieldModel: field,
+                                                index: fieldIndex,
                                               );
                                         },
-                                        icon: editFormName
-                                            ? const Icon(Icons.check)
-                                            : const Icon(Icons.check)),
+                                        onFieldDuplicated: (field) {
+                                          // Handle field duplication
+                                        },
+                                      ),
+                                    ],
                                   ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        // Reorderable Form Fields List
-                        ReorderableFormFieldsList(
-                          fields: page?.fields ??
-                              [], //_getFormFields(formBuilderState),
-                          // selectedFieldId: selectedFieldId,
-                          colorScheme: colorScheme,
-                          editorial: editorial,
-                          onReorder: (oldIndex, newIndex) {
-                            // _handleFieldReorder(oldIndex, newIndex);
-                          },
-                          onFieldSelected: (field) {
-                            // _handleFieldSelection(field);
-                          },
-                          onFieldDeleted: (field, fieldIndex) {
-                            ref
-                                .watch(formBuilderViewModelProvider.notifier)
-                                .removeField(
-                                  formFieldModel: field,
-                                  index: fieldIndex,
                                 );
-                            // _handleFieldDeletion(field);
-                          },
-                          onFieldDuplicated: (field) {
-                            // _handleFieldDuplication(field);
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+                              }).toList(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
             ),
           ],
         ),
