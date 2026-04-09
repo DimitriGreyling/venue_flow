@@ -113,10 +113,8 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
   }
 
   // Add a single form field
-  void addFormField({
-    required FormFieldModel formFieldModel,
-    required int index
-  }) async {
+  void addFormField(
+      {required FormFieldModel formFieldModel, required int index}) async {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
@@ -310,6 +308,31 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
         updatedForms[0].pages?.removeAt(index);
+      }
+
+      await _storageHelper.saveForm(state.form.first);
+
+      state = state.copyWith(
+        forms: updatedForms,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      // Handle error
+    }
+  }
+
+  void duplicateFiel(FormFieldModel formFieldModel, int index) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      // Create a new list with the existing forms plus the new field
+      final currentForms = state.form ?? [];
+      final updatedForms = [...currentForms];
+
+      // If you're adding a field to an existing form, you'd need to specify which form
+      // For example, adding to the first form:
+      if (updatedForms.isNotEmpty) {
+        updatedForms[0].pages![index].fields!.add(formFieldModel);
       }
 
       await _storageHelper.saveForm(state.form.first);

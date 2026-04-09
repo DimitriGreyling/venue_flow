@@ -1189,6 +1189,14 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                               },
                                               onFieldDuplicated: (field) {
                                                 // Handle field duplication
+                                                ref
+                                                    .watch(
+                                                        formBuilderViewModelProvider
+                                                            .notifier)
+                                                    .duplicateFiel(
+                                                      field,
+                                                      index,
+                                                    );
                                               },
                                             ),
                                           ),
