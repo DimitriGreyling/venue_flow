@@ -6,7 +6,10 @@ import 'package:venue_flow_app/models/dynamic_form_model.dart';
 
 abstract class IFormRepository {
   Future<List<DynamicFormModel>?> getForms();
-  Future<DynamicFormModel> addForm({
+  Future<DynamicFormModel?> addForm({
+    required DynamicFormModel formModel,
+  });
+  Future<DynamicFormModel?> updateForm({
     required DynamicFormModel formModel,
   });
 }
@@ -41,15 +44,38 @@ class FormRepository extends IFormRepository {
   }
 
   @override
-  Future<DynamicFormModel> addForm({
+  Future<DynamicFormModel?> addForm({
     required DynamicFormModel formModel,
   }) async {
     try {
-      final result = await _client.from(_tableName).insert(
+      final result = await _client
+          .from(_tableName)
+          .insert(
             formModel.toJson(),
-          );
+          )
+          .select();
 
-      return result as DynamicFormModel;
+      log('testing');
+      return DynamicFormModel.fromJson(result[0]);
+    } catch (error, stackTrace) {
+      throw Exception(error);
+    }
+  }
+
+  @override
+  Future<DynamicFormModel?> updateForm({
+    required DynamicFormModel formModel,
+  }) async {
+    try {
+      final result = await _client
+          .from(_tableName)
+          .update(
+            formModel.toJson(),
+          ).eq('id', formModel.id ?? '')
+          .select();
+
+      log('testing');
+     return DynamicFormModel.fromJson(result[0]);
     } catch (error, stackTrace) {
       throw Exception(error);
     }

@@ -26,7 +26,7 @@ class FormBuilderViewState {
         DynamicFormModel(
           name: 'Form Name',
           version: 1,
-          pages: [
+          schema: [
             FormPageModel(
               title: 'Page 1',
             ),
@@ -89,7 +89,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
         DynamicFormModel(
           name: 'Form Name',
           version: 1,
-          pages: [
+          schema: [
             FormPageModel(
               title: 'Page 1',
             ),
@@ -103,7 +103,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
         DynamicFormModel(
           name: 'Form Name',
           version: 1,
-          pages: [
+          schema: [
             FormPageModel(
               title: 'Page 1',
             ),
@@ -125,13 +125,13 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // If you're adding a field to an existing form, you'd need to specify which form
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
-        updatedForms[0].pages![index].fields ??= [];
-        updatedForms[0].pages![index].fields?.add(formFieldModel);
+        updatedForms[0].schema![index].fields ??= [];
+        updatedForms[0].schema![index].fields?.add(formFieldModel);
       } else {
         updatedForms.add(
           DynamicFormModel(
             name: 'Form Name',
-            pages: [
+            schema: [
               FormPageModel(
                 title: 'Page 1',
                 fields: [
@@ -168,12 +168,12 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // If you're adding a field to an existing form, you'd need to specify which form
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
-        updatedForms[0].pages?.add(formPageModel);
+        updatedForms[0].schema?.add(formPageModel);
       } else {
         updatedForms.add(
           DynamicFormModel(
             name: 'Form Name',
-            pages: [
+            schema: [
               formPageModel,
             ],
           ),
@@ -204,7 +204,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // If you're adding a field to an existing form, you'd need to specify which form
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
-        updatedForms[0].pages?.first.fields?.removeAt(index);
+        updatedForms[0].schema?.first.fields?.removeAt(index);
       }
 
       await _storageHelper.saveForm(state.form.first);
@@ -254,7 +254,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // If you're adding a field to an existing form, you'd need to specify which form
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
-        updatedForms[0].pages![index].title = newName;
+        updatedForms[0].schema![index].title = newName;
       }
 
       await _storageHelper.saveForm(state.form.first);
@@ -279,7 +279,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // If you're adding a field to an existing form, you'd need to specify which form
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
-        updatedForms[0].pages?.add(
+        updatedForms[0].schema?.add(
               FormPageModel(
                 title: 'Form Page',
               ),
@@ -308,7 +308,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // If you're adding a field to an existing form, you'd need to specify which form
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
-        updatedForms[0].pages?.removeAt(index);
+        updatedForms[0].schema?.removeAt(index);
       }
 
       await _storageHelper.saveForm(state.form.first);
@@ -333,7 +333,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // If you're adding a field to an existing form, you'd need to specify which form
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
-        updatedForms[0].pages![index].fields!.add(formFieldModel);
+        updatedForms[0].schema![index].fields!.add(formFieldModel);
       }
 
       await _storageHelper.saveForm(state.form.first);
@@ -359,7 +359,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // If you're adding a field to an existing form, you'd need to specify which form
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
-        updatedForms[0].pages![pageIndex].fields = reorderedList;
+        updatedForms[0].schema![pageIndex].fields = reorderedList;
       }
 
       await _storageHelper.saveForm(state.form.first);
@@ -374,21 +374,28 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     }
   }
 
-  void setDraftMode(
-    {
-      required  DynamicFormModel formModel,
-    required FormStatus formStatus,
-    }
-  ) async {
+  void saveForm({required FormStatus formStatus}) async {
     try {
       state = state.copyWith(isLoading: true);
-      
-      _formRepository.addForm(formModel: formModel);
 
-      // state = state.copyWith(
-      //   // forms: updatedForms,
-      //   isLoading: false,
-      // );
+      state.form.first.formStatus = formStatus;
+
+      DynamicFormModel? result;
+
+      if (state.form.first.id == null) {
+        result = await _formRepository.addForm(formModel: state.form.first);
+      } else {
+        result = await _formRepository.updateForm(formModel: state.form.first);
+      }
+
+      if (result == null) {
+        throw Exception('Something happend when saving form');
+      }
+
+      state = state.copyWith(
+        forms: [result],
+        isLoading: false,
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false);
       // Handle error

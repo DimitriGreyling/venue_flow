@@ -841,7 +841,11 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         colorScheme: colorScheme,
                         editorial: editorial,
                         callback: () {
-                          
+                          ref
+                              .watch(formBuilderViewModelProvider.notifier)
+                              .saveForm(
+                                formStatus: FormStatus.draft,
+                              );
                         },
                       ),
                     ),
@@ -853,7 +857,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
 
             // Canvas Area
             Expanded(
-              child: formBuilderState.form.first.pages?.isEmpty ?? true
+              child: formBuilderState.form.first.schema?.isEmpty ?? true
                   ? Center(
                       child: Text(
                         'No pages available',
@@ -863,7 +867,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                       ),
                     )
                   : DefaultTabController(
-                      length: formBuilderState.form.first.pages!.length,
+                      length: formBuilderState.form.first.schema!.length,
                       child: Column(
                         children: [
                           // TAB BAR
@@ -892,7 +896,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                     const EdgeInsets.symmetric(horizontal: 16),
                                 indicatorPadding:
                                     const EdgeInsets.symmetric(horizontal: 8),
-                                tabs: formBuilderState.form.first.pages!
+                                tabs: formBuilderState.form.first.schema!
                                     .asMap()
                                     .entries
                                     .map((entry) {
@@ -916,7 +920,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                               'Page ${index + 1}'),
                                           const SizedBox(width: 8),
                                           if (formBuilderState
-                                                  .form.first.pages!.length >
+                                                  .form.first.schema!.length >
                                               1)
                                             GestureDetector(
                                               onTap: () {
@@ -953,7 +957,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
 // 2. IMPROVED CANVAS SCROLLING - Replace TabBarView content with CustomScrollView
                           Expanded(
                             child: TabBarView(
-                              children: formBuilderState.form.first.pages!
+                              children: formBuilderState.form.first.schema!
                                   .asMap()
                                   .entries
                                   .map((entry) {
