@@ -18,12 +18,19 @@ class FormBuilderPage extends ConsumerStatefulWidget {
   ConsumerState<FormBuilderPage> createState() => _FormBuilderPageState();
 }
 
-class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
+class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
+    with TickerProviderStateMixin {
   String selectedFieldType = 'Text Input';
   bool editFormName = false;
   bool editPageName = false;
   TextEditingController formNameController = TextEditingController();
   TextEditingController pageNameController = TextEditingController();
+
+  // Floating Action Button variables
+  TabController? _tabController;
+  ScrollController _scrollController = ScrollController();
+  bool _showFAB = false;
+  int _currentTabIndex = 0;
 
   bool isFieldSelected = true;
   final List<PopupMenuItem> fieldTypeMenuItems = [
@@ -43,7 +50,39 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       value: FieldType.checkbox,
       child: Text('Checkbox'),
     ),
+    const PopupMenuItem(
+      value: FieldType.date,
+      child: Text('Date'),
+    ),
+    const PopupMenuItem(
+      value: FieldType.textarea,
+      child: Text('Text Area'),
+    ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _tabController?.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    // Show FAB when user scrolls down
+    final bool shouldShow = _scrollController.offset > 100;
+    if (shouldShow != _showFAB) {
+      setState(() {
+        _showFAB = shouldShow;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,9 +98,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Left Sidebar - Form Elements
-          // _buildComponentSidebar(context, colorScheme, editorial),
-
           // Center Canvas - Form Builder
           Expanded(
             child: _buildFormCanvas(
@@ -72,13 +108,169 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
               formBuilderState: formBuilderViewState,
             ),
           ),
-
-          // Right Sidebar - Properties Panel
-          //TODO implement hide and show when field is selected
-          // _buildPropertiesPanel(context, colorScheme, textTheme, editorial),
         ],
       ),
+      floatingActionButton: _showFAB &&
+              (formBuilderViewState.form.first.schema?.isNotEmpty ?? false)
+          ? _buildFloatingAddFieldButton(
+              context: context,
+              colorScheme: colorScheme,
+              editorial: editorial,
+              formBuilderState: formBuilderViewState,
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
+  }
+
+  Widget _buildFloatingAddFieldButton({
+    required BuildContext context,
+    required ColorScheme colorScheme,
+    required EditorialThemeData editorial,
+    required FormBuilderViewState formBuilderState,
+  }) {
+    return FloatingActionButton.extended(
+      onPressed: formBuilderState.isLoading
+          ? null
+          : () {
+              _showFieldTypeBottomSheet(
+                context: context,
+                colorScheme: colorScheme,
+                editorial: editorial,
+              );
+            },
+      icon: const Icon(Icons.add),
+      label: const Text('Add Field'),
+      backgroundColor: colorScheme.primary,
+      foregroundColor: colorScheme.onPrimary,
+      tooltip: 'Add a new field to the current page',
+      elevation: 6,
+      heroTag: "addField", // Unique hero tag to avoid conflicts
+    );
+  }
+
+  Future<void> _showFieldTypeBottomSheet({
+    required BuildContext context,
+    required ColorScheme colorScheme,
+    required EditorialThemeData editorial,
+  }) async {
+    final selectedFieldType = await showModalBottomSheet<FieldType>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.add_circle_outline,
+                    color: colorScheme.primary,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Select Field Type',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              ...fieldTypeMenuItems.map((item) {
+                final fieldType = item.value as FieldType;
+                final title = (item.child as Text).data ?? '';
+                return ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      _getIconForFieldType(fieldType),
+                      color: colorScheme.primary,
+                      size: 20,
+                    ),
+                  ),
+                  title: Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurface,
+                        ),
+                  ),
+                  subtitle: Text(
+                    _getFieldDescription(fieldType),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context, fieldType);
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                );
+              }).toList(),
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (selectedFieldType != null) {
+      final result = await _showAddFieldDialog(
+        context: context,
+        editorial: editorial,
+        fieldType: selectedFieldType,
+      );
+
+      if (result != null) {
+        ref.watch(formBuilderViewModelProvider.notifier).addFormField(
+              formFieldModel: FormFieldModel(
+                label: result['name'],
+                placeholder: result['placeholder'],
+                type: result['fieldType'],
+                required: result['required'] ?? false,
+                options: result['options'],
+              ),
+              index: _currentTabIndex,
+            );
+      }
+    }
+  }
+
+  String _getFieldDescription(FieldType fieldType) {
+    switch (fieldType) {
+      case FieldType.text:
+        return 'Single line text input';
+      case FieldType.textarea:
+        return 'Multi-line text input';
+      case FieldType.dropdown:
+        return 'Select from dropdown options';
+      case FieldType.radio:
+        return 'Choose one from multiple options';
+      case FieldType.checkbox:
+        return 'Check/uncheck option';
+      case FieldType.date:
+        return 'Date picker input';
+      default:
+        return 'Form input field';
+    }
   }
 
   PreferredSizeWidget _buildAppBar(
@@ -556,7 +748,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
 
     return result;
-    // NO finally block - let Flutter handle garbage collection
   }
 
   Future<void> _showDeletePageDialog(
@@ -604,12 +795,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
         return Icons.check_box_outlined;
       case FieldType.date:
         return Icons.calendar_month;
-      // case 'File Upload':
-      //   return Icons.upload_file;
-      // case 'E-Signature':
-      //   return Icons.draw;
-      // case 'Payment Link':
-      //   return Icons.payments;
       default:
         return Icons.help;
     }
@@ -800,11 +985,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                 TooltipMessageConstants.savePageNameMessage,
                             child: IconButton(
                                 onPressed: () {
-                                  // setState(() {
-                                  //   formBuilderState.form.first.name =
-                                  //       formNameController.text;
                                   editFormName = false;
-                                  // });
                                   ref
                                       .watch(
                                           formBuilderViewModelProvider.notifier)
@@ -838,9 +1019,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         },
                       ),
                     ),
-                    const SizedBox(
-                      width: 12,
-                    ),
+                    const SizedBox(width: 12),
                     TooltipWidget(
                       message: TooltipMessageConstants.saveDraftMessage,
                       child: _buildActionButton(
@@ -860,16 +1039,14 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         },
                       ),
                     ),
-                    const SizedBox(
-                      width: 12,
-                    ),
+                    const SizedBox(width: 12),
                     TooltipWidget(
                       message: TooltipMessageConstants.saveDraftMessage,
                       child: _buildActionButton(
                         isLoading: formBuilderState.isLoading,
                         text: _buildLoadingString(
                             isLoading: formBuilderState.isLoading,
-                            actualLabel: 'Pubish'),
+                            actualLabel: 'Publish'),
                         isPrimary: true,
                         colorScheme: colorScheme,
                         editorial: editorial,
@@ -899,407 +1076,371 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         ),
                       ),
                     )
-                  : DefaultTabController(
-                      length: formBuilderState.form.first.schema!.length,
-                      child: Column(
-                        children: [
-                          // TAB BAR
-                          IgnorePointer(
-                            ignoring: ref
-                                .watch(formBuilderViewModelProvider)
-                                .isLoading,
-                            child: Container(
-                              alignment: Alignment.centerLeft,
-                              height: 50,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                child: TabBar(
-                                  isScrollable: true,
-                                  tabAlignment: TabAlignment.start,
-                                  indicatorColor: colorScheme.primary,
-                                  labelColor: colorScheme.primary,
-                                  unselectedLabelColor:
-                                      colorScheme.onSurfaceVariant,
-                                  labelStyle: textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  unselectedLabelStyle:
-                                      textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  labelPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
-                                  indicatorPadding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  tabs: formBuilderState.form.first.schema!
-                                      .asMap()
-                                      .entries
-                                      .map((entry) {
-                                    final index = entry.key;
-                                    final page = entry.value;
-                                    return Tab(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 12, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          border: Border.all(
-                                            color: colorScheme.outlineVariant
-                                                .withOpacity(0.5),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              _buildLoadingString(
-                                                  isLoading: formBuilderState
-                                                      .isLoading,
-                                                  actualLabel: page.title ??
-                                                      'Page ${index + 1}'),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            if (formBuilderState
-                                                    .form.first.schema!.length >
-                                                1)
-                                              GestureDetector(
-                                                onTap:
-                                                    formBuilderState.isLoading
-                                                        ? null
-                                                        : () {
-                                                            _showDeletePageDialog(
-                                                                context, index);
-                                                          },
-                                                child: Container(
-                                                  padding:
-                                                      const EdgeInsets.all(2),
-                                                  decoration: BoxDecoration(
-                                                    color: colorScheme
-                                                        .errorContainer
-                                                        .withOpacity(0.8),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12),
-                                                  ),
-                                                  child: Icon(
-                                                    Icons.close,
-                                                    size: 14,
-                                                    color: colorScheme
-                                                        .onErrorContainer,
-                                                  ),
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          Expanded(
-                            child: TabBarView(
-                              children: formBuilderState.form.first.schema!
-                                  .asMap()
-                                  .entries
-                                  .map((entry) {
-                                final index = entry.key;
-                                final page = entry.value;
-
-                                return CustomScrollView(
-                                  slivers: [
-                                    SliverPadding(
-                                      padding: const EdgeInsets.all(16),
-                                      sliver: SliverToBoxAdapter(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // Page Header with Edit Functionality
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: Row(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            if (!editPageName)
-                                                              Flexible(
-                                                                child: Text(
-                                                                  _buildLoadingString(
-                                                                      isLoading:
-                                                                          formBuilderState
-                                                                              .isLoading,
-                                                                      actualLabel:
-                                                                          page.title ??
-                                                                              'Page ${index + 1}'),
-                                                                  style: textTheme
-                                                                      .headlineMedium
-                                                                      ?.copyWith(
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w900,
-                                                                    color: colorScheme
-                                                                        .onSurface,
-                                                                  ),
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                ),
-                                                              ),
-                                                            if (editPageName)
-                                                              Flexible(
-                                                                child: SizedBox(
-                                                                  width: MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width *
-                                                                      0.4,
-                                                                  child:
-                                                                      _buildTextField(
-                                                                    context,
-                                                                    label: _buildLoadingString(
-                                                                        isLoading:
-                                                                            formBuilderState
-                                                                                .isLoading,
-                                                                        actualLabel:
-                                                                            'Page Name'),
-                                                                    controller:
-                                                                        pageNameController,
-                                                                    focusNode:
-                                                                        FocusNode(),
-                                                                    hint:
-                                                                        'e.g. Contact Information',
-                                                                    enabled:
-                                                                        true,
-                                                                    textInputAction:
-                                                                        TextInputAction
-                                                                            .done,
-                                                                    validator:
-                                                                        (value) =>
-                                                                            null,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            const SizedBox(
-                                                                width: 15),
-                                                            TooltipWidget(
-                                                              message: editPageName
-                                                                  ? TooltipMessageConstants
-                                                                      .discardMessage
-                                                                  : TooltipMessageConstants
-                                                                      .editPageNameMessage,
-                                                              child: IconButton(
-                                                                onPressed: formBuilderState
-                                                                        .isLoading
-                                                                    ? null
-                                                                    : !editPageName
-                                                                        ? () {
-                                                                            pageNameController.text =
-                                                                                page.title ?? '';
-                                                                            setState(() {
-                                                                              editPageName = true;
-                                                                            });
-                                                                          }
-                                                                        : () {
-                                                                            setState(() {
-                                                                              editPageName = false;
-                                                                            });
-                                                                          },
-                                                                icon: editPageName
-                                                                    ? const Icon(
-                                                                        Icons
-                                                                            .close)
-                                                                    : const Icon(
-                                                                        Icons
-                                                                            .edit),
-                                                              ),
-                                                            ),
-                                                            if (editPageName)
-                                                              TooltipWidget(
-                                                                message:
-                                                                    TooltipMessageConstants
-                                                                        .savePageNameMessage,
-                                                                child:
-                                                                    IconButton(
-                                                                  onPressed:
-                                                                      formBuilderState
-                                                                              .isLoading
-                                                                          ? null
-                                                                          : () {
-                                                                              ref.watch(formBuilderViewModelProvider.notifier).updatePageName(
-                                                                                    pageNameController.text,
-                                                                                    index,
-                                                                                  );
-                                                                              setState(() {
-                                                                                editPageName = false;
-                                                                              });
-                                                                            },
-                                                                  icon: const Icon(
-                                                                      Icons
-                                                                          .check),
-                                                                ),
-                                                              ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      PopupMenuButton(
-                                                        enabled:
-                                                            !formBuilderState
-                                                                .isLoading,
-                                                        tooltip:
-                                                            'Add new fields to your form for clients to fill in.',
-                                                        child: Container(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(10),
-                                                          decoration: const BoxDecoration(
-                                                              color:
-                                                                  Colors.green,
-                                                              borderRadius: BorderRadius
-                                                                  .all(Radius
-                                                                      .circular(
-                                                                          8))),
-                                                          child: Text(_buildLoadingString(
-                                                              isLoading: ref
-                                                                  .watch(
-                                                                      formBuilderViewModelProvider)
-                                                                  .isLoading,
-                                                              actualLabel:
-                                                                  'Add Field')),
-                                                        ),
-                                                        onSelected:
-                                                            (value) async {
-                                                          final result =
-                                                              await _showAddFieldDialog(
-                                                            context: context,
-                                                            editorial:
-                                                                editorial,
-                                                            fieldType: value,
-                                                          );
-
-                                                          ref
-                                                              .watch(
-                                                                  formBuilderViewModelProvider
-                                                                      .notifier)
-                                                              .addFormField(
-                                                                  formFieldModel:
-                                                                      FormFieldModel(
-                                                                    label: result![
-                                                                        'name'],
-                                                                    placeholder:
-                                                                        result[
-                                                                            'placeholder'],
-                                                                    type: result[
-                                                                        'fieldType'],
-                                                                    required:
-                                                                        result['required'] ??
-                                                                            false,
-                                                                    options: result[
-                                                                        'options'],
-                                                                  ),
-                                                                  index: index);
-                                                        },
-                                                        itemBuilder: (context) {
-                                                          return fieldTypeMenuItems;
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 24),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-
-                                    // Form Fields List as Sliver
-                                    SliverPadding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16),
-                                      sliver: SliverToBoxAdapter(
-                                        child: Center(
-                                          child: ConstrainedBox(
-                                            constraints: BoxConstraints(
-                                                maxWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width),
-                                            child: ReorderableFormFieldsList(
-                                              fields: page.fields ?? [],
-                                              colorScheme: colorScheme,
-                                              editorial: editorial,
-                                              onReorder: (reorderFields) {
-                                                // Handle field reordering within this page
-                                                ref
-                                                    .watch(
-                                                        formBuilderViewModelProvider
-                                                            .notifier)
-                                                    .updateOrderOfList(
-                                                      reorderFields,
-                                                      index,
-                                                    );
-                                              },
-                                              onEditClicked: (field) {
-                                                // Handle field selection
-                                              },
-                                              onFieldDeleted:
-                                                  (field, fieldIndex) {
-                                                ref
-                                                    .watch(
-                                                        formBuilderViewModelProvider
-                                                            .notifier)
-                                                    .removeField(
-                                                      formFieldModel: field,
-                                                      index: fieldIndex,
-                                                    );
-                                              },
-                                              onFieldDuplicated: (field) {
-                                                // Handle field duplication
-                                                ref
-                                                    .watch(
-                                                        formBuilderViewModelProvider
-                                                            .notifier)
-                                                    .duplicateFiel(
-                                                      field,
-                                                      index,
-                                                    );
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
-                                    // Add some bottom padding for better scrolling
-                                    const SliverPadding(
-                                      padding: EdgeInsets.only(bottom: 100),
-                                    ),
-                                  ],
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ],
-                      ),
+                  : _buildTabController(
+                      context: context,
+                      formBuilderState: formBuilderState,
+                      colorScheme: colorScheme,
+                      textTheme: textTheme,
+                      editorial: editorial,
                     ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTabController({
+    required BuildContext context,
+    required FormBuilderViewState formBuilderState,
+    required ColorScheme colorScheme,
+    required TextTheme textTheme,
+    required EditorialThemeData editorial,
+  }) {
+    // Initialize tab controller if not already done or if length changed
+    if (_tabController == null ||
+        _tabController!.length != formBuilderState.form.first.schema!.length) {
+      _tabController?.dispose();
+      _tabController = TabController(
+        length: formBuilderState.form.first.schema!.length,
+        vsync: this,
+      );
+      _tabController!.addListener(() {
+        if (!_tabController!.indexIsChanging) {
+          setState(() {
+            _currentTabIndex = _tabController!.index;
+          });
+        }
+      });
+    }
+
+    return Column(
+      children: [
+        // TAB BAR
+        IgnorePointer(
+          ignoring: ref.watch(formBuilderViewModelProvider).isLoading,
+          child: Container(
+            alignment: Alignment.centerLeft,
+            height: 50,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                indicatorColor: colorScheme.primary,
+                labelColor: colorScheme.primary,
+                unselectedLabelColor: colorScheme.onSurfaceVariant,
+                labelStyle: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+                labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+                indicatorPadding: const EdgeInsets.symmetric(horizontal: 8),
+                tabs: formBuilderState.form.first.schema!
+                    .asMap()
+                    .entries
+                    .map((entry) {
+                  final index = entry.key;
+                  final page = entry.value;
+                  return Tab(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: colorScheme.outlineVariant.withOpacity(0.5),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _buildLoadingString(
+                                isLoading: formBuilderState.isLoading,
+                                actualLabel:
+                                    page.title ?? 'Page ${index + 1}'),
+                          ),
+                          const SizedBox(width: 8),
+                          if (formBuilderState.form.first.schema!.length > 1)
+                            GestureDetector(
+                              onTap: formBuilderState.isLoading
+                                  ? null
+                                  : () {
+                                      _showDeletePageDialog(context, index);
+                                    },
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.errorContainer
+                                      .withOpacity(0.8),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  size: 14,
+                                  color: colorScheme.onErrorContainer,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ),
+
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children:
+                formBuilderState.form.first.schema!.asMap().entries.map((entry) {
+              final index = entry.key;
+              final page = entry.value;
+
+              return CustomScrollView(
+                controller: _scrollController, // Add scroll controller here
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Page Header with Edit Functionality
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          if (!editPageName)
+                                            Flexible(
+                                              child: Text(
+                                                _buildLoadingString(
+                                                    isLoading: formBuilderState
+                                                        .isLoading,
+                                                    actualLabel: page.title ??
+                                                        'Page ${index + 1}'),
+                                                style: textTheme.headlineMedium
+                                                    ?.copyWith(
+                                                  fontWeight: FontWeight.w900,
+                                                  color: colorScheme.onSurface,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          if (editPageName)
+                                            Flexible(
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.4,
+                                                child: _buildTextField(
+                                                  context,
+                                                  label: _buildLoadingString(
+                                                      isLoading:
+                                                          formBuilderState
+                                                              .isLoading,
+                                                      actualLabel: 'Page Name'),
+                                                  controller:
+                                                      pageNameController,
+                                                  focusNode: FocusNode(),
+                                                  hint:
+                                                      'e.g. Contact Information',
+                                                  enabled: true,
+                                                  textInputAction:
+                                                      TextInputAction.done,
+                                                  validator: (value) => null,
+                                                ),
+                                              ),
+                                            ),
+                                          const SizedBox(width: 15),
+                                          TooltipWidget(
+                                            message: editPageName
+                                                ? TooltipMessageConstants
+                                                    .discardMessage
+                                                : TooltipMessageConstants
+                                                    .editPageNameMessage,
+                                            child: IconButton(
+                                              onPressed: formBuilderState
+                                                      .isLoading
+                                                  ? null
+                                                  : !editPageName
+                                                      ? () {
+                                                          pageNameController
+                                                                  .text =
+                                                              page.title ?? '';
+                                                          setState(() {
+                                                            editPageName = true;
+                                                          });
+                                                        }
+                                                      : () {
+                                                          setState(() {
+                                                            editPageName = false;
+                                                          });
+                                                        },
+                                              icon: editPageName
+                                                  ? const Icon(Icons.close)
+                                                  : const Icon(Icons.edit),
+                                            ),
+                                          ),
+                                          if (editPageName)
+                                            TooltipWidget(
+                                              message: TooltipMessageConstants
+                                                  .savePageNameMessage,
+                                              child: IconButton(
+                                                onPressed: formBuilderState
+                                                        .isLoading
+                                                    ? null
+                                                    : () {
+                                                        ref
+                                                            .watch(
+                                                                formBuilderViewModelProvider
+                                                                    .notifier)
+                                                            .updatePageName(
+                                                              pageNameController
+                                                                  .text,
+                                                              index,
+                                                            );
+                                                        setState(() {
+                                                          editPageName = false;
+                                                        });
+                                                      },
+                                                icon: const Icon(Icons.check),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    PopupMenuButton(
+                                      enabled: !formBuilderState.isLoading,
+                                      tooltip:
+                                          'Add new fields to your form for clients to fill in.',
+                                      child: Container(
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: const BoxDecoration(
+                                            color: Colors.green,
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(8))),
+                                        child: Text(_buildLoadingString(
+                                            isLoading: ref
+                                                .watch(
+                                                    formBuilderViewModelProvider)
+                                                .isLoading,
+                                            actualLabel: 'Add Field')),
+                                      ),
+                                      onSelected: (value) async {
+                                        final result = await _showAddFieldDialog(
+                                          context: context,
+                                          editorial: editorial,
+                                          fieldType: value,
+                                        );
+
+                                        if (result != null) {
+                                          ref
+                                              .watch(formBuilderViewModelProvider
+                                                  .notifier)
+                                              .addFormField(
+                                                  formFieldModel:
+                                                      FormFieldModel(
+                                                    label: result['name'],
+                                                    placeholder:
+                                                        result['placeholder'],
+                                                    type: result['fieldType'],
+                                                    required:
+                                                        result['required'] ??
+                                                            false,
+                                                    options: result['options'],
+                                                  ),
+                                                  index: index);
+                                        }
+                                      },
+                                      itemBuilder: (context) {
+                                        return fieldTypeMenuItems;
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Form Fields List as Sliver
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverToBoxAdapter(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width),
+                          child: ReorderableFormFieldsList(
+                            fields: page.fields ?? [],
+                            colorScheme: colorScheme,
+                            editorial: editorial,
+                            onReorder: (reorderFields) {
+                              // Handle field reordering within this page
+                              ref
+                                  .watch(formBuilderViewModelProvider.notifier)
+                                  .updateOrderOfList(
+                                    reorderFields,
+                                    index,
+                                  );
+                            },
+                            onEditClicked: (field) {
+                              // Handle field selection
+                            },
+                            onFieldDeleted: (field, fieldIndex) {
+                              ref
+                                  .watch(formBuilderViewModelProvider.notifier)
+                                  .removeField(
+                                    formFieldModel: field,
+                                    index: fieldIndex,
+                                  );
+                            },
+                            onFieldDuplicated: (field) {
+                              // Handle field duplication
+                              ref
+                                  .watch(formBuilderViewModelProvider.notifier)
+                                  .duplicateFiel(
+                                    field,
+                                    index,
+                                  );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Add some bottom padding for better scrolling
+                  const SliverPadding(
+                    padding: EdgeInsets.only(bottom: 100),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 

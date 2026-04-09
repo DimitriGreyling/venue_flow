@@ -69,7 +69,7 @@ class EditorialConciergeApp extends ConsumerWidget {
       // Theme configuration
       theme: editorialLightTheme,
       darkTheme: editorialDarkTheme,
-      themeMode: themeMode,
+      themeMode: ThemeMode.light, //themeMode,
       builder: (context, child) {
         if (child == null) return const SizedBox.shrink();
 
