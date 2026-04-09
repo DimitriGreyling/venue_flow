@@ -26,6 +26,8 @@ class FormBuilderViewState {
         DynamicFormModel(
           name: 'Form Name',
           version: 1,
+          isActive: true,
+          formStatus: FormStatus.draft,
           schema: [
             FormPageModel(
               title: 'Page 1',
@@ -383,7 +385,6 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       DynamicFormModel? result;
 
       if (state.form.first.id == null) {
-        state.form.first.isActive = true;
         result = await _formRepository.addForm(formModel: state.form.first);
       } else {
         result = await _formRepository.updateForm(formModel: state.form.first);
