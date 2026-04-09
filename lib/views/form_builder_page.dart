@@ -1000,9 +1000,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                               ),
                                                             if (editPageName)
                                                               Flexible(
-                                                                child:
-                                                                    SizedBox(
-                                                                  width: MediaQuery.of(context)
+                                                                child: SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
                                                                           .size
                                                                           .width *
                                                                       0.4,
@@ -1036,12 +1036,12 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                                       .discardMessage
                                                                   : TooltipMessageConstants
                                                                       .editPageNameMessage,
-                                                              child:
-                                                                  IconButton(
+                                                              child: IconButton(
                                                                 onPressed:
                                                                     !editPageName
                                                                         ? () {
-                                                                            pageNameController.text = page.title ?? '';
+                                                                            pageNameController.text =
+                                                                                page.title ?? '';
                                                                             setState(() {
                                                                               editPageName = true;
                                                                             });
@@ -1070,10 +1070,11 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                                   onPressed:
                                                                       () {
                                                                     ref
-                                                                        .watch(
-                                                                            formBuilderViewModelProvider.notifier)
+                                                                        .watch(formBuilderViewModelProvider
+                                                                            .notifier)
                                                                         .updatePageName(
-                                                                          pageNameController.text,
+                                                                          pageNameController
+                                                                              .text,
                                                                           index,
                                                                         );
                                                                     setState(
@@ -1098,8 +1099,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                               const EdgeInsets
                                                                   .all(10),
                                                           decoration: const BoxDecoration(
-                                                              color: Colors
-                                                                  .green,
+                                                              color:
+                                                                  Colors.green,
                                                               borderRadius: BorderRadius
                                                                   .all(Radius
                                                                       .circular(
@@ -1116,7 +1117,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                                 editorial,
                                                             fieldType: value,
                                                           );
-                                                  
+
                                                           ref
                                                               .watch(
                                                                   formBuilderViewModelProvider
@@ -1134,15 +1135,12 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                                     required:
                                                                         result['required'] ??
                                                                             false,
-                                                                    options:
-                                                                        result[
-                                                                            'options'],
+                                                                    options: result[
+                                                                        'options'],
                                                                   ),
-                                                                  index:
-                                                                      index);
+                                                                  index: index);
                                                         },
-                                                        itemBuilder:
-                                                            (context) {
+                                                        itemBuilder: (context) {
                                                           return fieldTypeMenuItems;
                                                         },
                                                       ),
