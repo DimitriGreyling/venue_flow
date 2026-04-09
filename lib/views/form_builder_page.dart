@@ -840,6 +840,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         isPrimary: false,
                         colorScheme: colorScheme,
                         editorial: editorial,
+                        callback: () {
+                          
+                        },
                       ),
                     ),
                   ],

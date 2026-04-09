@@ -6,3 +6,9 @@ enum FieldType {
   radio,
   date,
 }
+
+enum FormStatus{
+  active,
+  inactive,
+  draft,
+}

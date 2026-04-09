@@ -5,6 +5,7 @@ import 'dart:developer';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
+import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/models/form_page_model.dart';
 import 'package:venue_flow_app/repositories/form_repository.dart';
@@ -49,11 +50,11 @@ class FormBuilderViewState {
 }
 
 class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
-  final FormRepository _formRepository;
+  final IFormRepository _formRepository;
   final IStorageHelper _storageHelper;
 
   FormBuilderViewModel({
-    required FormRepository formRepo,
+    required IFormRepository formRepo,
     required IStorageHelper storageHelper,
   })  : _formRepository = formRepo,
         _storageHelper = storageHelper,
@@ -347,7 +348,8 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     }
   }
 
-  void updateOrderOfList(List<FormFieldModel> reorderedList, int pageIndex) async {
+  void updateOrderOfList(
+      List<FormFieldModel> reorderedList, int pageIndex) async {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
@@ -366,6 +368,27 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
         forms: updatedForms,
         isLoading: false,
       );
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      // Handle error
+    }
+  }
+
+  void setDraftMode(
+    {
+      required  DynamicFormModel formModel,
+    required FormStatus formStatus,
+    }
+  ) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      
+      _formRepository.addForm(formModel: formModel);
+
+      // state = state.copyWith(
+      //   // forms: updatedForms,
+      //   isLoading: false,
+      // );
     } catch (e) {
       state = state.copyWith(isLoading: false);
       // Handle error
