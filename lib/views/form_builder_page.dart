@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/constants/tooltip_message_constants.dart';
@@ -1170,9 +1172,16 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                               fields: page.fields ?? [],
                                               colorScheme: colorScheme,
                                               editorial: editorial,
-                                              onReorder: (oldIndex, newIndex) {
+                                              onReorder: (reorderFields) {
                                                 // Handle field reordering within this page
-
+                                                ref
+                                                    .watch(
+                                                        formBuilderViewModelProvider
+                                                            .notifier)
+                                                    .updateOrderOfList(
+                                                      reorderFields,
+                                                      index,
+                                                    );
                                               },
                                               onEditClicked: (field) {
                                                 // Handle field selection

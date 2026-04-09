@@ -346,4 +346,29 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // Handle error
     }
   }
+
+  void updateOrderOfList(List<FormFieldModel> reorderedList, int pageIndex) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      // Create a new list with the existing forms plus the new field
+      final currentForms = state.form ?? [];
+      final updatedForms = [...currentForms];
+
+      // If you're adding a field to an existing form, you'd need to specify which form
+      // For example, adding to the first form:
+      if (updatedForms.isNotEmpty) {
+        updatedForms[0].pages![pageIndex].fields = reorderedList;
+      }
+
+      await _storageHelper.saveForm(state.form.first);
+
+      state = state.copyWith(
+        forms: updatedForms,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      // Handle error
+    }
+  }
 }
