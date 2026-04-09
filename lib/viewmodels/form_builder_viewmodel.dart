@@ -1,9 +1,14 @@
 // lib/viewmodels/home_viewmodel.dart
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/models/form_page_model.dart';
 import 'package:venue_flow_app/repositories/form_repository.dart';
+import 'package:venue_flow_app/shared/helpers/storage_helper.dart';
 
 class FormBuilderViewState {
   final List<DynamicFormModel> form;
@@ -45,16 +50,72 @@ class FormBuilderViewState {
 
 class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
   final FormRepository _formRepository;
+  final IStorageHelper _storageHelper;
 
   FormBuilderViewModel({
     required FormRepository formRepo,
+    required IStorageHelper storageHelper,
   })  : _formRepository = formRepo,
-        super(FormBuilderViewState.initial());
+        _storageHelper = storageHelper,
+        super(FormBuilderViewState.initial()) {
+    _loadStoredForms();
+  }
+
+  // Load stored forms on initialization
+  Future<void> _loadStoredForms() async {
+    try {
+      final storedForms = await loadValuesFromPreferences();
+      state = state.copyWith(
+        forms: storedForms,
+        isLoading: false,
+      );
+    } catch (e) {
+      log('ERROR IN _loadStoredForms: $e');
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
+  Future<List<DynamicFormModel>> loadValuesFromPreferences() async {
+    try {      
+      final loadedForm = await _storageHelper.loadForm();
+
+      if (loadedForm != null && loadedForm.isNotEmpty) {
+        return loadedForm;
+      }
+
+      // Return default form if no stored forms exist
+      return [
+        DynamicFormModel(
+          name: 'Form Name',
+          version: 1,
+          pages: [
+            FormPageModel(
+              title: 'Page 1',
+            ),
+          ],
+        ),
+      ];
+    } catch (e) {
+      log('ERROR LOADING FORMS: $e');
+      // Return default form on error
+      return [
+        DynamicFormModel(
+          name: 'Form Name',
+          version: 1,
+          pages: [
+            FormPageModel(
+              title: 'Page 1',
+            ),
+          ],
+        ),
+      ];
+    }
+  }
 
   // Add a single form field
   void addFormField({
     required FormFieldModel formFieldModel,
-  }) {
+  }) async {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
@@ -81,6 +142,8 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
           ),
         );
       }
+
+      await _storageHelper.saveForm(state.form.first);
 
       state = state.copyWith(
         forms: updatedForms,
@@ -131,7 +194,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
   void removeField({
     required FormFieldModel formFieldModel,
     required int index,
-  }) {
+  }) async {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
@@ -143,6 +206,8 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       if (updatedForms.isNotEmpty) {
         updatedForms[0].pages?.first.fields?.removeAt(index);
       }
+
+      await _storageHelper.saveForm(state.form.first);
 
       state = state.copyWith(
         forms: updatedForms,
