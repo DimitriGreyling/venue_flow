@@ -98,7 +98,7 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
 
   Widget _buildEmptyState() {
     return Container(
-      padding: const EdgeInsets.all(48),
+      // padding: const EdgeInsets.all(48),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

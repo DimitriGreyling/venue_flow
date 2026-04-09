@@ -1059,29 +1059,31 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                       const SizedBox(height: 24),
 
                                       // Form Fields for this page
-                                      ReorderableFormFieldsList(
-                                        fields: page.fields ?? [],
-                                        colorScheme: colorScheme,
-                                        editorial: editorial,
-                                        onReorder: (oldIndex, newIndex) {
-                                          // Handle field reordering within this page
-                                        },
-                                        onFieldSelected: (field) {
-                                          // Handle field selection
-                                        },
-                                        onFieldDeleted: (field, fieldIndex) {
-                                          ref
-                                              .watch(
-                                                  formBuilderViewModelProvider
-                                                      .notifier)
-                                              .removeField(
-                                                formFieldModel: field,
-                                                index: fieldIndex,
-                                              );
-                                        },
-                                        onFieldDuplicated: (field) {
-                                          // Handle field duplication
-                                        },
+                                      Center(
+                                        child: ReorderableFormFieldsList(
+                                          fields: page.fields ?? [],
+                                          colorScheme: colorScheme,
+                                          editorial: editorial,
+                                          onReorder: (oldIndex, newIndex) {
+                                            // Handle field reordering within this page
+                                          },
+                                          onFieldSelected: (field) {
+                                            // Handle field selection
+                                          },
+                                          onFieldDeleted: (field, fieldIndex) {
+                                            ref
+                                                .watch(
+                                                    formBuilderViewModelProvider
+                                                        .notifier)
+                                                .removeField(
+                                                  formFieldModel: field,
+                                                  index: fieldIndex,
+                                                );
+                                          },
+                                          onFieldDuplicated: (field) {
+                                            // Handle field duplication
+                                          },
+                                        ),
                                       ),
                                     ],
                                   ),
