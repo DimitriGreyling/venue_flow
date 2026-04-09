@@ -1055,6 +1055,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                       message: TooltipMessageConstants.saveDraftMessage,
                       child: _buildActionButton(
                         isLoading: formBuilderState.isLoading,
+                        isSecondary: true,
+                        isElevated: true,
                         text: _buildLoadingString(
                             isLoading: formBuilderState.isLoading,
                             actualLabel: 'Save Draft'),
@@ -1437,7 +1439,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
 
   Widget _buildActionButton({
     required String text,
-    required bool isPrimary,
+    bool isPrimary = false,
+    bool isSecondary = false,
+    bool isElevated = false,
     required ColorScheme colorScheme,
     required EditorialThemeData editorial,
     void Function()? callback,
@@ -1453,12 +1457,15 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
         borderRadius: BorderRadius.circular(8),
       ),
       color: isPrimary ? colorScheme.primaryContainer : colorScheme.surface,
-      elevation: isPrimary ? 2 : 0,
+      elevation: isPrimary || isElevated ? 2 : 0,
       child: Text(
         text,
         style: editorial.buttonTextStyle.copyWith(
-          color:
-              isPrimary ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+          color: isPrimary
+              ? colorScheme.onPrimary
+              : isSecondary
+                  ? colorScheme.secondary
+                  : colorScheme.onSurfaceVariant,
           fontWeight: isPrimary ? FontWeight.w700 : FontWeight.w600,
         ),
       ),
