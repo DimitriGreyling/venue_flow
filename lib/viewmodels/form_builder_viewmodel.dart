@@ -387,6 +387,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       if (state.form.first.id == null) {
         result = await _formRepository.addForm(formModel: state.form.first);
       } else {
+        await incrementVersion();
         result = await _formRepository.updateForm(formModel: state.form.first);
       }
 
@@ -401,6 +402,26 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     } catch (e) {
       state = state.copyWith(isLoading: false);
       // Handle error
+    }
+  }
+
+  Future<void> incrementVersion() async {
+    try {
+      state = state.copyWith(isLoading: true);
+      final currentForms = [...state.form];
+
+      if (currentForms.isNotEmpty) {
+        final currentVersion = currentForms[0].version ?? 1;
+        currentForms[0] = currentForms[0].copyWith(version: currentVersion + 1);
+
+        await _storageHelper.saveForm(currentForms[0]);
+
+        state = state.copyWith(forms: currentForms, isLoading: false);
+        log('Version incremented to: ${currentVersion + 1}');
+      }
+    } catch (e) {
+      log('Error incrementing version: $e');
+      state = state.copyWith(isLoading: false);
     }
   }
 }
