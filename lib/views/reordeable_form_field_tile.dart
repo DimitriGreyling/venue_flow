@@ -245,7 +245,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
       case FieldType.text:
         return _buildTextField(context);
       case FieldType.dropdown:
-        return _buildDropDownField(context);
+        return _buildDropDownField(context, options: field.options);
       case FieldType.checkbox:
         return _buildCheckboxField(context);
       case FieldType.date:
@@ -374,7 +374,14 @@ class ReorderableFormFieldTile extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     // Get options from field.options or use default
-    final dropdownOptions = field.options ?? ['Option 1', 'Option 2', 'Option 3'];
+    List<String> dropdownOptions;
+    if (field.options != null && field.options!.isNotEmpty) {
+      dropdownOptions = field.options!;
+    } else if (options != null && options.isNotEmpty) {
+      dropdownOptions = options;
+    } else {
+      dropdownOptions = ['Option 1', 'Option 2', 'Option 3'];
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

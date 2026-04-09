@@ -56,7 +56,7 @@ class FormFieldModel {
       'defaultValue': defaultValue,
       'options': options,
       // 'validations': validations?.map((e) => e.toJson()).toList(),
-      'visibility': visibility?.toJson(),
+      // 'visibility': visibility?.toJson(),
     };
   }
 }
