@@ -115,6 +115,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
   // Add a single form field
   void addFormField({
     required FormFieldModel formFieldModel,
+    required int index
   }) async {
     try {
       state = state.copyWith(isLoading: true);
@@ -126,7 +127,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
         updatedForms[0].pages?.first.fields ??= [];
-        updatedForms[0].pages?.first.fields?.add(formFieldModel);
+        updatedForms[0].pages![index].fields?.add(formFieldModel);
       } else {
         updatedForms.add(
           DynamicFormModel(
