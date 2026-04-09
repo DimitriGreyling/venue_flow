@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/constants/tooltip_message_constants.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
@@ -767,7 +768,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                           width: 15,
                         ),
                         TooltipWidget(
-                          message: 'Change form name',
+                          message: editFormName
+                              ? TooltipMessageConstants.discardMessage
+                              : TooltipMessageConstants.editPageNameMessage,
                           child: IconButton(
                               onPressed: !editFormName
                                   ? () {
@@ -786,7 +789,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                         ),
                         if (editFormName)
                           TooltipWidget(
-                            message: 'Update form name',
+                            message: TooltipMessageConstants.savePageNameMessage,
                             child: IconButton(
                                 onPressed: () {
                                   // setState(() {
@@ -845,25 +848,31 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                     const SizedBox(
                       width: 12,
                     ),
-                    _buildActionButton(
-                      text: 'Add Page',
-                      isPrimary: false,
-                      colorScheme: colorScheme,
-                      editorial: editorial,
-                      callback: () {
-                        ref
-                            .watch(formBuilderViewModelProvider.notifier)
-                            .addFormPage();
-                      },
+                    TooltipWidget(
+                      message: TooltipMessageConstants.addPageMessage,
+                      child: _buildActionButton(
+                        text: 'Add Page',
+                        isPrimary: false,
+                        colorScheme: colorScheme,
+                        editorial: editorial,
+                        callback: () {
+                          ref
+                              .watch(formBuilderViewModelProvider.notifier)
+                              .addFormPage();
+                        },
+                      ),
                     ),
                     const SizedBox(
                       width: 12,
                     ),
-                    _buildActionButton(
-                      text: 'Save Draft',
-                      isPrimary: false,
-                      colorScheme: colorScheme,
-                      editorial: editorial,
+                    TooltipWidget(
+                      message: TooltipMessageConstants.saveDraftMessage,
+                      child: _buildActionButton(
+                        text: 'Save Draft',
+                        isPrimary: false,
+                        colorScheme: colorScheme,
+                        editorial: editorial,
+                      ),
                     ),
                   ],
                 ),
@@ -994,7 +1003,11 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                                 ),
                                               const SizedBox(width: 15),
                                               TooltipWidget(
-                                                message: 'Edit page name',
+                                                message: editPageName
+                                                    ? TooltipMessageConstants
+                                                        .discardMessage
+                                                    : TooltipMessageConstants
+                                                        .editPageNameMessage,
                                                 child: IconButton(
                                                   onPressed: !editPageName
                                                       ? () {
@@ -1018,7 +1031,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                               ),
                                               if (editPageName)
                                                 TooltipWidget(
-                                                  message: 'Save page name',
+                                                  message: TooltipMessageConstants
+                                                      .savePageNameMessage,
                                                   child: IconButton(
                                                     onPressed: () {
                                                       ref

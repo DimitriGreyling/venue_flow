@@ -9,7 +9,7 @@ class TooltipWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: message,
+      message: message ?? '',
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
