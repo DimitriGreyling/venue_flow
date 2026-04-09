@@ -124,7 +124,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // If you're adding a field to an existing form, you'd need to specify which form
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
-        updatedForms[0].pages?.first.fields ??= [];
+        updatedForms[0].pages![index].fields ??= [];
         updatedForms[0].pages![index].fields?.add(formFieldModel);
       } else {
         updatedForms.add(
