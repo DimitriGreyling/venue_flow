@@ -160,12 +160,12 @@ class ReorderableFormFieldTile extends StatelessWidget {
                         //   ),
                         // ),
                       ),
-                      if (_hasTrailingIcon())
-                        Icon(
-                          _getTrailingIcon(),
-                          color: colorScheme.onSurfaceVariant,
-                          size: 20,
-                        ),
+                      // if (_hasTrailingIcon())
+                      //   Icon(
+                      //     _getTrailingIcon(),
+                      //     color: colorScheme.onSurfaceVariant,
+                      //     size: 20,
+                      //   ),
                     ],
                   ),
                 ),
@@ -400,7 +400,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: selectedValue,
-          onChanged: enabled ? onChanged : null,
+          onChanged: enabled ? (onChanged ?? (val){}) : null,
           validator: validator,
           items: dropdownOptions.map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
