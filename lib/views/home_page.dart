@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/routing/app_router.dart';
 import '../theme/theme.dart';
 import '../theme/spacing.dart';
 import '../theme/components.dart';
@@ -153,6 +155,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     isSelected: _selectedNavItem == 'Dashboard',
                     colorScheme: colorScheme,
                     editorial: editorial,
+                  navigateToLink: 'form-list'
                   ),
                   _buildNavItem(
                     icon: Icons.edit_note_outlined,
@@ -160,6 +163,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     isSelected: _selectedNavItem == 'Form Builder',
                     colorScheme: colorScheme,
                     editorial: editorial,
+                    navigateToLink: 'form-list'
                   ),
                   _buildNavItem(
                     icon: Icons.calendar_today_outlined,
@@ -167,6 +171,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     isSelected: _selectedNavItem == 'Events',
                     colorScheme: colorScheme,
                     editorial: editorial,
+                    navigateToLink: 'form-list'
                   ),
                   _buildNavItem(
                     icon: Icons.settings_outlined,
@@ -174,6 +179,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     isSelected: _selectedNavItem == 'Settings',
                     colorScheme: colorScheme,
                     editorial: editorial,
+                    navigateToLink: 'form-list'
                   ),
                 ],
               ),
@@ -199,6 +205,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   isSelected: false,
                   colorScheme: colorScheme,
                   editorial: editorial,
+                  navigateToLink: 'form-list'
                 ),
                 _buildNavItem(
                   icon: Icons.person_outline,
@@ -206,6 +213,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   isSelected: false,
                   colorScheme: colorScheme,
                   editorial: editorial,
+                  navigateToLink: 'form-list'
                 ),
               ],
             ),
@@ -221,6 +229,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     required bool isSelected,
     required ColorScheme colorScheme,
     required EditorialThemeData editorial,
+    required String navigateToLink,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2),
@@ -234,6 +243,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           onTap: () {
             setState(() {
               _selectedNavItem = label;
+              context.goNamed(navigateToLink);
             });
           },
           child: Container(
@@ -312,20 +322,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
           const SizedBox(width: EditorialSpacing.spacing8),
 
-          // Top Navigation Links
-          Expanded(
-            child: Row(
-              children: [
-                _buildTopNavLink('Dashboard', true, colorScheme, editorial),
-                const SizedBox(width: EditorialSpacing.spacing8),
-                _buildTopNavLink('Forms', false, colorScheme, editorial),
-                const SizedBox(width: EditorialSpacing.spacing8),
-                _buildTopNavLink('Events', false, colorScheme, editorial),
-                const SizedBox(width: EditorialSpacing.spacing8),
-                _buildTopNavLink('Settings', false, colorScheme, editorial),
-              ],
-            ),
-          ),
+          const Spacer(),
 
           // Right Section
           Row(
@@ -406,36 +403,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildTopNavLink(
-    String label,
-    bool isSelected,
-    ColorScheme colorScheme,
-    EditorialThemeData editorial,
-  ) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        if (isSelected)
-          Container(
-            width: 24,
-            height: 2,
-            decoration: BoxDecoration(
-              color: colorScheme.primary,
-              borderRadius: BorderRadius.circular(1),
-            ),
-          ),
-      ],
-    );
-  }
-
   Widget _buildDashboardContent(ColorScheme colorScheme, EditorialThemeData editorial) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(EditorialSpacing.spacing8),
@@ -468,7 +435,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               Row(
                 children: [
                   OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.goNamed('form-builder');
+                    },
                     icon: const Icon(Icons.description_outlined, size: 18),
                     label: const Text('Create Form'),
                     style: OutlinedButton.styleFrom(

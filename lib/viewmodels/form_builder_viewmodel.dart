@@ -64,10 +64,20 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     _loadStoredForms();
   }
 
+  Future<List<DynamicFormModel>?> loadForms() async {
+    try {
+      final result = _formRepository.getForms();
+
+      return result;
+    } catch (error) {
+      return [];
+    }
+  }
+
   // Load stored forms on initialization
   Future<void> _loadStoredForms() async {
     try {
-      final storedForms = await loadValuesFromPreferences();
+      final storedForms = await _loadValuesFromPreferences();
       state = state.copyWith(
         forms: storedForms,
         isLoading: false,
@@ -78,7 +88,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     }
   }
 
-  Future<List<DynamicFormModel>> loadValuesFromPreferences() async {
+  Future<List<DynamicFormModel>> _loadValuesFromPreferences() async {
     try {
       final loadedForm = await _storageHelper.loadForm();
 
@@ -121,7 +131,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
-      final currentForms = state.form ?? [];
+      final currentForms = state.form;
       final updatedForms = [...currentForms];
 
       // If you're adding a field to an existing form, you'd need to specify which form
@@ -164,7 +174,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
-      final currentForms = state.form ?? [];
+      final currentForms = state.form;
       final updatedForms = [...currentForms];
 
       // If you're adding a field to an existing form, you'd need to specify which form
@@ -200,7 +210,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
-      final currentForms = state.form ?? [];
+      final currentForms = state.form;
       final updatedForms = [...currentForms];
 
       // If you're adding a field to an existing form, you'd need to specify which form
@@ -225,7 +235,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
-      final currentForms = state.form ?? [];
+      final currentForms = state.form;
       final updatedForms = [...currentForms];
 
       // If you're adding a field to an existing form, you'd need to specify which form
@@ -250,7 +260,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
-      final currentForms = state.form ?? [];
+      final currentForms = state.form;
       final updatedForms = [...currentForms];
 
       // If you're adding a field to an existing form, you'd need to specify which form
@@ -275,7 +285,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
-      final currentForms = state.form ?? [];
+      final currentForms = state.form;
       final updatedForms = [...currentForms];
 
       // If you're adding a field to an existing form, you'd need to specify which form
@@ -304,7 +314,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
-      final currentForms = state.form ?? [];
+      final currentForms = state.form;
       final updatedForms = [...currentForms];
 
       // If you're adding a field to an existing form, you'd need to specify which form
@@ -329,7 +339,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
-      final currentForms = state.form ?? [];
+      final currentForms = state.form;
       final updatedForms = [...currentForms];
 
       // If you're adding a field to an existing form, you'd need to specify which form
@@ -355,7 +365,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
-      final currentForms = state.form ?? [];
+      final currentForms = state.form;
       final updatedForms = [...currentForms];
 
       // If you're adding a field to an existing form, you'd need to specify which form

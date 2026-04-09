@@ -1,9 +1,10 @@
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/views/form_builder_page.dart';
+import 'package:venue_flow_app/views/form_list_page.dart';
 import 'package:venue_flow_app/views/home_page.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/form-builder',
+  initialLocation: '/home',
   restorationScopeId: 'appRouter',
   routes: [
     GoRoute(
@@ -15,6 +16,11 @@ final appRouter = GoRouter(
       path: '/form-builder',
       name: 'form-builder',
       builder: (context, state) => FormBuilderPage(),
+    ),
+    GoRoute(
+      path: '/form-list',
+      name: 'form-list',
+      builder: (context, state) => FormListPage(),
     ),
   ],
 );
