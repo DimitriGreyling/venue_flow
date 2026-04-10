@@ -1,21 +1,41 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/constants/tooltip_message_constants.dart';
+import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
 import 'package:venue_flow_app/views/reordeable_form_fields_list.dart';
+import 'package:venue_flow_app/views/tooltip_widget.dart';
 import '../theme/editorial_theme_data.dart';
 
 class FormBuilderPage extends ConsumerStatefulWidget {
-  const FormBuilderPage({super.key});
+  final String? formId;
+  final DynamicFormModel? formModel;
+
+  const FormBuilderPage({super.key, this.formId, this.formModel});
 
   @override
   ConsumerState<FormBuilderPage> createState() => _FormBuilderPageState();
 }
 
-class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
+class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
+    with TickerProviderStateMixin {
   String selectedFieldType = 'Text Input';
+  bool editFormName = false;
+  bool editPageName = false;
+  TextEditingController formNameController = TextEditingController();
+  TextEditingController pageNameController = TextEditingController();
+
+  // Floating Action Button variables
+  TabController? _tabController;
+  ScrollController _scrollController = ScrollController();
+  bool _showFAB = false;
+  int _currentTabIndex = 0;
+
   bool isFieldSelected = true;
   final List<PopupMenuItem> fieldTypeMenuItems = [
     const PopupMenuItem(
@@ -34,7 +54,48 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       value: FieldType.checkbox,
       child: Text('Checkbox'),
     ),
+    const PopupMenuItem(
+      value: FieldType.date,
+      child: Text('Date'),
+    ),
+    const PopupMenuItem(
+      value: FieldType.textarea,
+      child: Text('Text Area'),
+    ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.formId != null) {
+        ref.watch(formBuilderViewModelProvider.notifier).setForm(
+              formId: widget.formId,
+              formModel: widget.formModel,
+            );
+      }
+    });
+
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _tabController?.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    // Show FAB when user scrolls down
+    final bool shouldShow = _scrollController.offset > 100;
+    if (shouldShow != _showFAB) {
+      setState(() {
+        _showFAB = shouldShow;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +111,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Left Sidebar - Form Elements
-          // _buildComponentSidebar(context, colorScheme, editorial),
-
           // Center Canvas - Form Builder
           Expanded(
             child: _buildFormCanvas(
@@ -63,13 +121,200 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
               formBuilderState: formBuilderViewState,
             ),
           ),
-
-          // Right Sidebar - Properties Panel
-          //TODO implement hide and show when field is selected
-          // _buildPropertiesPanel(context, colorScheme, textTheme, editorial),
         ],
       ),
+      floatingActionButton: _showFAB &&
+              (formBuilderViewState.form.first.schema?.isNotEmpty ?? false)
+          ? _buildFloatingAddFieldButton(
+              context: context,
+              colorScheme: colorScheme,
+              editorial: editorial,
+              formBuilderState: formBuilderViewState,
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
+  }
+
+  Widget _buildFloatingAddFieldButton({
+    required BuildContext context,
+    required ColorScheme colorScheme,
+    required EditorialThemeData editorial,
+    required FormBuilderViewState formBuilderState,
+  }) {
+    return FloatingActionButton.extended(
+      onPressed: formBuilderState.isLoading
+          ? null
+          : () {
+              _showFieldTypeBottomSheet(
+                context: context,
+                colorScheme: colorScheme,
+                editorial: editorial,
+              );
+            },
+      icon: const Icon(Icons.add),
+      label: const Text('Add Field'),
+      backgroundColor: colorScheme.secondary,
+      foregroundColor: colorScheme.onSecondary,
+      tooltip: 'Add a new field to the current page',
+      elevation: 6,
+      heroTag: "addField", // Unique hero tag to avoid conflicts
+    );
+  }
+
+  Widget _buildButton({
+    required BuildContext context,
+    required ColorScheme colorScheme,
+    required EditorialThemeData editorial,
+    required FormBuilderViewState formBuilderState,
+  }) {
+    return FloatingActionButton.extended(
+      onPressed: formBuilderState.isLoading
+          ? null
+          : () {
+              _showFieldTypeBottomSheet(
+                context: context,
+                colorScheme: colorScheme,
+                editorial: editorial,
+              );
+            },
+      icon: const Icon(Icons.add),
+      label: const Text('Add Field'),
+      backgroundColor: colorScheme.secondary,
+      foregroundColor: colorScheme.onSecondary,
+      tooltip: 'Add a new field to the current page',
+      elevation: 0,
+      heroTag: "addField", // Unique hero tag to avoid conflicts
+    );
+  }
+
+  Future<void> _showFieldTypeBottomSheet({
+    required BuildContext context,
+    required ColorScheme colorScheme,
+    required EditorialThemeData editorial,
+  }) async {
+    final selectedFieldType = await showModalBottomSheet<FieldType>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.add_circle_outline,
+                        color: colorScheme.primary,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Select Field Type',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.onSurface,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  ...fieldTypeMenuItems.map((item) {
+                    final fieldType = item.value as FieldType;
+                    final title = (item.child as Text).data ?? '';
+                    return ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          _getIconForFieldType(fieldType),
+                          color: colorScheme.primary,
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(
+                        title,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: colorScheme.onSurface,
+                            ),
+                      ),
+                      subtitle: Text(
+                        _getFieldDescription(fieldType),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context, fieldType);
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                    );
+                  }).toList(),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selectedFieldType != null) {
+      final result = await _showAddFieldDialog(
+        context: context,
+        editorial: editorial,
+        fieldType: selectedFieldType,
+      );
+
+      if (result != null) {
+        ref.watch(formBuilderViewModelProvider.notifier).addFormField(
+              formFieldModel: FormFieldModel(
+                label: result['name'],
+                placeholder: result['placeholder'],
+                type: result['fieldType'],
+                required: result['required'] ?? false,
+                options: result['options'],
+              ),
+              index: _currentTabIndex,
+            );
+      }
+    }
+  }
+
+  String _getFieldDescription(FieldType fieldType) {
+    switch (fieldType) {
+      case FieldType.text:
+        return 'Single line text input';
+      case FieldType.textarea:
+        return 'Multi-line text input';
+      case FieldType.dropdown:
+        return 'Select from dropdown options';
+      case FieldType.radio:
+        return 'Choose one from multiple options';
+      case FieldType.checkbox:
+        return 'Check/uncheck option';
+      case FieldType.date:
+        return 'Date picker input';
+      default:
+        return 'Form input field';
+    }
   }
 
   PreferredSizeWidget _buildAppBar(
@@ -178,189 +423,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
-  Widget _buildComponentSidebar(BuildContext context, ColorScheme colorScheme,
-      EditorialThemeData editorial) {
-    return Container(
-      width: 288,
-      color: colorScheme.surfaceContainerLow,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'FORM ELEMENTS',
-              style: editorial.labelUppercase.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                letterSpacing: 2,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: Column(
-                children: [
-                  _buildFormElements(colorScheme, editorial),
-                  const SizedBox(height: 32),
-                  Text(
-                    'ADVANCED',
-                    style: editorial.labelUppercase.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildAdvancedElements(colorScheme, editorial),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFormElements(
-      ColorScheme colorScheme, EditorialThemeData editorial) {
-    final elements = [
-      {'icon': Icons.short_text, 'title': 'Text Input'},
-      {'icon': Icons.list, 'title': 'Select Menu'},
-      {'icon': Icons.check_box_outlined, 'title': 'Checkbox Group'},
-      {'icon': Icons.calendar_month, 'title': 'Date Picker'},
-      {'icon': Icons.upload_file, 'title': 'File Upload'},
-    ];
-
-    return Column(
-      children: elements
-          .map(
-            (element) => _buildDraggableElement(
-              element['icon'] as IconData,
-              element['title'] as String,
-              colorScheme.secondary,
-              colorScheme,
-              editorial,
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget _buildAdvancedElements(
-      ColorScheme colorScheme, EditorialThemeData editorial) {
-    final elements = [
-      {'icon': Icons.draw, 'title': 'E-Signature'},
-      {'icon': Icons.payments, 'title': 'Payment Link'},
-    ];
-
-    return Column(
-      children: elements
-          .map(
-            (element) => _buildDraggableElement(
-              element['icon'] as IconData,
-              element['title'] as String,
-              colorScheme.tertiary,
-              colorScheme,
-              editorial,
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  Widget _buildDraggableElement(
-    IconData icon,
-    String title,
-    Color iconColor,
-    ColorScheme colorScheme,
-    EditorialThemeData editorial,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () async {
-            TextEditingController nameController = TextEditingController();
-
-            showDialog(
-              context: context,
-              builder: (context) {
-                final screenSize = MediaQuery.of(context).size;
-                final dialogWidth = screenSize.width > 768
-                    ? screenSize.width * 0.7
-                    : screenSize.width * 0.9;
-                final dialogHeight = screenSize.height * 0.8;
-
-                return Dialog(
-                  child: SizedBox(
-                    width: dialogWidth,
-                    height: dialogHeight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Add New Field',
-                            style: editorial.labelBold,
-                          ),
-                          const Divider(),
-                          TextFormField(
-                            controller: nameController,
-                            decoration: const InputDecoration(
-                              hintText: 'Name',
-                              label: Text('Name'),
-                            ),
-                          ),
-                          ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text('Submit')),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-
-            ref.watch(formBuilderViewModelProvider.notifier).addFormField(
-                    formFieldModel: FormFieldModel(
-                  label: nameController.text,
-                  placeholder: nameController.text,
-                  required: true,
-                  type: FieldType.text,
-                  options: null,
-                ));
-            // setState(() {
-            //   selectedFieldType = title;
-            // });
-          },
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.transparent),
-            ),
-            child: Row(
-              children: [
-                Icon(icon, color: iconColor, size: 20),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: editorial.navigationLabel.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Future<Map<String, dynamic>?> _showAddFieldDialog({
     required BuildContext context,
     required EditorialThemeData editorial,
@@ -376,7 +438,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     List<TextEditingController> optionControllers = [TextEditingController()];
 
     bool needsOptions =
-        fieldType == FieldType.dropdown || fieldType == FieldType.radio;
+        fieldType == FieldType.dropdown || fieldType == FieldType.radio || fieldType == FieldType.checkbox; 
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -576,7 +638,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                           ],
                                         ),
                                       );
-                                    }).toList(),
+                                    }),
                                   ],
                                 ),
                                 const SizedBox(height: 24),
@@ -704,7 +766,11 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                                 ),
                               ),
                               child: Text(
-                                'Add Field',
+                                _buildLoadingString(
+                                    isLoading: ref
+                                        .watch(formBuilderViewModelProvider)
+                                        .isLoading,
+                                    actualLabel: 'Add Field'),
                                 style: editorial.buttonTextStyle.copyWith(
                                   color:
                                       Theme.of(context).colorScheme.onPrimary,
@@ -726,7 +792,37 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
 
     return result;
-    // NO finally block - let Flutter handle garbage collection
+  }
+
+  Future<void> _showDeletePageDialog(
+      BuildContext context, int pageIndex) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Page'),
+          content: const Text(
+              'Are you sure you want to delete this page? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      ref.watch(formBuilderViewModelProvider.notifier).removePage(pageIndex);
+    }
   }
 
   IconData _getIconForFieldType(FieldType fieldType) {
@@ -743,12 +839,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
         return Icons.check_box_outlined;
       case FieldType.date:
         return Icons.calendar_month;
-      // case 'File Upload':
-      //   return Icons.upload_file;
-      // case 'E-Signature':
-      //   return Icons.draw;
-      // case 'Payment Link':
-      //   return Icons.payments;
       default:
         return Icons.help;
     }
@@ -859,10 +949,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     required EditorialThemeData editorial,
     required FormBuilderViewState formBuilderState,
   }) {
-    if (formBuilderState.isLoading) {
-      return const CircularProgressIndicator();
-    }
-
     return Container(
       color: colorScheme.surface,
       child: Padding(
@@ -885,64 +971,140 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      formBuilderState.form?.first.name ?? '',
-                      style: textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: colorScheme.onSurface,
-                      ),
+                    Row(
+                      children: [
+                        if (!editFormName)
+                          Text(
+                            _buildLoadingString(
+                                isLoading: formBuilderState.isLoading,
+                                actualLabel:
+                                    formBuilderState.form.first.name ?? ''),
+                            style: textTheme.headlineLarge?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: colorScheme.onSurface,
+                            ),
+                          ),
+                        if (editFormName)
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            child: _buildTextField(
+                              context,
+                              label: _buildLoadingString(
+                                  isLoading: formBuilderState.isLoading,
+                                  actualLabel: 'Form Name'),
+                              controller: formNameController,
+                              focusNode: FocusNode(),
+                              hint: 'e.g. Meal Options',
+                              enabled: true,
+                              textInputAction: TextInputAction.done,
+                              validator: (value) => null,
+                            ),
+                          ),
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        TooltipWidget(
+                          message: editFormName
+                              ? TooltipMessageConstants.discardMessage
+                              : TooltipMessageConstants.editPageNameMessage,
+                          child: IconButton(
+                              onPressed: !editFormName
+                                  ? () {
+                                      setState(() {
+                                        editFormName = true;
+                                      });
+                                    }
+                                  : () {
+                                      setState(() {
+                                        editFormName = false;
+                                      });
+                                    },
+                              icon: editFormName
+                                  ? const Icon(Icons.close)
+                                  : const Icon(Icons.edit)),
+                        ),
+                        if (editFormName)
+                          TooltipWidget(
+                            message:
+                                TooltipMessageConstants.savePageNameMessage,
+                            child: IconButton(
+                                onPressed: () {
+                                  editFormName = false;
+                                  ref
+                                      .watch(
+                                          formBuilderViewModelProvider.notifier)
+                                      .updateFormName(
+                                          formNameController.text, 0);
+                                },
+                                icon: editFormName
+                                    ? const Icon(Icons.check)
+                                    : const Icon(Icons.check)),
+                          ),
+                      ],
                     ),
                   ],
                 ),
                 Row(
                   children: [
-                    PopupMenuButton(
-                      tooltip:
-                          'Add new fields to your form for clients to fill in.',
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: const BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.all(Radius.circular(8))),
-                        child: const Text('Add a field'),
+                    TooltipWidget(
+                      message: TooltipMessageConstants.addPageMessage,
+                      child: _buildActionButton(
+                        text: _buildLoadingString(
+                            isLoading: formBuilderState.isLoading,
+                            actualLabel: 'Add Page'),
+                        isPrimary: false,
+                        isLoading: formBuilderState.isLoading,
+                        colorScheme: colorScheme,
+                        editorial: editorial,
+                        callback: () {
+                          ref
+                              .watch(formBuilderViewModelProvider.notifier)
+                              .addFormPage();
+                        },
                       ),
-                      onSelected: (value) async {
-                        final result = await _showAddFieldDialog(
-                          context: context,
-                          editorial: editorial,
-                          fieldType: value,
-                        );
-
-                        ref
-                            .watch(formBuilderViewModelProvider.notifier)
-                            .addFormField(
-                                formFieldModel: FormFieldModel(
-                              label: result!['name'],
-                              placeholder: result['placeholder'],
-                              type: result['fieldType'],
-                              required: result['required'] ?? false,
-                              options: result['options'],
-                            ));
-                      },
-                      itemBuilder: (context) {
-                        return fieldTypeMenuItems;
-                      },
                     ),
-                    const SizedBox(
-                      width: 12,
+                    const SizedBox(width: 12),
+                    TooltipWidget(
+                      message: TooltipMessageConstants.saveDraftMessage,
+                      child: _buildActionButton(
+                        isLoading: formBuilderState.isLoading,
+                        isSecondary: true,
+                        isElevated: true,
+                        text: _buildLoadingString(
+                            isLoading: formBuilderState.isLoading,
+                            actualLabel: 'Save Draft'),
+                        isPrimary: false,
+                        colorScheme: colorScheme,
+                        editorial: editorial,
+                        callback: () {
+                          ref
+                              .watch(formBuilderViewModelProvider.notifier)
+                              .saveForm(
+                                formStatus: FormStatus.draft,
+                              );
+                        },
+                      ),
                     ),
-                    // _buildActionButton(
-                    //     'Preview', false, colorScheme, editorial),
-                    // const SizedBox(width: 12),
-                    _buildActionButton(
-                      text: 'Save Draft',
-                      isPrimary: false,
-                      colorScheme: colorScheme,
-                      editorial: editorial,
+                    const SizedBox(width: 12),
+                    TooltipWidget(
+                      message: TooltipMessageConstants.saveDraftMessage,
+                      child: _buildActionButton(
+                        isLoading: formBuilderState.isLoading,
+                        text: _buildLoadingString(
+                            isLoading: formBuilderState.isLoading,
+                            actualLabel: 'Publish'),
+                        isPrimary: true,
+                        colorScheme: colorScheme,
+                        editorial: editorial,
+                        callback: () {
+                          ref
+                              .watch(formBuilderViewModelProvider.notifier)
+                              .saveForm(
+                                formStatus: FormStatus.active,
+                              );
+                        },
+                      ),
                     ),
-                    // const SizedBox(width: 12),
-                    // _buildActionButton(
-                    //     'Publish Form', true, colorScheme, editorial),
                   ],
                 ),
               ],
@@ -951,62 +1113,22 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
 
             // Canvas Area
             Expanded(
-              child: Container(
-                // constraints: const BoxConstraints(maxWidth: 768),
-                child: PageView.builder(
-                  itemBuilder: (context, index) {
-                    final page = formBuilderState.form?.first.pages![index];
-                    return Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 8),
-                                Text(
-                                  page?.title ?? '',
-                                  style: textTheme.headlineMedium?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    color: colorScheme.onSurface,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+              child: formBuilderState.form.first.schema?.isEmpty ?? true
+                  ? Center(
+                      child: Text(
+                        'No pages available',
+                        style: textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                        // Reorderable Form Fields List
-                        ReorderableFormFieldsList(
-                          fields: page?.fields ??
-                              [], //_getFormFields(formBuilderState),
-                          // selectedFieldId: selectedFieldId,
-                          colorScheme: colorScheme,
-                          editorial: editorial,
-                          onReorder: (oldIndex, newIndex) {
-                            // _handleFieldReorder(oldIndex, newIndex);
-                          },
-                          onFieldSelected: (field) {
-                            // _handleFieldSelection(field);
-                          },
-                          onFieldDeleted: (field, fieldIndex) {
-                            ref
-                                .watch(formBuilderViewModelProvider.notifier)
-                                .removeField(
-                                  formFieldModel: field,
-                                  index: fieldIndex,
-                                );
-                            // _handleFieldDeletion(field);
-                          },
-                          onFieldDuplicated: (field) {
-                            // _handleFieldDuplication(field);
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+                      ),
+                    )
+                  : _buildTabController(
+                      context: context,
+                      formBuilderState: formBuilderState,
+                      colorScheme: colorScheme,
+                      textTheme: textTheme,
+                      editorial: editorial,
+                    ),
             ),
           ],
         ),
@@ -1014,15 +1136,332 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
     );
   }
 
+  Widget _buildTabController({
+    required BuildContext context,
+    required FormBuilderViewState formBuilderState,
+    required ColorScheme colorScheme,
+    required TextTheme textTheme,
+    required EditorialThemeData editorial,
+  }) {
+    // Initialize tab controller if not already done or if length changed
+    if (_tabController == null ||
+        _tabController!.length != formBuilderState.form.first.schema!.length) {
+      _tabController?.dispose();
+      _tabController = TabController(
+        length: formBuilderState.form.first.schema!.length,
+        vsync: this,
+      );
+      _tabController!.addListener(() {
+        if (!_tabController!.indexIsChanging) {
+          setState(() {
+            _currentTabIndex = _tabController!.index;
+          });
+        }
+      });
+    }
+
+    return Column(
+      children: [
+        // TAB BAR
+        IgnorePointer(
+          ignoring: ref.watch(formBuilderViewModelProvider).isLoading,
+          child: Container(
+            alignment: Alignment.centerLeft,
+            height: 50,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                indicatorColor: colorScheme.primary,
+                labelColor: colorScheme.primary,
+                unselectedLabelColor: colorScheme.onSurfaceVariant,
+                labelStyle: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+                labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+                indicatorPadding: const EdgeInsets.symmetric(horizontal: 8),
+                tabs: formBuilderState.form.first.schema!
+                    .asMap()
+                    .entries
+                    .map((entry) {
+                  final index = entry.key;
+                  final page = entry.value;
+                  return Tab(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: colorScheme.outlineVariant.withOpacity(0.5),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _buildLoadingString(
+                                isLoading: formBuilderState.isLoading,
+                                actualLabel: page.title ?? 'Page ${index + 1}'),
+                          ),
+                          const SizedBox(width: 8),
+                          if (formBuilderState.form.first.schema!.length > 1)
+                            GestureDetector(
+                              onTap: formBuilderState.isLoading
+                                  ? null
+                                  : () {
+                                      _showDeletePageDialog(context, index);
+                                    },
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.errorContainer
+                                      .withOpacity(0.8),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  size: 14,
+                                  color: colorScheme.onErrorContainer,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ),
+
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: formBuilderState.form.first.schema!
+                .asMap()
+                .entries
+                .map((entry) {
+              final index = entry.key;
+              final page = entry.value;
+
+              return CustomScrollView(
+                controller: _scrollController, // Add scroll controller here
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverToBoxAdapter(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Page Header with Edit Functionality
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          if (!editPageName)
+                                            Flexible(
+                                              child: Text(
+                                                _buildLoadingString(
+                                                    isLoading: formBuilderState
+                                                        .isLoading,
+                                                    actualLabel: page.title ??
+                                                        'Page ${index + 1}'),
+                                                style: textTheme.headlineMedium
+                                                    ?.copyWith(
+                                                  fontWeight: FontWeight.w900,
+                                                  color: colorScheme.onSurface,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          if (editPageName)
+                                            Flexible(
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.4,
+                                                child: _buildTextField(
+                                                  context,
+                                                  label: _buildLoadingString(
+                                                      isLoading:
+                                                          formBuilderState
+                                                              .isLoading,
+                                                      actualLabel: 'Page Name'),
+                                                  controller:
+                                                      pageNameController,
+                                                  focusNode: FocusNode(),
+                                                  hint:
+                                                      'e.g. Contact Information',
+                                                  enabled: true,
+                                                  textInputAction:
+                                                      TextInputAction.done,
+                                                  validator: (value) => null,
+                                                ),
+                                              ),
+                                            ),
+                                          const SizedBox(width: 15),
+                                          TooltipWidget(
+                                            message: editPageName
+                                                ? TooltipMessageConstants
+                                                    .discardMessage
+                                                : TooltipMessageConstants
+                                                    .editPageNameMessage,
+                                            child: IconButton(
+                                              onPressed: formBuilderState
+                                                      .isLoading
+                                                  ? null
+                                                  : !editPageName
+                                                      ? () {
+                                                          pageNameController
+                                                                  .text =
+                                                              page.title ?? '';
+                                                          setState(() {
+                                                            editPageName = true;
+                                                          });
+                                                        }
+                                                      : () {
+                                                          setState(() {
+                                                            editPageName =
+                                                                false;
+                                                          });
+                                                        },
+                                              icon: editPageName
+                                                  ? const Icon(Icons.close)
+                                                  : const Icon(Icons.edit),
+                                            ),
+                                          ),
+                                          if (editPageName)
+                                            TooltipWidget(
+                                              message: TooltipMessageConstants
+                                                  .savePageNameMessage,
+                                              child: IconButton(
+                                                onPressed: formBuilderState
+                                                        .isLoading
+                                                    ? null
+                                                    : () {
+                                                        ref
+                                                            .watch(
+                                                                formBuilderViewModelProvider
+                                                                    .notifier)
+                                                            .updatePageName(
+                                                              pageNameController
+                                                                  .text,
+                                                              index,
+                                                            );
+                                                        setState(() {
+                                                          editPageName = false;
+                                                        });
+                                                      },
+                                                icon: const Icon(Icons.check),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                    _buildButton(
+                                        context: context,
+                                        colorScheme: colorScheme,
+                                        editorial: editorial,
+                                        formBuilderState: formBuilderState),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Form Fields List as Sliver
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverToBoxAdapter(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width),
+                          child: ReorderableFormFieldsList(
+                            fields: page.fields ?? [],
+                            colorScheme: colorScheme,
+                            editorial: editorial,
+                            onReorder: (reorderFields) {
+                              // Handle field reordering within this page
+                              ref
+                                  .watch(formBuilderViewModelProvider.notifier)
+                                  .updateOrderOfList(
+                                    reorderFields,
+                                    index,
+                                  );
+                            },
+                            onEditClicked: (field) {
+                              // Handle field selection
+                            },
+                            onFieldDeleted: (field, fieldIndex) {
+                              ref
+                                  .watch(formBuilderViewModelProvider.notifier)
+                                  .removeField(
+                                    formFieldModel: field,
+                                    index: fieldIndex,
+                                  );
+                            },
+                            onFieldDuplicated: (field) {
+                              // Handle field duplication
+                              ref
+                                  .watch(formBuilderViewModelProvider.notifier)
+                                  .duplicateFiel(
+                                    field,
+                                    index,
+                                  );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Add some bottom padding for better scrolling
+                  const SliverPadding(
+                    padding: EdgeInsets.only(bottom: 100),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildActionButton({
     required String text,
-    required bool isPrimary,
+    bool isPrimary = false,
+    bool isSecondary = false,
+    bool isElevated = false,
     required ColorScheme colorScheme,
     required EditorialThemeData editorial,
     void Function()? callback,
+    bool isLoading = false,
   }) {
     return MaterialButton(
-      onPressed: () => callback?.call(),
+      onPressed: isLoading ? null : () => callback?.call(),
       padding: EdgeInsets.symmetric(
         horizontal: isPrimary ? 24 : 20,
         vertical: 12,
@@ -1030,497 +1469,24 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
-      color: isPrimary
-          ? colorScheme.primaryContainer
-          : colorScheme.surfaceContainerLowest,
-      elevation: isPrimary ? 2 : 0,
+      color: isPrimary ? colorScheme.primaryContainer : colorScheme.surface,
+      elevation: isPrimary || isElevated ? 2 : 0,
       child: Text(
         text,
         style: editorial.buttonTextStyle.copyWith(
-          color:
-              isPrimary ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
+          color: isPrimary
+              ? colorScheme.onPrimary
+              : isSecondary
+                  ? colorScheme.secondary
+                  : colorScheme.onSurfaceVariant,
           fontWeight: isPrimary ? FontWeight.w700 : FontWeight.w600,
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(ColorScheme colorScheme, TextTheme textTheme,
-      EditorialThemeData editorial) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border(
-          left: BorderSide(color: colorScheme.primary, width: 4),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Event Essentials',
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Basic information regarding the requested venue date and party size.',
-                style: editorial.captionStyle.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          Icon(Icons.drag_indicator, color: colorScheme.outline),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSelectedField(ColorScheme colorScheme, TextTheme textTheme,
-      EditorialThemeData editorial) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.secondary, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.secondary.withOpacity(0.05),
-            blurRadius: 8,
-            spreadRadius: 4,
-          ),
-        ],
-      ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // Selected Badge
-          Positioned(
-            top: -48,
-            left: -4,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: colorScheme.secondary,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                'SELECTED',
-                style: editorial.labelUppercase.copyWith(
-                  color: colorScheme.onSecondary,
-                  fontSize: 10,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ),
-          ),
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Full Name of Primary Contact',
-                    style: editorial.labelBold.copyWith(
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.content_copy, size: 18),
-                        color: colorScheme.outline,
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.delete_outline, size: 18),
-                        color: colorScheme.error,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Container(
-                width: double.infinity,
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: colorScheme.outlineVariant),
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'e.g. Johnathan Smith',
-                    style: editorial.placeholderStyle.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFormField(
-    String label,
-    String placeholder,
-    IconData? trailingIcon,
-    bool isSelected,
-    ColorScheme colorScheme,
-    TextTheme textTheme,
-    EditorialThemeData editorial,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isSelected ? colorScheme.secondary : Colors.transparent,
-          width: isSelected ? 2 : 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                label,
-                style: editorial.labelBold.copyWith(
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              Icon(Icons.drag_indicator, color: colorScheme.outlineVariant),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: colorScheme.surface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: colorScheme.outlineVariant),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  placeholder,
-                  style: editorial.placeholderStyle.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                if (trailingIcon != null)
-                  Icon(trailingIcon, color: colorScheme.onSurfaceVariant),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDropZone(ColorScheme colorScheme, EditorialThemeData editorial) {
-    return Container(
-      padding: const EdgeInsets.all(48),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outlineVariant,
-          width: 2,
-          style: BorderStyle.solid,
-        ),
-        color: colorScheme.surfaceContainerLow,
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: colorScheme.surfaceContainer,
-            ),
-            child: Icon(
-              Icons.add,
-              color: colorScheme.outline,
-              size: 24,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Drag a component here or click to add a field',
-            style: editorial.labelSubtle.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPropertiesPanel(BuildContext context, ColorScheme colorScheme,
-      TextTheme textTheme, EditorialThemeData editorial) {
-    return Container(
-      width: 320,
-      color: colorScheme.surfaceContainerLow,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.settings,
-                    size: 16, color: colorScheme.onSurfaceVariant),
-                const SizedBox(width: 8),
-                Text(
-                  'FIELD PROPERTIES',
-                  style: editorial.labelUppercase.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    letterSpacing: 2,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildPropertyField(
-                    'Label',
-                    'Full Name of Primary Contact',
-                    colorScheme,
-                    editorial,
-                  ),
-                  const SizedBox(height: 24),
-                  _buildPropertyField(
-                    'Placeholder Text',
-                    'e.g. Johnathan Smith',
-                    colorScheme,
-                    editorial,
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Validation Toggles
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(
-                          color: colorScheme.outlineVariant.withOpacity(0.3),
-                        ),
-                      ),
-                    ),
-                    padding: const EdgeInsets.only(top: 24),
-                    child: Column(
-                      children: [
-                        _buildToggleOption(
-                            'Required Field', true, colorScheme, editorial),
-                        const SizedBox(height: 16),
-                        _buildToggleOption(
-                            'Unique Answer', false, colorScheme, editorial),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  // Conditional Logic
-                  Text(
-                    'CONDITIONAL LOGIC',
-                    style: editorial.labelUppercase.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildAddRuleButton(colorScheme, editorial),
-
-                  const SizedBox(height: 32),
-
-                  // Helper Info
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: colorScheme.tertiary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Helper Text',
-                                style: editorial.labelBold.copyWith(
-                                  fontSize: 12,
-                                  color: colorScheme.onSurface,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Provide context to your guests for why this field is required.',
-                                style: editorial.captionStyle.copyWith(
-                                  fontSize: 10,
-                                  color: colorScheme.onSurfaceVariant,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPropertyField(
-    String label,
-    String value,
-    ColorScheme colorScheme,
-    EditorialThemeData editorial,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: editorial.labelBold.copyWith(
-            fontSize: 12,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: colorScheme.surfaceContainerLowest,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: colorScheme.outlineVariant),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: colorScheme.secondary, width: 2),
-            ),
-            contentPadding: const EdgeInsets.all(12),
-            hintText: value,
-          ),
-          style: editorial.formFieldStyle,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildToggleOption(
-    String title,
-    bool value,
-    ColorScheme colorScheme,
-    EditorialThemeData editorial,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: editorial.labelSubtle.copyWith(
-            color: colorScheme.onSurface,
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
-            // Toggle functionality
-          },
-          child: Container(
-            width: 40,
-            height: 20,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: value
-                  ? colorScheme.primaryContainer
-                  : colorScheme.outlineVariant,
-            ),
-            child: AnimatedAlign(
-              alignment: value ? Alignment.centerRight : Alignment.centerLeft,
-              duration: const Duration(milliseconds: 200),
-              child: Container(
-                width: 12,
-                height: 12,
-                margin: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colorScheme.surface,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAddRuleButton(
-      ColorScheme colorScheme, EditorialThemeData editorial) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colorScheme.outline,
-          style: BorderStyle.solid,
-          width: 1,
-        ),
-      ),
-      child: Center(
-        child: Text(
-          '+ Add Display Rule',
-          style: editorial.labelBold.copyWith(
-            fontSize: 12,
-            color: colorScheme.outline,
-          ),
-        ),
-      ),
-    );
+  String _buildLoadingString(
+      {required bool isLoading, required String actualLabel}) {
+    return isLoading ? 'Loading...' : actualLabel;
   }
 }

@@ -29,10 +29,10 @@ class HomeViewState {
 }
 
 class HomeViewModel extends StateNotifier<HomeViewState> {
-  final FormRepository _formRepository;
+  final IFormRepository _formRepository;
 
   HomeViewModel({
-    required FormRepository formRepo,
+    required IFormRepository formRepo,
   })  : _formRepository = formRepo,
         super(const HomeViewState());
 

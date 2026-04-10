@@ -6,8 +6,8 @@ import '../theme/editorial_theme_data.dart';
 class ReorderableFormFieldsList extends StatefulWidget {
   final List<FormFieldModel> fields;
   final String? selectedFieldId;
-  final Function(int oldIndex, int newIndex)? onReorder;
-  final Function(FormFieldModel field)? onFieldSelected;
+  final Function(List<FormFieldModel> reorderedFields)? onReorder;
+  final Function(FormFieldModel field)? onEditClicked;
   final Function(FormFieldModel field, int index)? onFieldDeleted;
   final Function(FormFieldModel field)? onFieldDuplicated;
   final ColorScheme colorScheme;
@@ -20,7 +20,7 @@ class ReorderableFormFieldsList extends StatefulWidget {
     required this.editorial,
     this.selectedFieldId,
     this.onReorder,
-    this.onFieldSelected,
+    this.onEditClicked,
     this.onFieldDeleted,
     this.onFieldDuplicated,
   }) : super(key: key);
@@ -47,18 +47,45 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
     // }
   }
 
+  // void _handleReorder(int oldIndex, int newIndex) {
+  //   setState(() {
+  //     // Handle the reordering logic
+  //     if (newIndex > oldIndex) {
+  //       newIndex -= 1;
+  //     }
+  //     final item = _fields.removeAt(oldIndex);
+  //     _fields.insert(newIndex, item);
+  //   });
+
+  //   // Call the callback
+  //   widget.onReorder?.call(oldIndex, newIndex,);
+  // }
+
+  List<FormFieldModel> _reorderFields(
+      List<FormFieldModel> fields, int oldIndex, int newIndex) {
+    final List<FormFieldModel> reorderedFields = List.from(fields);
+
+    // Handle the reordering logic
+    if (newIndex > oldIndex) {
+      newIndex -= 1;
+    }
+
+    final item = reorderedFields.removeAt(oldIndex);
+    reorderedFields.insert(newIndex, item);
+
+    return reorderedFields;
+  }
+
   void _handleReorder(int oldIndex, int newIndex) {
+    // Create reordered list
+    final reorderedFields = _reorderFields(_fields, oldIndex, newIndex);
+
     setState(() {
-      // Handle the reordering logic
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
-      final item = _fields.removeAt(oldIndex);
-      _fields.insert(newIndex, item);
+      _fields = reorderedFields;
     });
 
-    // Call the callback
-    widget.onReorder?.call(oldIndex, newIndex);
+    // ✅ Pass the reordered list to parent
+    widget.onReorder?.call(reorderedFields);
   }
 
   @override
@@ -87,7 +114,7 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
             isSelected: isSelected,
             colorScheme: widget.colorScheme,
             editorial: widget.editorial,
-            onTap: () => widget.onFieldSelected?.call(field),
+            onEditClicked: () => widget.onEditClicked?.call(field),
             onDelete: () => widget.onFieldDeleted?.call(field, index),
             onDuplicate: () => widget.onFieldDuplicated?.call(field),
           ),
@@ -98,7 +125,7 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
 
   Widget _buildEmptyState() {
     return Container(
-      padding: const EdgeInsets.all(48),
+      // padding: const EdgeInsets.all(48),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

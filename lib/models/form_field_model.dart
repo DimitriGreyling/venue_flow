@@ -31,7 +31,7 @@ class FormFieldModel {
   factory FormFieldModel.fromJson(Map<String, dynamic> json) {
     return FormFieldModel(
       id: json['id'],
-      type: json['type'],
+      type: json['type'] != null ? FieldType.values.byName(json['type']) : null,
       label: json['label'] ?? '',
       placeholder: json['placeholder'],
       required: json['required'] ?? false,
@@ -44,5 +44,19 @@ class FormFieldModel {
           ? VisibilityRule.fromJson(json['visibility'])
           : null,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'type': type?.name,
+      'label': label,
+      'placeholder': placeholder,
+      'required': required,
+      'defaultValue': defaultValue,
+      'options': options,
+      // 'validations': validations?.map((e) => e.toJson()).toList(),
+      // 'visibility': visibility?.toJson(),
+    };
   }
 }

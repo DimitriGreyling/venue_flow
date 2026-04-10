@@ -2,6 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/models/enums.dart';
+import 'package:venue_flow_app/models/user_model.dart';
+import 'package:venue_flow_app/providers/auth_provider.dart';
+import 'package:venue_flow_app/providers/viewmodel_provider.dart';
+import 'package:venue_flow_app/routing/app_router.dart';
+import 'package:venue_flow_app/views/side_nav_widget.dart';
+import 'package:venue_flow_app/views/top_bar_widget.dart';
 import '../theme/theme.dart';
 import '../theme/spacing.dart';
 import '../theme/components.dart';
@@ -33,14 +41,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       backgroundColor: colorScheme.surface,
       body: Row(
         children: [
-          // Side Navigation
-          _buildSideNavigation(colorScheme, editorial),
+          // // Side Navigation
+          // _buildSideNavigation(colorScheme, editorial),
+          const SideNavWidget(),
           // Main Content
           Expanded(
             child: Column(
               children: [
                 // Top Navigation
-                _buildTopNavigation(colorScheme, editorial),
+                const TopBarWidget(),
+                // _buildTopNavigation(colorScheme, editorial),
                 // Dashboard Content
                 Expanded(
                   child: _buildDashboardContent(colorScheme, editorial),
@@ -53,390 +63,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildSideNavigation(ColorScheme colorScheme, EditorialThemeData editorial) {
-    return Container(
-      width: 256,
-      height: double.infinity,
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withOpacity(0.04),
-            blurRadius: 32,
-            offset: const Offset(32, 0),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Logo Section
-          Container(
-            padding: const EdgeInsets.all(EditorialSpacing.spacing6),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        colorScheme.primaryContainer,
-                        colorScheme.primary,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.hub_outlined,
-                    color: colorScheme.onPrimary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: EditorialSpacing.spacing3),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Venue Flow',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      Text(
-                        'MANAGEMENT PORTAL',
-                        style: editorial.metadataStyle.copyWith(
-                          fontSize: 8,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // New Event Button
-          Container(
-            margin: const EdgeInsets.symmetric(
-              horizontal: EditorialSpacing.spacing6,
-              vertical: EditorialSpacing.spacing4,
-            ),
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                elevation: 8,
-                shadowColor: colorScheme.primary.withOpacity(0.2),
-              ),
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('New Event'),
-            ),
-          ),
-
-          // Navigation Items
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: EditorialSpacing.spacing4),
-              child: Column(
-                children: [
-                  _buildNavItem(
-                    icon: Icons.dashboard_outlined,
-                    label: 'Dashboard',
-                    isSelected: _selectedNavItem == 'Dashboard',
-                    colorScheme: colorScheme,
-                    editorial: editorial,
-                  ),
-                  _buildNavItem(
-                    icon: Icons.edit_note_outlined,
-                    label: 'Form Builder',
-                    isSelected: _selectedNavItem == 'Form Builder',
-                    colorScheme: colorScheme,
-                    editorial: editorial,
-                  ),
-                  _buildNavItem(
-                    icon: Icons.calendar_today_outlined,
-                    label: 'Events',
-                    isSelected: _selectedNavItem == 'Events',
-                    colorScheme: colorScheme,
-                    editorial: editorial,
-                  ),
-                  _buildNavItem(
-                    icon: Icons.settings_outlined,
-                    label: 'Settings',
-                    isSelected: _selectedNavItem == 'Settings',
-                    colorScheme: colorScheme,
-                    editorial: editorial,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Bottom Section
-          Container(
-            padding: const EdgeInsets.all(EditorialSpacing.spacing6),
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: colorScheme.outline.withOpacity(0.1),
-                  width: 1,
-                ),
-              ),
-            ),
-            child: Column(
-              children: [
-                _buildNavItem(
-                  icon: Icons.help_outline,
-                  label: 'Help Center',
-                  isSelected: false,
-                  colorScheme: colorScheme,
-                  editorial: editorial,
-                ),
-                _buildNavItem(
-                  icon: Icons.person_outline,
-                  label: 'Account',
-                  isSelected: false,
-                  colorScheme: colorScheme,
-                  editorial: editorial,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-    required ColorScheme colorScheme,
-    required EditorialThemeData editorial,
-  }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2),
-      child: Material(
-        color: isSelected 
-          ? colorScheme.surfaceContainerHighest
-          : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () {
-            setState(() {
-              _selectedNavItem = label;
-            });
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: EditorialSpacing.spacing4,
-              vertical: EditorialSpacing.spacing3,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  icon,
-                  size: 20,
-                  color: isSelected 
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: EditorialSpacing.spacing3),
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: isSelected 
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTopNavigation(ColorScheme colorScheme, EditorialThemeData editorial) {
-    return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: EditorialSpacing.spacing8),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.outline.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          // Search Bar
-          Container(
-            width: 320,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search events, forms, or clients...',
-                hintStyle: editorial.captionStyle,
-                prefixIcon: Icon(
-                  Icons.search,
-                  size: 18,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: EditorialSpacing.spacing4,
-                  vertical: EditorialSpacing.spacing2,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(width: EditorialSpacing.spacing8),
-
-          // Top Navigation Links
-          Expanded(
-            child: Row(
-              children: [
-                _buildTopNavLink('Dashboard', true, colorScheme, editorial),
-                const SizedBox(width: EditorialSpacing.spacing8),
-                _buildTopNavLink('Forms', false, colorScheme, editorial),
-                const SizedBox(width: EditorialSpacing.spacing8),
-                _buildTopNavLink('Events', false, colorScheme, editorial),
-                const SizedBox(width: EditorialSpacing.spacing8),
-                _buildTopNavLink('Settings', false, colorScheme, editorial),
-              ],
-            ),
-          ),
-
-          // Right Section
-          Row(
-            children: [
-              // Notifications
-              Stack(
-                children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.notifications_outlined,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: colorScheme.error,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: colorScheme.surface,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(width: EditorialSpacing.spacing4),
-
-              // Divider
-              Container(
-                width: 1,
-                height: 32,
-                color: colorScheme.outline.withOpacity(0.2),
-              ),
-
-              const SizedBox(width: EditorialSpacing.spacing4),
-
-              // Profile Section
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: colorScheme.primary.withOpacity(0.1),
-                        width: 2,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.person,
-                      size: 16,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: EditorialSpacing.spacing2),
-                  Text(
-                    'Alex Rivera',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTopNavLink(
-    String label,
-    bool isSelected,
-    ColorScheme colorScheme,
-    EditorialThemeData editorial,
-  ) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        if (isSelected)
-          Container(
-            width: 24,
-            height: 2,
-            decoration: BoxDecoration(
-              color: colorScheme.primary,
-              borderRadius: BorderRadius.circular(1),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildDashboardContent(ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildDashboardContent(
+      ColorScheme colorScheme, EditorialThemeData editorial) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(EditorialSpacing.spacing8),
       child: Column(
@@ -452,28 +80,31 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   Text(
                     'Coordinator Dashboard',
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: colorScheme.onSurface,
-                    ),
+                          fontWeight: FontWeight.w900,
+                          color: colorScheme.onSurface,
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Welcome back, Alex. You have 4 meetings scheduled for today.',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                   ),
                 ],
               ),
               Row(
                 children: [
                   OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      context.goNamed('form-builder');
+                    },
                     icon: const Icon(Icons.description_outlined, size: 18),
                     label: const Text('Create Form'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: colorScheme.onSecondaryContainer,
-                      side: BorderSide(color: colorScheme.outline.withOpacity(0.1)),
+                      side: BorderSide(
+                          color: colorScheme.outline.withOpacity(0.1)),
                     ),
                   ),
                   const SizedBox(width: EditorialSpacing.spacing3),
@@ -520,7 +151,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildMetricsGrid(ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildMetricsGrid(
+      ColorScheme colorScheme, EditorialThemeData editorial) {
     return Row(
       children: [
         // Portfolio Overview - Large Card
@@ -559,16 +191,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     Text(
                       '24',
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.w900,
-                      ),
+                            color: colorScheme.onPrimary,
+                            fontWeight: FontWeight.w900,
+                          ),
                     ),
                     const SizedBox(width: EditorialSpacing.spacing2),
                     Text(
                       'Active Events',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: colorScheme.onPrimary.withOpacity(0.9),
-                      ),
+                            color: colorScheme.onPrimary.withOpacity(0.9),
+                          ),
                     ),
                   ],
                 ),
@@ -690,7 +322,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: badgeColor?.withOpacity(0.1) ?? colorScheme.secondaryContainer.withOpacity(0.5),
+              color: badgeColor?.withOpacity(0.1) ??
+                  colorScheme.secondaryContainer.withOpacity(0.5),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -707,9 +340,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           Text(
             value,
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: colorScheme.onSurface,
-            ),
+                  fontWeight: FontWeight.w900,
+                  color: colorScheme.onSurface,
+                ),
           ),
           if (badgeColor != null) ...[
             const SizedBox(height: EditorialSpacing.spacing4),
@@ -756,7 +389,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildActiveEventsSection(ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildActiveEventsSection(
+      ColorScheme colorScheme, EditorialThemeData editorial) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -766,17 +400,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             Text(
               'Active Events',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w900,
-              ),
+                    fontWeight: FontWeight.w900,
+                  ),
             ),
             TextButton(
               onPressed: () {},
               child: Text(
                 'View all schedules',
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: colorScheme.secondary,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: colorScheme.secondary,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ),
           ],
@@ -852,7 +486,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildEventRow(int index, ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildEventRow(
+      int index, ColorScheme colorScheme, EditorialThemeData editorial) {
     final events = [
       {
         'name': 'Annual Tech Gala',
@@ -878,7 +513,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     ];
 
     final event = events[index];
-    
+
     return Container(
       decoration: BoxDecoration(
         border: Border(
@@ -908,9 +543,11 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
-                          index == 0 ? Icons.celebration_outlined :
-                          index == 1 ? Icons.favorite_outline :
-                          Icons.business_outlined,
+                          index == 0
+                              ? Icons.celebration_outlined
+                              : index == 1
+                                  ? Icons.favorite_outline
+                                  : Icons.business_outlined,
                           size: 20,
                           color: colorScheme.primary,
                         ),
@@ -918,9 +555,10 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                       const SizedBox(width: EditorialSpacing.spacing3),
                       Text(
                         event['name'] as String,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ],
                   ),
@@ -930,16 +568,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                   child: Text(
                     event['client'] as String,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                   ),
                 ),
                 Expanded(
                   child: Text(
                     event['date'] as String,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                   ),
                 ),
                 Expanded(
@@ -981,15 +619,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildRecentActivitySection(ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildRecentActivitySection(
+      ColorScheme colorScheme, EditorialThemeData editorial) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Recent Activity',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w900,
-          ),
+                fontWeight: FontWeight.w900,
+              ),
         ),
         const SizedBox(height: EditorialSpacing.spacing6),
         ...List.generate(
@@ -1024,7 +663,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildActivityItem(int index, ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildActivityItem(
+      int index, ColorScheme colorScheme, EditorialThemeData editorial) {
     final activities = [
       {
         'icon': Icons.description_outlined,
@@ -1087,8 +727,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 Text(
                   activity['title'] as String,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -1113,11 +753,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildInsightsSection(ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildInsightsSection(
+      ColorScheme colorScheme, EditorialThemeData editorial) {
     return Container(
       padding: const EdgeInsets.all(EditorialSpacing.spacing8),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant.withOpacity(0.3),
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: colorScheme.outline.withOpacity(0.1),
@@ -1132,15 +773,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 Text(
                   'Venue Occupancy Analysis',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w900,
-                  ),
+                        fontWeight: FontWeight.w900,
+                      ),
                 ),
                 const SizedBox(height: EditorialSpacing.spacing2),
                 Text(
                   'Your current venue booking rate is 15% higher than last quarter. Consider opening more weekend slots for Q4.',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
@@ -1152,14 +793,16 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
               Container(
                 width: 1,
                 height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: EditorialSpacing.spacing8),
+                margin: const EdgeInsets.symmetric(
+                    horizontal: EditorialSpacing.spacing8),
                 color: colorScheme.outline.withOpacity(0.2),
               ),
               _buildStatColumn('12k', 'ATTENDEES', colorScheme, editorial),
               Container(
                 width: 1,
                 height: 48,
-                margin: const EdgeInsets.symmetric(horizontal: EditorialSpacing.spacing8),
+                margin: const EdgeInsets.symmetric(
+                    horizontal: EditorialSpacing.spacing8),
                 color: colorScheme.outline.withOpacity(0.2),
               ),
               _buildStatColumn('4.9', 'RATING', colorScheme, editorial),
@@ -1181,9 +824,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         Text(
           value,
           style: Theme.of(context).textTheme.displayMedium?.copyWith(
-            fontWeight: FontWeight.w900,
-            color: colorScheme.primary,
-          ),
+                fontWeight: FontWeight.w900,
+                color: colorScheme.primary,
+              ),
         ),
         Text(
           label,

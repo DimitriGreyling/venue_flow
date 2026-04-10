@@ -20,4 +20,12 @@ class FormPageModel {
           .toList(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title':title,
+      'fields': fields?.map((x)=>x.toJson()).toList(),
+    };
+  }
 }
