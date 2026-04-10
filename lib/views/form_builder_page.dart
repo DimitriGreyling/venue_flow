@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/constants/tooltip_message_constants.dart';
+import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
@@ -12,7 +13,10 @@ import 'package:venue_flow_app/views/tooltip_widget.dart';
 import '../theme/editorial_theme_data.dart';
 
 class FormBuilderPage extends ConsumerStatefulWidget {
-  const FormBuilderPage({super.key});
+  final String? formId;
+  final DynamicFormModel? formModel;
+
+  const FormBuilderPage({super.key, this.formId, this.formModel});
 
   @override
   ConsumerState<FormBuilderPage> createState() => _FormBuilderPageState();
@@ -63,6 +67,15 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.formId != null) {
+        ref.watch(formBuilderViewModelProvider.notifier).setForm(
+              formId: widget.formId,
+              formModel: widget.formModel,
+            );
+      }
+    });
+
     _scrollController.addListener(_onScroll);
   }
 

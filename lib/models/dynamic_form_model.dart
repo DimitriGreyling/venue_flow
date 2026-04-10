@@ -57,8 +57,12 @@ class DynamicFormModel {
           ? FormStatus.values.byName(json['status'])
           : null,
       isActive: json['is_active'] as bool? ?? false,
-      createdAt: DateTime.tryParse(json['created_at']),
-      modifiedDate: DateTime.tryParse(json['modified_date']),
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.tryParse(json['created_at']),
+      modifiedDate: json['modified_date'] == null
+          ? null
+          : DateTime.tryParse(json['modified_date']),
     );
 
     return resp;
@@ -90,7 +94,7 @@ class DynamicFormModel {
         'schema': schema?.map((x) => x.toJson()).toList(),
         'status': formStatus?.name,
         'is_active': isActive,
-        'created_at': createdAt,
+        'created_at': createdAt?.toIso8601String(),
         'modified_date': DateTime.now().toIso8601String(),
       };
 

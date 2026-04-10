@@ -413,7 +413,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
     }
   }
 
-  Widget _buildEventRow({
+  Widget _buildFormRow({
     required DynamicFormModel formModel,
     required ColorScheme colorScheme,
     required EditorialThemeData editorial,
@@ -430,7 +430,15 @@ class _FormListPageState extends ConsumerState<FormListPage> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            context.goNamed('form-builder',
+            extra: {
+              'formModel': formModel,
+            },
+             queryParameters: {
+              'id': formModel.id,
+            });
+          },
           child: Padding(
             padding: const EdgeInsets.all(EditorialSpacing.spacing6),
             child: Row(
@@ -919,7 +927,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                           // Table Rows
                           ...List.generate(
                             snapshot.data?.length ?? 0,
-                            (index) => _buildEventRow(
+                            (index) => _buildFormRow(
                               formModel: snapshot.data![index],
                               colorScheme: colorScheme,
                               editorial: editorial,

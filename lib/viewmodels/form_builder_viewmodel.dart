@@ -74,6 +74,32 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     }
   }
 
+  Future<void> setForm({
+    String? formId,
+    DynamicFormModel? formModel,
+  }) async {
+    try {
+      state = state.copyWith(
+        isLoading: false,
+      );
+
+      if (formModel != null) {
+        await _storageHelper.saveForm(formModel);
+        state = state.copyWith(
+          forms: [formModel],
+          isLoading: false,
+        );
+      } else {
+        final loadedForm = await _storageHelper.loadForm();
+
+        state = state.copyWith(
+          forms: loadedForm,
+          isLoading: false,
+        );
+      }
+    } catch (error) {}
+  }
+
   // Load stored forms on initialization
   Future<void> _loadStoredForms() async {
     try {

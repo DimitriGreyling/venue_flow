@@ -15,7 +15,12 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/form-builder',
       name: 'form-builder',
-      builder: (context, state) => FormBuilderPage(),
+      builder: (context, state) {
+        final id = state.uri.queryParameters['id'];
+        final formModel = state.extra != null ? (state.extra as Map<String, dynamic>)['formModel'] : null;
+
+        return FormBuilderPage(formId: id,formModel: formModel,);
+      },
     ),
     GoRoute(
       path: '/form-list',
