@@ -891,7 +891,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                         // ),
                         Expanded(
                           child: Text(
-                            'LAST DATE',
+                            'LAST MODIFIED',
                             style:
                                 editorial.metadataStyle.copyWith(fontSize: 10),
                           ),
