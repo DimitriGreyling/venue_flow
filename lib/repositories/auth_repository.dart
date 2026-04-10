@@ -19,7 +19,15 @@ class AuthRepository {
 
       //  await createTestUsers();
 
-      final response = await _cF
+      final response = await _client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      if (response.user != null) {
+        final userData = await _getUserProfile(response.user!.id);
+        return userData;
+      }
       return null;
     } catch (error) {
       log('Sign in error: $error');
