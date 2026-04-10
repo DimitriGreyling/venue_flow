@@ -549,7 +549,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Welcome back, Alex. You have 4 meetings scheduled for today.',
+                    'Welcome back, Alex. You have 4 forms awaiting review.',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
