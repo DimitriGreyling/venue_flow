@@ -438,7 +438,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
     List<TextEditingController> optionControllers = [TextEditingController()];
 
     bool needsOptions =
-        fieldType == FieldType.dropdown || fieldType == FieldType.radio;
+        fieldType == FieldType.dropdown || fieldType == FieldType.radio || fieldType == FieldType.checkbox; 
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
