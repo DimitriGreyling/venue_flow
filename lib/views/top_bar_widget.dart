@@ -102,13 +102,13 @@ class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
               ),
 
               const SizedBox(width: EditorialSpacing.spacing4),
-
-              // Divider
-              Container(
-                width: 1,
-                height: 32,
-                color: colorScheme.outline.withOpacity(0.2),
-              ),
+              if (isLoggedIn)
+                // Divider
+                Container(
+                  width: 1,
+                  height: 32,
+                  color: colorScheme.outline.withOpacity(0.2),
+                ),
 
               const SizedBox(width: EditorialSpacing.spacing4),
 

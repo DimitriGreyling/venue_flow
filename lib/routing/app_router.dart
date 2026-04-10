@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/views/form_list_page.dart';
 import 'package:venue_flow_app/views/home_page.dart';
 import 'package:venue_flow_app/views/login_page.dart';
 import '../providers/auth_provider.dart';
@@ -57,6 +58,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: '/form-builder',
             name: 'form-builder',
             builder: (context, state) => FormBuilderPage(),
+          ),
+          GoRoute(
+            path: '/form-list',
+            name: 'form-list',
+            builder: (context, state) => const FormListPage(),
           ),
         ],
       ),
