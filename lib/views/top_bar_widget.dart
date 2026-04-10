@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/models/user_model.dart';
+import 'package:venue_flow_app/providers/auth_provider.dart';
 import 'package:venue_flow_app/theme/editorial_theme_data.dart';
 import 'package:venue_flow_app/theme/spacing.dart';
 
@@ -17,6 +19,9 @@ class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final editorial = context.editorial;
+
+    final isLoggedIn = ref.watch(isAuthenticatedProvider);
+    UserModel? currentUser = ref.watch(currentUserProvider);
 
     return Container(
       height: 64,
@@ -108,34 +113,52 @@ class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
               const SizedBox(width: EditorialSpacing.spacing4),
 
               // Profile Section
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: colorScheme.primary.withOpacity(0.1),
-                        width: 2,
+              if (isLoggedIn)
+                Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colorScheme.primary.withOpacity(0.1),
+                          width: 2,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.person,
+                        size: 16,
+                        color: colorScheme.onPrimary,
                       ),
                     ),
-                    child: Icon(
-                      Icons.person,
-                      size: 16,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: EditorialSpacing.spacing2),
-                  Text(
-                    'Alex Rivera',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                    const SizedBox(width: EditorialSpacing.spacing2),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          currentUser?.fullName ?? '',
+                          style:
+                              Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
-                  ),
-                ],
-              ),
+                        Text(
+                          currentUser?.role.name.toUpperCase() ?? '',
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
             ],
           ),
         ],
