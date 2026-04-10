@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/routing/app_router.dart';
+import 'package:venue_flow_app/views/top_bar_widget.dart';
 import '../theme/theme.dart';
 import '../theme/spacing.dart';
 import '../theme/components.dart';
@@ -42,7 +43,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             child: Column(
               children: [
                 // Top Navigation
-                _buildTopNavigation(colorScheme, editorial),
+               TopBarWidget(),
+                // _buildTopNavigation(colorScheme, editorial),
                 // Dashboard Content
                 Expanded(
                   child: _buildDashboardContent(colorScheme, editorial),
