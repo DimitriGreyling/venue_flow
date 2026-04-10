@@ -64,6 +64,16 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     _loadStoredForms();
   }
 
+  Future<List<DynamicFormModel>?> getFormNames() async {
+    try {
+      final result = _formRepository.getFormNames();
+
+      return result;
+    } catch (error) {
+      return [];
+    }
+  }
+
   Future<List<DynamicFormModel>?> loadForms() async {
     try {
       final result = _formRepository.getForms();
