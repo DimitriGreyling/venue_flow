@@ -35,7 +35,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       backgroundColor: colorScheme.surface,
       body: Row(
         children: [
-          // Side Navigation
+          // // Side Navigation
           _buildSideNavigation(colorScheme, editorial),
           // Main Content
           Expanded(

@@ -11,6 +11,8 @@ class DynamicFormModel {
   FormStatus? formStatus;
   List<FormPageModel>? schema;
   bool? isActive;
+  DateTime? createdAt;
+  DateTime? modifiedDate;
 
   DynamicFormModel({
     this.id,
@@ -19,6 +21,8 @@ class DynamicFormModel {
     this.schema,
     this.formStatus,
     this.isActive,
+    this.createdAt,
+    this.modifiedDate,
   });
 
   factory DynamicFormModel.fromJson(Map<String, dynamic> json) {
@@ -53,6 +57,8 @@ class DynamicFormModel {
           ? FormStatus.values.byName(json['status'])
           : null,
       isActive: json['is_active'] as bool? ?? false,
+      createdAt: DateTime.tryParse(json['created_at']),
+      modifiedDate: DateTime.tryParse(json['modified_date']),
     );
 
     return resp;
@@ -70,6 +76,8 @@ class DynamicFormModel {
       schema: pages ?? this.schema,
       version: version ?? this.version,
       formStatus: formStatus ?? this.formStatus,
+      createdAt: createdAt ?? this.createdAt,
+      modifiedDate: modifiedDate ?? this.modifiedDate,
     );
   }
 
@@ -82,6 +90,8 @@ class DynamicFormModel {
         'schema': schema?.map((x) => x.toJson()).toList(),
         'status': formStatus?.name,
         'is_active': isActive,
+        'created_at': createdAt,
+        'modified_date': DateTime.now().toIso8601String(),
       };
 
       return myObjec;
