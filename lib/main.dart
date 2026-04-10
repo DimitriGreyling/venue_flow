@@ -44,6 +44,7 @@ class EditorialConciergeApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final router = ref.watch(appRouterProvider);
 
     // Update system UI overlay style when theme changes
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -64,7 +65,7 @@ class EditorialConciergeApp extends ConsumerWidget {
           // },
           ),
       debugShowCheckedModeBanner: false,
-      routerConfig: appRouter,
+      routerConfig: router,
       title: 'Venue Flow',
       // Theme configuration
       theme: editorialLightTheme,

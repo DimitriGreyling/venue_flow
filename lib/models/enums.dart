@@ -7,8 +7,14 @@ enum FieldType {
   date,
 }
 
-enum FormStatus{
+enum FormStatus {
   active,
   inactive,
   draft,
+}
+
+enum UserRole {
+  client,
+  coordinator,
+  admin,
 }
