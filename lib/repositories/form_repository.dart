@@ -68,6 +68,7 @@ class FormRepository extends IFormRepository {
     required DynamicFormModel formModel,
   }) async {
     try {
+      final test = formModel.toJson();
       final result = await _client
           .from(_tableName)
           .insert(
@@ -78,6 +79,7 @@ class FormRepository extends IFormRepository {
       log('testing');
       return DynamicFormModel.fromJson(result[0]);
     } catch (error, stackTrace) {
+      log('ERROR :: ${error}');
       throw Exception(error);
     }
   }

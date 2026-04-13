@@ -16,7 +16,6 @@ class AuthRepository {
     required String password,
   }) async {
     try {
-
       //  await createTestUsers();
 
       final response = await _client.auth.signInWithPassword(
@@ -240,6 +239,18 @@ class AuthRepository {
     try {
       final response =
           await _client.from('tenants').select().eq('slug', slug).single();
+
+      return TenantModel.fromJson(response);
+    } catch (error) {
+      log('Get tenant error: $error');
+      return null;
+    }
+  }
+
+  Future<TenantModel?> getTenantById(String tenantId) async {
+    try {
+      final response =
+          await _client.from('tenants').select().eq('id', tenantId).single();
 
       return TenantModel.fromJson(response);
     } catch (error) {

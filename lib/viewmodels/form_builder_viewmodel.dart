@@ -8,6 +8,7 @@ import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/models/form_page_model.dart';
+import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/repositories/form_repository.dart';
 import 'package:venue_flow_app/shared/helpers/storage_helper.dart';
 
@@ -54,12 +55,15 @@ class FormBuilderViewState {
 class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
   final IFormRepository _formRepository;
   final IStorageHelper _storageHelper;
+  final UserModel? _user;
 
   FormBuilderViewModel({
     required IFormRepository formRepo,
     required IStorageHelper storageHelper,
+    required UserModel? currentUser,
   })  : _formRepository = formRepo,
         _storageHelper = storageHelper,
+        _user = currentUser,
         super(FormBuilderViewState.initial()) {
     _loadStoredForms();
   }
@@ -84,13 +88,27 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     }
   }
 
+  Future<void> loadForm({
+    required String formId,
+  }) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      await Future.delayed(const Duration(seconds: 10));
+      final result = await _formRepository.getForms();
+
+      state = state.copyWith(isLoading: false, forms: result);
+    } catch (error) {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
   Future<void> setForm({
     String? formId,
     DynamicFormModel? formModel,
   }) async {
     try {
       state = state.copyWith(
-        isLoading: false,
+        isLoading: true,
       );
 
       if (formModel != null) {
@@ -429,6 +447,8 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       state.form.first.formStatus = formStatus;
 
       DynamicFormModel? result;
+
+      state.form.first.tenantId = _user?.tenantId;
 
       if (state.form.first.id == null) {
         result = await _formRepository.addForm(formModel: state.form.first);

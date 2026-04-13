@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/providers/auth_provider.dart';
-import 'package:venue_flow_app/providers/navigation_provider.dart';
+import 'package:venue_flow_app/providers/repository_provider.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/theme/editorial_theme_data.dart';
 import 'package:venue_flow_app/theme/spacing.dart';
@@ -122,7 +122,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
       isSelected: selectedItem == 'Dashboard',
       colorScheme: colorScheme,
       editorial: editorial,
-      onTap: () => _navigateToItem('Dashboard', '/dashboard'),
+      onTap: () => _navigateToItem('Dashboard', 'dashboard'),
     ));
 
     // Role-specific items
@@ -134,7 +134,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           isSelected: selectedItem == 'Form Builder',
           colorScheme: colorScheme,
           editorial: editorial,
-          onTap: () => _navigateToItem('Form Builder', '/form-list'),
+          onTap: () => _navigateToItem('Form Builder', 'form-list'),
         ),
         _buildNavItem(
           icon: Icons.calendar_today_outlined,
@@ -142,7 +142,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           isSelected: selectedItem == 'Events',
           colorScheme: colorScheme,
           editorial: editorial,
-          onTap: () => _navigateToItem('Events', '/events'),
+          onTap: () => _navigateToItem('Events', 'events'),
         ),
         _buildNavItem(
           icon: Icons.analytics_outlined,
@@ -150,21 +150,21 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           isSelected: selectedItem == 'Analytics',
           colorScheme: colorScheme,
           editorial: editorial,
-          onTap: () => _navigateToItem('Analytics', '/analytics'),
+          onTap: () => _navigateToItem('Analytics', 'analytics'),
         ),
       ]);
     }
 
-    if (currentUser?.isClient == true) {
-      items.add(_buildNavItem(
-        icon: Icons.assignment_outlined,
-        label: 'My Forms',
-        isSelected: selectedItem == 'My Forms',
-        colorScheme: colorScheme,
-        editorial: editorial,
-        onTap: () => _navigateToItem('My Forms', '/client/forms'),
-      ));
-    }
+    // if (currentUser?.isCoordinator == true) {
+    //   items.add(_buildNavItem(
+    //     icon: Icons.assignment_outlined,
+    //     label: 'My Forms',
+    //     isSelected: selectedItem == 'My Forms',
+    //     colorScheme: colorScheme,
+    //     editorial: editorial,
+    //     onTap: () => _navigateToItem('My Forms', '/coordinator/form-list'),
+    //   ));
+    // }
 
     items.add(_buildNavItem(
       icon: Icons.settings_outlined,
@@ -233,7 +233,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
   Future<List<dynamic>> _loadNavigationData() async {
     try {
       final forms = await ref
-          .read(formBuilderViewModelProvider.notifier)
+          .read(formRepositoryProvider)
           .getFormNames();
       return forms ?? [];
     } catch (e) {
@@ -244,11 +244,11 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
   void _navigateToItem(String itemName, String route) {
     ref.read(navigationStateProvider.notifier).selectNavItem(itemName, route);
     ref.read(currentRouteProvider.notifier).state = route;
-    context.go(route);
+    context.goNamed(route);
   }
 
   void _navigateToForm(String formName, String formId) {
-    final route = '/client/forms/$formId';
+    final route = '/client/view-form/$formId';
     ref.read(navigationStateProvider.notifier).selectNavItem(formName, route);
     ref.read(currentRouteProvider.notifier).state = route;
     context.go(route);

@@ -6,6 +6,8 @@ import 'package:venue_flow_app/constants/tooltip_message_constants.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
+import 'package:venue_flow_app/models/user_model.dart';
+import 'package:venue_flow_app/providers/auth_provider.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
 import 'package:venue_flow_app/views/reordeable_form_fields_list.dart';
@@ -37,6 +39,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
   int _currentTabIndex = 0;
 
   bool isFieldSelected = true;
+  UserModel? user;
+
   final List<PopupMenuItem> fieldTypeMenuItems = [
     const PopupMenuItem(
       value: FieldType.text,
@@ -67,13 +71,22 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (widget.formId != null) {
-        ref.watch(formBuilderViewModelProvider.notifier).setForm(
+        ref.read(formBuilderViewModelProvider.notifier).setForm(
               formId: widget.formId,
               formModel: widget.formModel,
             );
       }
+
+      final currentUser =
+          await ref.read(authRepositoryProvider).getCurrentUser();
+
+      if (!mounted) return;
+
+      setState(() {
+        user = currentUser;
+      });
     });
 
     _scrollController.addListener(_onScroll);
@@ -99,10 +112,10 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
 
   @override
   Widget build(BuildContext context) {
+    
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final editorial = context.editorial;
-
     final formBuilderViewState = ref.watch(formBuilderViewModelProvider);
 
     return Scaffold(
@@ -142,6 +155,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
     required EditorialThemeData editorial,
     required FormBuilderViewState formBuilderState,
   }) {
+    if (user != null && user!.isClient) {
+      return const SizedBox.shrink();
+    }
     return FloatingActionButton.extended(
       onPressed: formBuilderState.isLoading
           ? null
@@ -168,6 +184,10 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
     required EditorialThemeData editorial,
     required FormBuilderViewState formBuilderState,
   }) {
+    if (user != null && user!.isClient) {
+      return const SizedBox.shrink();
+    }
+
     return FloatingActionButton.extended(
       onPressed: formBuilderState.isLoading
           ? null
@@ -437,8 +457,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
     List<String> fieldOptions = [''];
     List<TextEditingController> optionControllers = [TextEditingController()];
 
-    bool needsOptions =
-        fieldType == FieldType.dropdown || fieldType == FieldType.radio || fieldType == FieldType.checkbox; 
+    bool needsOptions = fieldType == FieldType.dropdown ||
+        fieldType == FieldType.radio ||
+        fieldType == FieldType.checkbox;
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
@@ -1046,65 +1067,89 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                 ),
                 Row(
                   children: [
-                    TooltipWidget(
-                      message: TooltipMessageConstants.addPageMessage,
-                      child: _buildActionButton(
-                        text: _buildLoadingString(
-                            isLoading: formBuilderState.isLoading,
-                            actualLabel: 'Add Page'),
-                        isPrimary: false,
-                        isLoading: formBuilderState.isLoading,
-                        colorScheme: colorScheme,
-                        editorial: editorial,
-                        callback: () {
-                          ref
-                              .watch(formBuilderViewModelProvider.notifier)
-                              .addFormPage();
-                        },
+                    if (user != null && user!.isCoordinator)
+                      TooltipWidget(
+                        message: TooltipMessageConstants.addPageMessage,
+                        child: _buildActionButton(
+                          text: _buildLoadingString(
+                              isLoading: formBuilderState.isLoading,
+                              actualLabel: 'Add Page'),
+                          isPrimary: false,
+                          isLoading: formBuilderState.isLoading,
+                          colorScheme: colorScheme,
+                          editorial: editorial,
+                          callback: () {
+                            ref
+                                .watch(formBuilderViewModelProvider.notifier)
+                                .addFormPage();
+                          },
+                        ),
                       ),
-                    ),
                     const SizedBox(width: 12),
-                    TooltipWidget(
-                      message: TooltipMessageConstants.saveDraftMessage,
-                      child: _buildActionButton(
-                        isLoading: formBuilderState.isLoading,
-                        isSecondary: true,
-                        isElevated: true,
-                        text: _buildLoadingString(
-                            isLoading: formBuilderState.isLoading,
-                            actualLabel: 'Save Draft'),
-                        isPrimary: false,
-                        colorScheme: colorScheme,
-                        editorial: editorial,
-                        callback: () {
-                          ref
-                              .watch(formBuilderViewModelProvider.notifier)
-                              .saveForm(
-                                formStatus: FormStatus.draft,
-                              );
-                        },
+                    if (user != null && user!.isCoordinator)
+                      TooltipWidget(
+                        message: TooltipMessageConstants.saveDraftMessage,
+                        child: _buildActionButton(
+                          isLoading: formBuilderState.isLoading,
+                          isSecondary: true,
+                          isElevated: true,
+                          text: _buildLoadingString(
+                              isLoading: formBuilderState.isLoading,
+                              actualLabel: 'Save Draft'),
+                          isPrimary: false,
+                          colorScheme: colorScheme,
+                          editorial: editorial,
+                          callback: () {
+                            ref
+                                .watch(formBuilderViewModelProvider.notifier)
+                                .saveForm(
+                                  formStatus: FormStatus.draft,
+                                );
+                          },
+                        ),
                       ),
-                    ),
                     const SizedBox(width: 12),
-                    TooltipWidget(
-                      message: TooltipMessageConstants.saveDraftMessage,
-                      child: _buildActionButton(
-                        isLoading: formBuilderState.isLoading,
-                        text: _buildLoadingString(
-                            isLoading: formBuilderState.isLoading,
-                            actualLabel: 'Publish'),
-                        isPrimary: true,
-                        colorScheme: colorScheme,
-                        editorial: editorial,
-                        callback: () {
-                          ref
-                              .watch(formBuilderViewModelProvider.notifier)
-                              .saveForm(
-                                formStatus: FormStatus.active,
-                              );
-                        },
+                    if (user != null && user!.isClient)
+                      TooltipWidget(
+                        message: TooltipMessageConstants.saveDraftMessage,
+                        child: _buildActionButton(
+                          isLoading: formBuilderState.isLoading,
+                          text: _buildLoadingString(
+                              isLoading: formBuilderState.isLoading,
+                              actualLabel: 'Save'),
+                          isPrimary: true,
+                          colorScheme: colorScheme,
+                          editorial: editorial,
+                          // callback:
+                          // () {
+                          //   ref
+                          //       .watch(formBuilderViewModelProvider.notifier)
+                          //       .saveForm(
+                          //         formStatus: FormStatus.active,
+                          //       );
+                          // },
+                        ),
                       ),
-                    ),
+                    if (user != null && user!.isCoordinator)
+                      TooltipWidget(
+                        message: TooltipMessageConstants.saveDraftMessage,
+                        child: _buildActionButton(
+                          isLoading: formBuilderState.isLoading,
+                          text: _buildLoadingString(
+                              isLoading: formBuilderState.isLoading,
+                              actualLabel: 'Publish'),
+                          isPrimary: true,
+                          colorScheme: colorScheme,
+                          editorial: editorial,
+                          callback: () {
+                            ref
+                                .watch(formBuilderViewModelProvider.notifier)
+                                .saveForm(
+                                  formStatus: FormStatus.active,
+                                );
+                          },
+                        ),
+                      ),
                   ],
                 ),
               ],

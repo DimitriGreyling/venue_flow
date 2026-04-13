@@ -39,6 +39,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     });
 
+    // if(authState.isAuthenticated){
+    //   if(authState.user != null && authState.user!.isCoordinator){
+    //     context.goNamed('coordinator-dashboard');
+    //   }else{
+    //     context.goNamed('client-dashboard');
+    //   }
+    // }
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: Center(
@@ -54,6 +62,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Image.asset(
+                    "assets/logo_white_transparent.png"
+                  ),
                   // Header
                   Text(
                     'Welcome Back',
