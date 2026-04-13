@@ -603,10 +603,10 @@ class ReorderableFormFieldTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.arrow_drop_down,
-                  color: scheme.onSurfaceVariant,
-                ),
+                // Icon(
+                //   Icons.arrow_drop_down,
+                //   color: scheme.onSurfaceVariant,
+                // ),
               ],
             ),
           ),

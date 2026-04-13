@@ -83,6 +83,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/client',
         name: 'client-dashboard',
         builder: (context, state) => const DashboardPage(),
+         routes: [
+          GoRoute(
+            path: 'view-form',
+            name: 'view-form',
+            builder: (context, state) {
+              final id = state.uri.queryParameters['id'];
+              return FormBuilderPage(formId: id);
+            },
+          ),
+        ],
       ),
     ],
   );
