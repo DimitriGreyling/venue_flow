@@ -62,6 +62,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Image.asset(
+                    "assets/logo_white_transparent.png"
+                  ),
                   // Header
                   Text(
                     'Welcome Back',
