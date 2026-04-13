@@ -8,6 +8,7 @@ import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/models/form_page_model.dart';
+import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/repositories/form_repository.dart';
 import 'package:venue_flow_app/shared/helpers/storage_helper.dart';
 
@@ -54,12 +55,15 @@ class FormBuilderViewState {
 class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
   final IFormRepository _formRepository;
   final IStorageHelper _storageHelper;
+  final UserModel? _user;
 
   FormBuilderViewModel({
     required IFormRepository formRepo,
     required IStorageHelper storageHelper,
+    required UserModel? currentUser,
   })  : _formRepository = formRepo,
         _storageHelper = storageHelper,
+        _user = currentUser,
         super(FormBuilderViewState.initial()) {
     _loadStoredForms();
   }
@@ -429,6 +433,8 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       state.form.first.formStatus = formStatus;
 
       DynamicFormModel? result;
+
+      state.form.first.tenantId = _user?.tenantId;
 
       if (state.form.first.id == null) {
         result = await _formRepository.addForm(formModel: state.form.first);
