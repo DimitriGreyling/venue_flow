@@ -12,30 +12,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     initialLocation: '/login',
-    redirect: (context, state) {
-      final isAuthenticated = authState.isAuthenticated;
-      final user = authState.user;
+    // redirect: (context, state) {
+    //   final isAuthenticated = authState.isAuthenticated;
+    //   final user = authState.user;
 
-      // If not authenticated, redirect to login
-      if (!isAuthenticated &&
-          !state.matchedLocation.startsWith('/login') &&
-          !state.matchedLocation.startsWith('/signup')) {
-        return '/login';
-      }
+    //   // If not authenticated, redirect to login
+    //   if (!isAuthenticated &&
+    //       !state.matchedLocation.startsWith('/login') &&
+    //       !state.matchedLocation.startsWith('/signup')) {
+    //     return '/login';
+    //   }
 
-      // If authenticated, redirect from auth pages to appropriate dashboard
-      if (isAuthenticated &&
-          (state.matchedLocation.startsWith('/login') ||
-              state.matchedLocation.startsWith('/signup'))) {
-        if (user?.isCoordinator == true) {
-          return '/coordinator';
-        } else {
-          return '/client';
-        }
-      }
+    //   // If authenticated, redirect from auth pages to appropriate dashboard
+    //   if (isAuthenticated &&
+    //       (state.matchedLocation.startsWith('/login') ||
+    //           state.matchedLocation.startsWith('/signup'))) {
+    //     if (user?.isCoordinator == true) {
+    //       return '/coordinator';
+    //     } else {
+    //       return '/client';
+    //     }
+    //   }
 
-      return null;
-    },
+    //   return null;
+    // },
     routes: [
       // Auth Routes
       GoRoute(
