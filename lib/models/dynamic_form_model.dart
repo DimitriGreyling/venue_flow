@@ -14,6 +14,7 @@ class DynamicFormModel {
   DateTime? createdAt;
   DateTime? modifiedDate;
   String? tenantId;
+  List<FormPageModel>? draftSchema;
 
   DynamicFormModel({
     this.id,
@@ -25,10 +26,12 @@ class DynamicFormModel {
     this.createdAt,
     this.modifiedDate,
     this.tenantId,
+    this.draftSchema,
   });
 
   factory DynamicFormModel.fromJson(Map<String, dynamic> json) {
     List<FormPageModel>? pages;
+    List<FormPageModel>? draftPges;
 
     // ✅ Handle different JSON structures
     if (json['schema'] != null) {
@@ -50,6 +53,25 @@ class DynamicFormModel {
           .toList();
     }
 
+    if (json['draft_schema'] != null) {
+      if (json['draft_schema'] is List) {
+        // Direct array: "schema": [{"title": "Page 1", ...}]
+        draftPges = (json['draft_schema'] as List)
+            .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else if (json['draft_schema'] is Map && json['draft_schema']['pages'] != null) {
+        // Nested structure: "schema": {"pages": [...]}
+        draftPges = (json['draft_schema']['pages'] as List)
+            .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+    } else if (json['pages'] != null) {
+      // Direct pages field: "pages": [...]
+      draftPges = (json['pages'] as List)
+          .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+
     final resp = DynamicFormModel(
       id: json['id'],
       name: json['name'] ?? '',
@@ -66,6 +88,7 @@ class DynamicFormModel {
           ? null
           : DateTime.tryParse(json['modified_date']),
       tenantId: json['tenant_id'],
+      draftSchema: draftPges,
     );
 
     return resp;
@@ -98,7 +121,8 @@ class DynamicFormModel {
         'schema': schema?.map((x) => x.toJson()).toList(),
         'status': formStatus?.name,
         'is_active': isActive,
-        'created_at': createdAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
+        'created_at':
+            createdAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
         'modified_date': DateTime.now().toIso8601String(),
         'tenant_id': tenantId,
       };
