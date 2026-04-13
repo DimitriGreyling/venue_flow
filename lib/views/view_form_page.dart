@@ -16,6 +16,7 @@ class ViewFormPage extends ConsumerStatefulWidget {
 class _ViewFormPageState extends ConsumerState<ViewFormPage> {
   int _currentPageIndex = 0;
   final ScrollController _scrollController = ScrollController();
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -65,8 +67,61 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(
+            height: 68,
+            child: ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              scrollDirection: Axis.horizontal,
+              itemCount: pages.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final isSelected = index == _currentPageIndex;
+
+                return InkWell(
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: () {
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? colorScheme.primaryContainer
+                          : colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: isSelected
+                            ? colorScheme.primary
+                            : colorScheme.outlineVariant,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        pages[index].title ?? 'Page ${index + 1}',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: isSelected
+                                  ? colorScheme.onPrimaryContainer
+                                  : colorScheme.onSurfaceVariant,
+                              fontWeight:
+                                  isSelected ? FontWeight.w700 : FontWeight.w500,
+                            ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: Text(
               pages[_currentPageIndex].title ?? 'Page ${_currentPageIndex + 1}',
               style: Theme.of(context).textTheme.headlineSmall,
@@ -74,6 +129,7 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
           ),
           Expanded(
             child: PageView.builder(
+              controller: _pageController,
               itemCount: pages.length,
               onPageChanged: (index) {
                 setState(() {
