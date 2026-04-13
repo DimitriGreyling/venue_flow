@@ -84,4 +84,6 @@ class FormViewBuilderViewModel extends StateNotifier<FormViewBuilderViewState> {
       state = state.copyWith(isLoading: false);
     }
   }
+
+  UserModel? get currentUser => _getCurrentUser();
 }

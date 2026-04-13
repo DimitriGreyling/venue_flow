@@ -209,14 +209,23 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           sliver: SliverToBoxAdapter(
-            child: Center(
-              child: ConstrainedBox(
-                constraints:
-                    BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
-                child: ReorderableFormFieldsList(
-                  fields: page.fields ?? [],
-                  colorScheme: colorScheme,
-                  editorial: editorial,
+            child: Card(
+              color: colorScheme.surfaceContainer,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width,
+                    minHeight: MediaQuery.of(context).size.height,
+                  ),
+                  child: ReorderableFormFieldsList(
+                    fields: page.fields ?? [],
+                    colorScheme: colorScheme,
+                    editorial: editorial,
+                    isClient: ref
+                        .watch(formViewBuilderViewModelProvider.notifier)
+                        .currentUser
+                        ?.isClient,
+                  ),
                 ),
               ),
             ),

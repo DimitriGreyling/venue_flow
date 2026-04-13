@@ -12,6 +12,7 @@ class ReorderableFormFieldsList extends StatefulWidget {
   final Function(FormFieldModel field)? onFieldDuplicated;
   final ColorScheme colorScheme;
   final EditorialThemeData editorial;
+  final bool? isClient;
 
   const ReorderableFormFieldsList({
     Key? key,
@@ -23,6 +24,7 @@ class ReorderableFormFieldsList extends StatefulWidget {
     this.onEditClicked,
     this.onFieldDeleted,
     this.onFieldDuplicated,
+    this.isClient = false,
   }) : super(key: key);
 
   @override
@@ -114,9 +116,16 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
             isSelected: isSelected,
             colorScheme: widget.colorScheme,
             editorial: widget.editorial,
-            onEditClicked: () => widget.onEditClicked?.call(field),
-            onDelete: () => widget.onFieldDeleted?.call(field, index),
-            onDuplicate: () => widget.onFieldDuplicated?.call(field),
+            isClient: widget.isClient,
+            onEditClicked: widget.isClient == true
+                ? null
+                : () => widget.onEditClicked?.call(field),
+            onDelete: widget.isClient == true
+                ? null
+                : () => widget.onFieldDeleted?.call(field, index),
+            onDuplicate: widget.isClient == true
+                ? null
+                : () => widget.onFieldDuplicated?.call(field),
           ),
         );
       },
