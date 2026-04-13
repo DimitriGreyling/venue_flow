@@ -24,15 +24,15 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.watch(formBuilderViewModelProvider.notifier).loadForm(
-            formId: widget.formId ?? '',
+      ref.watch(formViewBuilderViewModelProvider.notifier).loadForm(
+          // formId: widget.formId ?? '',
           );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final formState = ref.watch(formBuilderViewModelProvider);
+    final formState = ref.watch(formViewBuilderViewModelProvider);
     final form = formState.form.isNotEmpty ? formState.form.first : null;
     final pages = form?.schema ?? const <FormPageModel>[];
 
@@ -63,7 +63,9 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
       body: Column(children: [
         if (form.schema != null)
           ...form.schema!.map((page) {
-            return Container();
+            return Container(
+              child: Text(page.title ?? ''),
+            );
           }),
       ]),
     );
@@ -126,9 +128,9 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
               .toList(),
           validator: (value) => _validateRequired(field, value),
           onChanged: (value) {
-            setState(() {
-              _answers[fieldKey] = value;
-            });
+            // setState(() {
+            //   _answers[fieldKey] = value;
+            // });
           },
         );
 
@@ -150,9 +152,9 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                 value: option,
                 groupValue: selectedValue,
                 onChanged: (value) {
-                  setState(() {
-                    _answers[fieldKey] = value;
-                  });
+                  // setState(() {
+                  //   _answers[fieldKey] = value;
+                  // });
                 },
               ),
             ),
@@ -173,9 +175,9 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
         return CheckboxListTile(
           value: currentValue,
           onChanged: (value) {
-            setState(() {
-              _answers[fieldKey] = value ?? false;
-            });
+            // setState(() {
+            //   _answers[fieldKey] = value ?? false;
+            // });
           },
           title: Text(field.label ?? 'Checkbox'),
           subtitle: field.placeholder != null ? Text(field.placeholder!) : null,
@@ -195,9 +197,9 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
             );
 
             if (pickedDate != null) {
-              setState(() {
-                _answers[fieldKey] = pickedDate;
-              });
+              // setState(() {
+              //   _answers[fieldKey] = pickedDate;
+              // });
             }
           },
           child: InputDecorator(
