@@ -73,10 +73,12 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               scrollDirection: Axis.horizontal,
               itemCount: pages.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, __) => const SizedBox(
+                width: 20,
+                child: Divider(),
+              ),
               itemBuilder: (context, index) {
                 final isSelected = index == _currentPageIndex;
-
                 return InkWell(
                   borderRadius: BorderRadius.circular(999),
                   onTap: () {
@@ -95,12 +97,12 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? colorScheme.primaryContainer
-                          : colorScheme.surfaceContainerHighest,
+                          : colorScheme.surfaceContainerLow,
                       borderRadius: BorderRadius.circular(999),
                       border: Border.all(
                         color: isSelected
                             ? colorScheme.primary
-                            : colorScheme.outlineVariant,
+                            : colorScheme.surfaceContainerHigh,
                       ),
                     ),
                     child: Center(
@@ -108,7 +110,7 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                         pages[index].title ?? 'Page ${index + 1}',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               color: isSelected
-                                  ? colorScheme.onPrimaryContainer
+                                  ? colorScheme.onPrimary
                                   : colorScheme.onSurfaceVariant,
                               fontWeight: isSelected
                                   ? FontWeight.w700
