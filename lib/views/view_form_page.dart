@@ -110,8 +110,9 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                               color: isSelected
                                   ? colorScheme.onPrimaryContainer
                                   : colorScheme.onSurfaceVariant,
-                              fontWeight:
-                                  isSelected ? FontWeight.w700 : FontWeight.w500,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
                             ),
                       ),
                     ),
@@ -137,7 +138,30 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                 });
               },
               itemBuilder: (context, index) {
-                return _buildFormPage(pages[index], colorScheme, editorial);
+                return Form(
+                  child: Stack(
+                    children: [
+                      _buildFormPage(pages[index], colorScheme, editorial),
+                      Positioned(
+                        bottom: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          width: MediaQuery.of(context).size.width,
+                          color: colorScheme.surface,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              ElevatedButton(
+                                  onPressed: () {}, child: Text('Cancel')),
+                              ElevatedButton(
+                                  onPressed: () {}, child: Text('Next'))
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
           ),
