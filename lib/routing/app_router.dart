@@ -1,43 +1,54 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:venue_flow_app/models/enums.dart';
-import 'package:venue_flow_app/views/form_list_page.dart';
-import 'package:venue_flow_app/views/home_page.dart';
-import 'package:venue_flow_app/views/login_page.dart';
 import '../providers/auth_provider.dart';
 import '../views/form_builder_page.dart';
+import '../views/form_list_page.dart';
+import '../views/home_page.dart';
+import '../views/login_page.dart';
+
+final _rootNavigatorKey = GlobalKey<NavigatorState>();
+GoRouter? _previousRouter;
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authViewModelProvider);
 
-  return GoRouter(
-    initialLocation: '/login',
-    // redirect: (context, state) {
-    //   final isAuthenticated = authState.isAuthenticated;
-    //   final user = authState.user;
+  final previousLocation =
+      _previousRouter?.routeInformationProvider.value.uri.toString();
 
-    //   // If not authenticated, redirect to login
-    //   if (!isAuthenticated &&
-    //       !state.matchedLocation.startsWith('/login') &&
-    //       !state.matchedLocation.startsWith('/signup')) {
-    //     return '/login';
-    //   }
+  final router = GoRouter(
+    navigatorKey: _rootNavigatorKey,
+    initialLocation: previousLocation ?? '/login',
+    redirect: (context, state) {
+      final isAuthenticated = authState.isAuthenticated;
+      final isLoading = authState.isLoading;
 
-    //   // If authenticated, redirect from auth pages to appropriate dashboard
-    //   if (isAuthenticated &&
-    //       (state.matchedLocation.startsWith('/login') ||
-    //           state.matchedLocation.startsWith('/signup'))) {
-    //     if (user?.isCoordinator == true) {
-    //       return '/coordinator';
-    //     } else {
-    //       return '/client';
-    //     }
-    //   }
+      final isAuthPage = state.matchedLocation == '/login' ||
+          state.matchedLocation == '/signup';
 
-    //   return null;
-    // },
+      if (isLoading) {
+        return null;
+      }
+
+      if (!isAuthenticated && !isAuthPage) {
+        final from = Uri.encodeComponent(state.uri.toString());
+        return '/login?from=$from';
+      }
+
+      if (isAuthenticated && isAuthPage) {
+        final from = state.uri.queryParameters['from'];
+        if (from != null && from.isNotEmpty) {
+          return Uri.decodeComponent(from);
+        }
+
+        return authState.user?.isCoordinator == true
+            ? '/coordinator'
+            : '/client';
+      }
+
+      return null;
+    },
     routes: [
-      // Auth Routes
       GoRoute(
         path: '/login',
         name: 'login',
@@ -48,50 +59,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'signup',
         builder: (context, state) => const LoginPage(),
       ),
-
-      // Coordinator Routes
       GoRoute(
         path: '/coordinator',
         name: 'coordinator-dashboard',
         builder: (context, state) => const DashboardPage(),
         routes: [
           GoRoute(
-            path: '/form-builder',
+            path: 'form-builder',
             name: 'form-builder',
             builder: (context, state) {
               final id = state.uri.queryParameters['id'];
-              final formModel = state.extra != null
-                  ? (state.extra as Map<String, dynamic>)['formModel']
-                  : null;
-              return FormBuilderPage(
-                formId: id,
-                formModel: formModel,
-              );
+              return FormBuilderPage(formId: id);
             },
           ),
           GoRoute(
-            path: '/form-builder:id',
-            name: 'form-builder-with-id',
-            builder: (context, state) {
-              final id = state.uri.queryParameters['id'];
-              final formModel = state.extra != null
-                  ? (state.extra as Map<String, dynamic>)['formModel']
-                  : null;
-              return FormBuilderPage(
-                formId: id,
-                formModel: formModel,
-              );
-            },
-          ),
-          GoRoute(
-            path: '/form-list',
+            path: 'form-list',
             name: 'form-list',
             builder: (context, state) => const FormListPage(),
           ),
         ],
       ),
-
-      // Client Routes
       GoRoute(
         path: '/client',
         name: 'client-dashboard',
@@ -99,4 +86,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+
+  _previousRouter = router;
+  return router;
 });

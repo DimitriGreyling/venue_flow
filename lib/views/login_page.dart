@@ -39,13 +39,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     });
 
-    if(authState.isAuthenticated){
-      if(authState.user != null && authState.user!.isCoordinator){
-        context.goNamed('coordinator-dashboard');
-      }else{
-        context.goNamed('client-dashboard');
-      }
-    }
+    // if(authState.isAuthenticated){
+    //   if(authState.user != null && authState.user!.isCoordinator){
+    //     context.goNamed('coordinator-dashboard');
+    //   }else{
+    //     context.goNamed('client-dashboard');
+    //   }
+    // }
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
