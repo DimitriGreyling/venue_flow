@@ -112,6 +112,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
 
   @override
   Widget build(BuildContext context) {
+    
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final editorial = context.editorial;

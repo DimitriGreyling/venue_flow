@@ -248,7 +248,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
   }
 
   void _navigateToForm(String formName, String formId) {
-    final route = '/client/forms/$formId';
+    final route = '/client/view-form/$formId';
     ref.read(navigationStateProvider.notifier).selectNavItem(formName, route);
     ref.read(currentRouteProvider.notifier).state = route;
     context.go(route);

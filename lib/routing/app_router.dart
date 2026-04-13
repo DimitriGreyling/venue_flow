@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/views/view_form_page.dart';
 import '../providers/auth_provider.dart';
 import '../views/form_builder_page.dart';
 import '../views/form_list_page.dart';
@@ -85,11 +86,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const DashboardPage(),
          routes: [
           GoRoute(
-            path: 'view-form',
+            path: '/view-form/:id',
             name: 'view-form',
             builder: (context, state) {
               final id = state.uri.queryParameters['id'];
-              return FormBuilderPage(formId: id);
+              return ViewFormPage();
             },
           ),
         ],
