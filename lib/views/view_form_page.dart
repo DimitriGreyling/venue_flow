@@ -215,7 +215,7 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                     maxWidth: MediaQuery.of(context).size.width,
-                    minHeight: MediaQuery.of(context).size.height,
+                    minHeight: MediaQuery.of(context).size.height * 0.7,
                   ),
                   child: ReorderableFormFieldsList(
                     fields: page.fields ?? [],
