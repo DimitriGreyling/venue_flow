@@ -73,14 +73,19 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (widget.formId != null) {
-        ref.watch(formBuilderViewModelProvider.notifier).setForm(
+        ref.read(formBuilderViewModelProvider.notifier).setForm(
               formId: widget.formId,
               formModel: widget.formModel,
             );
       }
 
-      setState(() async {
-        user = await ref.read(authRepositoryProvider).getCurrentUser();
+      final currentUser =
+          await ref.read(authRepositoryProvider).getCurrentUser();
+
+      if (!mounted) return;
+
+      setState(() {
+        user = currentUser;
       });
     });
 
@@ -1061,45 +1066,47 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                 ),
                 Row(
                   children: [
-                    TooltipWidget(
-                      message: TooltipMessageConstants.addPageMessage,
-                      child: _buildActionButton(
-                        text: _buildLoadingString(
-                            isLoading: formBuilderState.isLoading,
-                            actualLabel: 'Add Page'),
-                        isPrimary: false,
-                        isLoading: formBuilderState.isLoading,
-                        colorScheme: colorScheme,
-                        editorial: editorial,
-                        callback: () {
-                          ref
-                              .watch(formBuilderViewModelProvider.notifier)
-                              .addFormPage();
-                        },
+                    if (user != null && user!.isCoordinator)
+                      TooltipWidget(
+                        message: TooltipMessageConstants.addPageMessage,
+                        child: _buildActionButton(
+                          text: _buildLoadingString(
+                              isLoading: formBuilderState.isLoading,
+                              actualLabel: 'Add Page'),
+                          isPrimary: false,
+                          isLoading: formBuilderState.isLoading,
+                          colorScheme: colorScheme,
+                          editorial: editorial,
+                          callback: () {
+                            ref
+                                .watch(formBuilderViewModelProvider.notifier)
+                                .addFormPage();
+                          },
+                        ),
                       ),
-                    ),
                     const SizedBox(width: 12),
-                    TooltipWidget(
-                      message: TooltipMessageConstants.saveDraftMessage,
-                      child: _buildActionButton(
-                        isLoading: formBuilderState.isLoading,
-                        isSecondary: true,
-                        isElevated: true,
-                        text: _buildLoadingString(
-                            isLoading: formBuilderState.isLoading,
-                            actualLabel: 'Save Draft'),
-                        isPrimary: false,
-                        colorScheme: colorScheme,
-                        editorial: editorial,
-                        callback: () {
-                          ref
-                              .watch(formBuilderViewModelProvider.notifier)
-                              .saveForm(
-                                formStatus: FormStatus.draft,
-                              );
-                        },
+                    if (user != null && user!.isCoordinator)
+                      TooltipWidget(
+                        message: TooltipMessageConstants.saveDraftMessage,
+                        child: _buildActionButton(
+                          isLoading: formBuilderState.isLoading,
+                          isSecondary: true,
+                          isElevated: true,
+                          text: _buildLoadingString(
+                              isLoading: formBuilderState.isLoading,
+                              actualLabel: 'Save Draft'),
+                          isPrimary: false,
+                          colorScheme: colorScheme,
+                          editorial: editorial,
+                          callback: () {
+                            ref
+                                .watch(formBuilderViewModelProvider.notifier)
+                                .saveForm(
+                                  formStatus: FormStatus.draft,
+                                );
+                          },
+                        ),
                       ),
-                    ),
                     const SizedBox(width: 12),
                     if (user != null && user!.isClient)
                       TooltipWidget(
@@ -1112,7 +1119,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                           isPrimary: true,
                           colorScheme: colorScheme,
                           editorial: editorial,
-                          // callback: 
+                          // callback:
                           // () {
                           //   ref
                           //       .watch(formBuilderViewModelProvider.notifier)
