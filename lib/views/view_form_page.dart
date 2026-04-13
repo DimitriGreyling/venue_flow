@@ -151,10 +151,38 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              Row(
+                                children: [
+                                  ElevatedButton(
+                                      onPressed: () {}, child: Text('Cancel')),
+                                  const SizedBox(
+                                    width: 16,
+                                  ),
+                                  ElevatedButton(
+                                      onPressed: index == 0
+                                          ? null
+                                          : () {
+                                              _pageController.previousPage(
+                                                  duration: const Duration(
+                                                      milliseconds: 300),
+                                                  curve: Curves.bounceOut);
+                                            },
+                                      child: Text('Back')),
+                                ],
+                              ),
                               ElevatedButton(
-                                  onPressed: () {}, child: Text('Cancel')),
-                              ElevatedButton(
-                                  onPressed: () {}, child: Text('Next'))
+                                onPressed: index == (pages.length - 1)
+                                    ? () {}
+                                    : () {
+                                        _pageController.nextPage(
+                                            duration: const Duration(
+                                                milliseconds: 300),
+                                            curve: Curves.bounceOut);
+                                      },
+                                child: index == (pages.length - 1)
+                                    ? Text('Submit')
+                                    : Text('Next'),
+                              ),
                             ],
                           ),
                         ),
