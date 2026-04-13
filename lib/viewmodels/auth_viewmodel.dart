@@ -19,7 +19,7 @@ class AuthViewModel extends StateNotifier<AuthStateModel> {
     try {
       final user = await _authRepository.getCurrentUser();
       if (user != null) {
-        final tenant = await _authRepository.getTenantBySlug(user.tenantId ?? '');
+        final tenant = await _authRepository.getTenantById(user.tenantId ?? '');
         state = state.copyWith(
           user: user,
           tenant: tenant,
@@ -50,7 +50,7 @@ class AuthViewModel extends StateNotifier<AuthStateModel> {
       );
 
       if (user != null) {
-        final tenant = await _authRepository.getTenantBySlug(user.tenantId ?? '');
+        final tenant = await _authRepository.getTenantById(user.tenantId ?? '');
         state = state.copyWith(
           user: user,
           tenant: tenant,
@@ -92,7 +92,7 @@ class AuthViewModel extends StateNotifier<AuthStateModel> {
       );
 
       if (user != null) {
-        final tenant = await _authRepository.getTenantBySlug(tenantSlug);
+        final tenant = await _authRepository.getTenantById(tenantSlug);
         state = state.copyWith(
           user: user,
           tenant: tenant,
