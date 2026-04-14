@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/providers/auth_provider.dart';
+import 'package:venue_flow_app/routing/app_router.dart';
 import 'package:venue_flow_app/theme/editorial_theme_data.dart';
 import 'package:venue_flow_app/theme/spacing.dart';
 
@@ -134,28 +136,44 @@ class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
                       ),
                     ),
                     const SizedBox(width: EditorialSpacing.spacing2),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          currentUser?.fullName ?? '',
-                          style:
-                              Theme.of(context).textTheme.labelMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                        ),
-                        Text(
-                          currentUser?.role.name.toUpperCase() ?? '',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.secondary,
-                              ),
-                        ),
-                      ],
+                    PopupMenuButton(
+                      itemBuilder: (context) {
+                        return [
+                          PopupMenuItem(
+                            child: Text('Logout'),
+                            onTap: () {
+                              ref.watch(authRepositoryProvider).signOut();
+                              context.goNamed('login');
+                            },
+                          ),
+                        ];
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            currentUser?.fullName ?? '',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                          Text(
+                            currentUser?.role.name.toUpperCase() ?? '',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
