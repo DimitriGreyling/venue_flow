@@ -158,15 +158,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: EditorialSpacing.spacing4),
 
                   // Sign Up Link
-                  Center(
-                    child: TextButton(
-                      onPressed: () => context.goNamed('signup'),
-                      child: Text(
-                        'Need an account? Sign up',
-                        style: editorial.linkStyle,
-                      ),
-                    ),
-                  ),
+                  // Center(
+                  //   child: TextButton(
+                  //     onPressed: () => context.goNamed('signup'),
+                  //     child: Text(
+                  //       'Need an account? Sign up',
+                  //       style: editorial.linkStyle,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

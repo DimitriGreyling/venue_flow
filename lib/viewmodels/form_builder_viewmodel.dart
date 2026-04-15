@@ -55,18 +55,20 @@ class FormBuilderViewState {
 class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
   final IFormRepository _formRepository;
   final IStorageHelper _storageHelper;
-  final UserModel? _user;
+  final UserModel? Function() _getCurrentUser;
 
   FormBuilderViewModel({
     required IFormRepository formRepo,
     required IStorageHelper storageHelper,
-    required UserModel? currentUser,
+    required UserModel? Function() getCurrentUser,
   })  : _formRepository = formRepo,
         _storageHelper = storageHelper,
-        _user = currentUser,
+        _getCurrentUser = getCurrentUser,
         super(FormBuilderViewState.initial()) {
     _loadStoredForms();
   }
+
+  UserModel? get currentUser => _getCurrentUser();
 
   Future<List<DynamicFormModel>?> getFormNames() async {
     try {
@@ -115,6 +117,13 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
         await _storageHelper.saveForm(formModel);
         state = state.copyWith(
           forms: [formModel],
+          isLoading: false,
+        );
+      } else if (formId != null) {
+        final form = await _formRepository.getFormById(formId: formId);
+
+        state = state.copyWith(
+          forms: form,
           isLoading: false,
         );
       } else {
@@ -448,7 +457,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
 
       DynamicFormModel? result;
 
-      state.form.first.tenantId = _user?.tenantId;
+      state.form.first.tenantId = currentUser?.tenantId;
 
       if (state.form.first.id == null) {
         result = await _formRepository.addForm(formModel: state.form.first);

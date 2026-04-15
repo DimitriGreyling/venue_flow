@@ -5,11 +5,15 @@ import '../theme/editorial_theme_data.dart';
 
 class ReorderableFormFieldsList extends StatefulWidget {
   final List<FormFieldModel> fields;
+  final int pageIndex;
   final String? selectedFieldId;
+  final Map<String, dynamic> fieldValues;
   final Function(List<FormFieldModel> reorderedFields)? onReorder;
   final Function(FormFieldModel field)? onEditClicked;
   final Function(FormFieldModel field, int index)? onFieldDeleted;
   final Function(FormFieldModel field)? onFieldDuplicated;
+  final ValueChanged<MapEntry<String, dynamic>>? onFieldChanged;
+  final ValueChanged<MapEntry<String, dynamic>>? onFieldSaved;
   final ColorScheme colorScheme;
   final EditorialThemeData editorial;
   final bool? isClient;
@@ -17,13 +21,17 @@ class ReorderableFormFieldsList extends StatefulWidget {
   const ReorderableFormFieldsList({
     Key? key,
     required this.fields,
+    required this.pageIndex,
     required this.colorScheme,
     required this.editorial,
+    this.fieldValues = const {},
     this.selectedFieldId,
     this.onReorder,
     this.onEditClicked,
     this.onFieldDeleted,
     this.onFieldDuplicated,
+    this.onFieldChanged,
+    this.onFieldSaved,
     this.isClient = false,
   }) : super(key: key);
 
@@ -106,6 +114,10 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
       itemBuilder: (context, index) {
         final field = _fields[index];
         final isSelected = field.id == widget.selectedFieldId;
+        final fieldKey = field.submissionKey(
+          pageIndex: widget.pageIndex,
+          fieldIndex: index,
+        );
 
         return ReorderableDelayedDragStartListener(
           key:
@@ -113,10 +125,17 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
           index: index,
           child: ReorderableFormFieldTile(
             field: field,
+            pageIndex: widget.pageIndex,
+            fieldIndex: index,
             isSelected: isSelected,
+            currentValue: widget.fieldValues[fieldKey],
             colorScheme: widget.colorScheme,
             editorial: widget.editorial,
             isClient: widget.isClient,
+            onValueChanged: (value) =>
+                widget.onFieldChanged?.call(MapEntry(fieldKey, value)),
+            onValueSaved: (value) =>
+                widget.onFieldSaved?.call(MapEntry(fieldKey, value)),
             onEditClicked: widget.isClient == true
                 ? null
                 : () => widget.onEditClicked?.call(field),

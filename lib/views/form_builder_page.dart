@@ -1444,6 +1444,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                           constraints: BoxConstraints(
                               maxWidth: MediaQuery.of(context).size.width),
                           child: ReorderableFormFieldsList(
+                            pageIndex: index,
                             fields: page.fields ?? [],
                             colorScheme: colorScheme,
                             editorial: editorial,
