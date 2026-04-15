@@ -143,7 +143,7 @@ class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
                             child: Text('Logout'),
                             onTap: () {
                               ref.watch(authRepositoryProvider).signOut();
-                              context.goNamed('login');
+                              context.pushNamed('login');
                             },
                           ),
                         ];

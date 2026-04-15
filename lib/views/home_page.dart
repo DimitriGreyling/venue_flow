@@ -97,7 +97,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 children: [
                   OutlinedButton.icon(
                     onPressed: () {
-                      context.goNamed('form-builder');
+                      context.pushNamed('form-builder');
                     },
                     icon: const Icon(Icons.description_outlined, size: 18),
                     label: const Text('Create Form'),

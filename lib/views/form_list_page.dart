@@ -211,7 +211,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            context.goNamed('form-builder', extra: {
+            context.pushNamed('form-builder', extra: {
               'formModel': formModel,
             }, queryParameters: {
               'id': formModel.id,
@@ -346,7 +346,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                 children: [
                   OutlinedButton.icon(
                     onPressed: () {
-                      context.goNamed('form-builder');
+                      context.pushNamed('form-builder');
                     },
                     icon: const Icon(Icons.description_outlined, size: 18),
                     label: const Text('Create Form'),

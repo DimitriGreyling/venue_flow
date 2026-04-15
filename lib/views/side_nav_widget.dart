@@ -249,7 +249,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
   void _navigateToItem(String itemName, String route) {
     ref.read(navigationStateProvider.notifier).selectNavItem(itemName, route);
     ref.read(currentRouteProvider.notifier).state = route;
-    context.goNamed(route);
+    context.pushNamed(route);
   }
 
   void _navigateToForm({
@@ -260,7 +260,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     final route = '/client/view-form/$formId';
     ref.read(navigationStateProvider.notifier).selectNavItem(formName, route);
     ref.read(currentRouteProvider.notifier).state = route;
-    context.go(route, extra: {
+    context.pushNamed(route, extra: {
       'formModel': formModel,
     });
   }

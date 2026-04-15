@@ -32,9 +32,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         // Navigate based on user role
         final user = next.user;
         if (user?.isCoordinator == true) {
-          context.goNamed('coordinator-dashboard');
+          context.pushNamed('coordinator-dashboard');
         } else {
-          context.goNamed('client-dashboard');
+          context.pushNamed('client-dashboard');
         }
       }
     });

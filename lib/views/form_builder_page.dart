@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/constants/tooltip_message_constants.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
@@ -9,6 +10,7 @@ import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/providers/auth_provider.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
+import 'package:venue_flow_app/routing/app_router.dart';
 import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
 import 'package:venue_flow_app/views/reordeable_form_fields_list.dart';
 import 'package:venue_flow_app/views/tooltip_widget.dart';
@@ -340,10 +342,18 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
   PreferredSizeWidget _buildAppBar(
       BuildContext context, ColorScheme colorScheme, TextTheme textTheme) {
     return AppBar(
+      
       backgroundColor: colorScheme.surface,
       elevation: 0,
       scrolledUnderElevation: 0,
       toolbarHeight: 64,
+      leading: Row(
+        children: [
+          IconButton(onPressed: (){
+            context.pop();
+          }, icon: Icon(Icons.back_hand))
+        ],
+      ),
       title: Row(
         children: [
           Text(
