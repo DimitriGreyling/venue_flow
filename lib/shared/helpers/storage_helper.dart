@@ -7,12 +7,13 @@ import 'package:venue_flow_app/models/dynamic_form_model.dart';
 
 abstract class IStorageHelper {
   Future<void> saveForm(DynamicFormModel form);
-   Future<List<DynamicFormModel>?> loadForm();
+  Future<List<DynamicFormModel>?> loadForm({
+    String? formId,
+  });
   Future<void> clearForms();
 }
 
 class StorageHelper implements IStorageHelper {
-  
   @override
   Future<void> saveForm(DynamicFormModel form) async {
     try {
@@ -25,13 +26,15 @@ class StorageHelper implements IStorageHelper {
       throw StorageException('Failed to save form');
     }
   }
-  
+
   @override
-  Future<List<DynamicFormModel>?> loadForm() async {
+  Future<List<DynamicFormModel>?> loadForm({
+    String? formId,
+  }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final jsonString = prefs.getString(StorageFormKeys.storageFormKey);
-      
+
       if (jsonString != null && jsonString.isNotEmpty) {
         final json = jsonDecode(jsonString);
         return [DynamicFormModel.fromJson(json)];
@@ -42,7 +45,7 @@ class StorageHelper implements IStorageHelper {
       return null;
     }
   }
-  
+
   @override
   Future<void> clearForms() async {
     try {

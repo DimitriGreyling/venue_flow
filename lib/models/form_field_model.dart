@@ -59,4 +59,23 @@ class FormFieldModel {
       // 'visibility': visibility?.toJson(),
     };
   }
+
+  String submissionKey({
+    required int pageIndex,
+    required int fieldIndex,
+  }) {
+    final trimmedId = id?.trim();
+    if (trimmedId != null && trimmedId.isNotEmpty) {
+      return trimmedId;
+    }
+
+    final normalizedLabel = (label ?? 'field')
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_+|_+$'), '');
+
+    final safeLabel = normalizedLabel.isEmpty ? 'field' : normalizedLabel;
+    return 'page_${pageIndex}_field_${fieldIndex}_${type?.name ?? 'value'}_$safeLabel';
+  }
 }

@@ -13,6 +13,9 @@ abstract class IFormRepository {
   Future<DynamicFormModel?> updateForm({
     required DynamicFormModel formModel,
   });
+  Future<List<DynamicFormModel>?> getFormById({
+    String? formId,
+  });
 }
 
 class FormRepository extends IFormRepository {
@@ -24,6 +27,30 @@ class FormRepository extends IFormRepository {
   //VARIABLES
   final SupabaseClient _client;
   final _tableName = SupabaseTableNames.formTable;
+
+  @override
+  Future<List<DynamicFormModel>?> getFormById({
+    String? formId,
+  }) async {
+    try {
+      if (formId == null) return null;
+
+      final response =
+          await _client.from(_tableName).select().eq('id', formId ?? '');
+
+      final forms = response
+          .map(
+            (json) => DynamicFormModel.fromJson(json),
+          )
+          .toList();
+
+      log('done');
+      return forms; // Return the transformed data
+    } catch (erro, stackTrace) {
+      log('assfsd');
+      return null;
+    }
+  }
 
   @override
   Future<List<DynamicFormModel>?> getFormNames() async {

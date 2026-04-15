@@ -70,7 +70,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: 'form-builder',
             builder: (context, state) {
               final id = state.uri.queryParameters['id'];
-              return FormBuilderPage(formId: id);
+              final formModel = state.extra != null
+                  ? (state.extra as Map)['formModel']
+                  : null;
+              return FormBuilderPage(
+                formId: id,
+                formModel: formModel,
+              );
             },
           ),
           GoRoute(
@@ -84,7 +90,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/client',
         name: 'client-dashboard',
         builder: (context, state) => const DashboardPage(),
-         routes: [
+        routes: [
           GoRoute(
             path: '/view-form/:id',
             name: 'view-form',

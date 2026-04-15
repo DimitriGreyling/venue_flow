@@ -19,9 +19,10 @@ final formBuilderViewModelProvider =
   final currentUser = ref.watch(currentUserProvider);
 
   return FormBuilderViewModel(
-      formRepo: formRepository,
-      storageHelper: storageHelper,
-      currentUser: currentUser);
+    formRepo: formRepository,
+    storageHelper: storageHelper,
+    getCurrentUser: () => ref.read(currentUserProvider),
+  );
 });
 
 final formViewBuilderViewModelProvider =
@@ -32,8 +33,8 @@ final formViewBuilderViewModelProvider =
   // final currentUser = ref.watch(currentUserProvider);
 
   return FormViewBuilderViewModel(
-      formRepo: formRepository,
-      storageHelper: storageHelper,
-      getCurrentUser: () => ref.read(currentUserProvider),
-      );
+    formRepo: formRepository,
+    storageHelper: storageHelper,
+    getCurrentUser: () => ref.read(currentUserProvider),
+  );
 });

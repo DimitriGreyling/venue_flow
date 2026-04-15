@@ -32,9 +32,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         // Navigate based on user role
         final user = next.user;
         if (user?.isCoordinator == true) {
-          context.goNamed('coordinator-dashboard');
+          context.pushNamed('coordinator-dashboard');
         } else {
-          context.goNamed('client-dashboard');
+          context.pushNamed('client-dashboard');
         }
       }
     });
@@ -158,15 +158,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: EditorialSpacing.spacing4),
 
                   // Sign Up Link
-                  Center(
-                    child: TextButton(
-                      onPressed: () => context.goNamed('signup'),
-                      child: Text(
-                        'Need an account? Sign up',
-                        style: editorial.linkStyle,
-                      ),
-                    ),
-                  ),
+                  // Center(
+                  //   child: TextButton(
+                  //     onPressed: () => context.goNamed('signup'),
+                  //     child: Text(
+                  //       'Need an account? Sign up',
+                  //       style: editorial.linkStyle,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
