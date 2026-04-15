@@ -347,13 +347,13 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
       elevation: 0,
       scrolledUnderElevation: 0,
       toolbarHeight: 64,
-      leading: Row(
-        children: [
-          IconButton(onPressed: (){
-            context.pop();
-          }, icon: Icon(Icons.back_hand))
-        ],
-      ),
+      // leading: Row(
+      //   children: [
+      //     IconButton(onPressed: (){
+      //       context.pop();
+      //     }, icon: Icon(Icons.back_hand))
+      //   ],
+      // ),
       title: Row(
         children: [
           Text(
