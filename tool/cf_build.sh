@@ -74,5 +74,10 @@ fi
 "${FLUTTER_BIN}" pub get
 "${FLUTTER_BIN}" build web --release --web-renderer canvaskit
 
+# if you do not need offline/PWA behavior, disable the Flutter service worker.
+# This is the simplest way to guarantee users see the latest deployment.
+# Change the build command in cf_build.sh from:
+# "${FLUTTER_BIN}" build web --release --web-renderer canvaskit --pwa-strategy=none
+
 echo "Build complete. Output:"
 ls -la "${ROOT_DIR}/build/web" | head -n 60
