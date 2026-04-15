@@ -121,7 +121,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
         );
       } else if (formId != null) {
         final form = await _formRepository.getFormById(formId: formId);
-
+        await _storageHelper.saveForm(form!.first);
         state = state.copyWith(
           forms: form,
           isLoading: false,

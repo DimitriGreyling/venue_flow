@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/providers/auth_provider.dart';
@@ -22,7 +23,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
   @override
   void initState() {
     super.initState();
-    
+
     // Update navigation state based on current route when widget initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final currentRoute = GoRouterState.of(context).uri.path;
@@ -82,7 +83,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
                         editorial,
                         currentUser,
                       ),
-                      
+
                       // Dynamic form navigation items
                       if (snapshot.data != null)
                         ..._buildDynamicNavItems(
@@ -100,7 +101,8 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           ),
 
           // Bottom Section (same as before)
-          _buildBottomSection(navigationState.selectedItem, colorScheme, editorial),
+          _buildBottomSection(
+              navigationState.selectedItem, colorScheme, editorial),
         ],
       ),
     );
@@ -197,7 +199,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
         height: 1,
         color: colorScheme.outline.withOpacity(0.1),
       ),
-      
+
       // Section header
       Padding(
         padding: const EdgeInsets.symmetric(
@@ -212,19 +214,24 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           ),
         ),
       ),
-      
+
       // Form items
-      ...formData.take(5).map((form) { // Limit to 5 forms
+      ...formData.take(5).map((form) {
+        // Limit to 5 forms
         final formName = form.name ?? 'Unnamed Form';
         final formId = form.id ?? '';
-        
+
         return _buildNavItem(
           icon: Icons.description_outlined,
           label: formName,
           isSelected: selectedItem == formName,
           colorScheme: colorScheme,
           editorial: editorial,
-          onTap: () => _navigateToForm(formName, formId),
+          onTap: () => _navigateToForm(
+            formName: formName,
+            formId: formId,
+            formModel: form,
+          ),
         );
       }).toList(),
     ];
@@ -232,9 +239,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
 
   Future<List<dynamic>> _loadNavigationData() async {
     try {
-      final forms = await ref
-          .read(formRepositoryProvider)
-          .getFormNames();
+      final forms = await ref.read(formRepositoryProvider).getFormNames();
       return forms ?? [];
     } catch (e) {
       return [];
@@ -247,11 +252,17 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     context.goNamed(route);
   }
 
-  void _navigateToForm(String formName, String formId) {
+  void _navigateToForm({
+    required String formName,
+    required String formId,
+    required DynamicFormModel formModel,
+  }) {
     final route = '/client/view-form/$formId';
     ref.read(navigationStateProvider.notifier).selectNavItem(formName, route);
     ref.read(currentRouteProvider.notifier).state = route;
-    context.go(route);
+    context.go(route, extra: {
+      'formModel': formModel,
+    });
   }
 
   Widget _buildNavItem({
@@ -308,7 +319,8 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     );
   }
 
-  Widget _buildLogoSection(ColorScheme colorScheme, EditorialThemeData editorial, BuildContext context) {
+  Widget _buildLogoSection(ColorScheme colorScheme,
+      EditorialThemeData editorial, BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(EditorialSpacing.spacing6),
       child: Row(
@@ -360,7 +372,8 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     );
   }
 
-  Widget _buildBottomSection(String selectedItem, ColorScheme colorScheme, EditorialThemeData editorial) {
+  Widget _buildBottomSection(String selectedItem, ColorScheme colorScheme,
+      EditorialThemeData editorial) {
     return Container(
       padding: const EdgeInsets.all(EditorialSpacing.spacing6),
       decoration: BoxDecoration(
