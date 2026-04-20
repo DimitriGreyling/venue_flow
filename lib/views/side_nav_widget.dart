@@ -260,8 +260,9 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     final route = '/client/view-form/$formId';
     ref.read(navigationStateProvider.notifier).selectNavItem(formName, route);
     ref.read(currentRouteProvider.notifier).state = route;
-    context.pushNamed(route, extra: {
-      'formModel': formModel,
+    context.pushNamed('view-form', queryParameters: {
+      // 'formModel': formModel,
+      'id': formId,
     });
   }
 

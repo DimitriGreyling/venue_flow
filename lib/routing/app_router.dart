@@ -92,7 +92,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const DashboardPage(),
         routes: [
           GoRoute(
-            path: '/view-form/:id',
+            path: '/view-form',
             name: 'view-form',
             builder: (context, state) {
               final id = state.uri.queryParameters['id'];
