@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 
@@ -9,11 +12,11 @@ class FormSubmission {
   DateTime? createdAt;
 
   FormSubmission({
-     this.formId,
-     this.userId,
-     this.formVersion,
-     this.data,
-     this.createdAt,
+    this.formId,
+    this.userId,
+    this.formVersion,
+    this.data,
+    this.createdAt,
   });
 
   factory FormSubmission.fromFormValues({
@@ -107,7 +110,22 @@ class FormSubmission {
       'user_id': userId,
       'form_version': formVersion,
       'data': data,
-      'created_at': createdAt?.toIso8601String(),
+      'created_at': createdAt?.toIso8601String() ?? DateTime.now(),
+      'modified_date': DateTime.now().toIso8601String(),
     };
+  }
+
+  //toString
+  @override
+  String toString() => toJsonString();
+
+//toJsonString
+  String toJsonString() {
+    try {
+      return jsonEncode(toJson());
+    } catch (error, stackTrace) {
+      log('TOJSONSTRING ERROR:: ${error}');
+      return '';
+    }
   }
 }

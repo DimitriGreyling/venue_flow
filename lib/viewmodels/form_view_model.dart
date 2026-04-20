@@ -2,12 +2,14 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/models/form_page_model.dart';
+import 'package:venue_flow_app/models/form_submission_model.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/repositories/form_repository.dart';
 import 'package:venue_flow_app/shared/helpers/storage_helper.dart';
@@ -86,4 +88,51 @@ class FormViewBuilderViewModel extends StateNotifier<FormViewBuilderViewState> {
   }
 
   UserModel? get currentUser => _getCurrentUser();
+
+  Future<void> handleSubmit({
+    required GlobalKey<FormState> formKey,
+    required Map<String, dynamic> formValues,
+  }) async {
+    final formState = formKey.currentState;
+    if (formState == null) {
+      return;
+    }
+
+    if (!formState.validate()) {
+      return;
+    }
+
+    formState.save();
+
+    // final formViewState = ref.read(formViewBuilderViewModelProvider);
+    final currentForm = state.form.first;
+    //     formViewState.form.isNotEmpty ? formViewState.form.first : null;
+    // final currentUser =
+    //     ref.read(formViewBuilderViewModelProvider.notifier).currentUser;
+
+    // if (currentForm == null || currentUser == null) {
+    //   return;
+    // }
+
+    if(currentUser == null){
+      throw Exception('User cannot be found');
+    }
+
+    final submission = FormSubmission.fromFormValues(
+      form: currentForm,
+      user: currentUser!,
+      values: formValues,
+    );
+
+    log('FORM VALUES :: $formValues');
+    log('FORM SUBMISSION :: ${submission.toJsonString()}');
+
+    // if (!mounted) {
+    //   return;
+    // }
+
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text('Captured ${_formValues.length} field values.')),
+    // );
+  }
 }

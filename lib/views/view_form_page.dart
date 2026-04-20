@@ -49,43 +49,43 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
     );
   }
 
-  Future<void> _handleSubmit() async {
-    final formState = _formKey.currentState;
-    if (formState == null) {
-      return;
-    }
+  // Future<void> _handleSubmit() async {
+  //   final formState = _formKey.currentState;
+  //   if (formState == null) {
+  //     return;
+  //   }
 
-    if (!formState.validate()) {
-      return;
-    }
+  //   if (!formState.validate()) {
+  //     return;
+  //   }
 
-    formState.save();
+  //   formState.save();
 
-    final formViewState = ref.read(formViewBuilderViewModelProvider);
-    final currentForm = formViewState.form.isNotEmpty ? formViewState.form.first : null;
-    final currentUser = ref.read(formViewBuilderViewModelProvider.notifier).currentUser;
+  //   final formViewState = ref.read(formViewBuilderViewModelProvider);
+  //   final currentForm = formViewState.form.isNotEmpty ? formViewState.form.first : null;
+  //   final currentUser = ref.read(formViewBuilderViewModelProvider.notifier).currentUser;
 
-    if (currentForm == null || currentUser == null) {
-      return;
-    }
+  //   if (currentForm == null || currentUser == null) {
+  //     return;
+  //   }
 
-    final submission = FormSubmission.fromFormValues(
-      form: currentForm,
-      user: currentUser,
-      values: _formValues,
-    );
+  //   final submission = FormSubmission.fromFormValues(
+  //     form: currentForm,
+  //     user: currentUser,
+  //     values: _formValues,
+  //   );
 
-    log('FORM VALUES :: $_formValues');
-    log('FORM SUBMISSION :: ${submission.toJson()}');
+  //   log('FORM VALUES :: $_formValues');
+  //   log('FORM SUBMISSION :: ${submission.toJson()}');
 
-    if (!mounted) {
-      return;
-    }
+  //   if (!mounted) {
+  //     return;
+  //   }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Captured ${_formValues.length} field values.')),
-    );
-  }
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(content: Text('Captured ${_formValues.length} field values.')),
+  //   );
+  // }
 
   @override
   void initState() {
@@ -179,14 +179,15 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                       child: Center(
                         child: Text(
                           pages[index].title ?? 'Page ${index + 1}',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: isSelected
-                                    ? colorScheme.onPrimary
-                                    : colorScheme.onSurfaceVariant,
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: isSelected
+                                        ? colorScheme.onPrimary
+                                        : colorScheme.onSurfaceVariant,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                  ),
                         ),
                       ),
                     ),
@@ -197,7 +198,8 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Text(
-                pages[_currentPageIndex].title ?? 'Page ${_currentPageIndex + 1}',
+                pages[_currentPageIndex].title ??
+                    'Page ${_currentPageIndex + 1}',
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
@@ -244,7 +246,8 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                                         ? null
                                         : () {
                                             _pageController.previousPage(
-                                              duration: const Duration(milliseconds: 300),
+                                              duration: const Duration(
+                                                  milliseconds: 300),
                                               curve: Curves.easeInOut,
                                             );
                                           },
@@ -254,10 +257,18 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                               ),
                               ElevatedButton(
                                 onPressed: index == (pages.length - 1)
-                                    ? _handleSubmit
+                                    ? () {
+                                        ref
+                                            .watch(
+                                                formViewBuilderViewModelProvider
+                                                    .notifier)
+                                            .handleSubmit(formKey: _formKey,formValues:_formValues);
+                                      }
                                     : _handleNext,
                                 child: Text(
-                                  index == (pages.length - 1) ? 'Submit' : 'Next',
+                                  index == (pages.length - 1)
+                                      ? 'Submit'
+                                      : 'Next',
                                 ),
                               ),
                             ],

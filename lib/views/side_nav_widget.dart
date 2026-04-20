@@ -20,9 +20,13 @@ class SideNavWidget extends ConsumerStatefulWidget {
 }
 
 class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
+  late Future<List<DynamicFormModel>> _navigationDataFuture;
+
   @override
   void initState() {
     super.initState();
+
+    _navigationDataFuture = _loadNavigationData();
 
     // Update navigation state based on current route when widget initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -68,7 +72,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
               padding: const EdgeInsets.symmetric(
                   horizontal: EditorialSpacing.spacing4),
               child: FutureBuilder(
-                future: _loadNavigationData(),
+                future: _navigationDataFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -237,7 +241,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     ];
   }
 
-  Future<List<dynamic>> _loadNavigationData() async {
+  Future<List<DynamicFormModel>> _loadNavigationData() async {
     try {
       final forms = await ref.read(formRepositoryProvider).getFormNames();
       return forms ?? [];
