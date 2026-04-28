@@ -131,7 +131,9 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(form.name ?? 'Form Viewer'),
+        title: _buildAppBar(
+          formName: form.name,
+        ),
       ),
       body: Form(
         key: _formKey,
@@ -178,7 +180,7 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                       ),
                       child: Center(
                         child: Text(
-                          pages[index].title ?? 'Page ${index + 1}',
+                          pages[index].title ?? '',
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
                                     color: isSelected
@@ -262,7 +264,9 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
                                             .watch(
                                                 formViewBuilderViewModelProvider
                                                     .notifier)
-                                            .handleSubmit(formKey: _formKey,formValues:_formValues);
+                                            .handleSubmit(
+                                                formKey: _formKey,
+                                                formValues: _formValues);
                                       }
                                     : _handleNext,
                                 child: Text(
@@ -283,6 +287,16 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAppBar({
+    required String? formName,
+  }) {
+    return Row(
+      children: [
+        if (formName != null) Text(formName),
+      ],
     );
   }
 

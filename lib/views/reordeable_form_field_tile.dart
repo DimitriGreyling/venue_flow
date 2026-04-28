@@ -38,7 +38,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: isClient == false?  const EdgeInsets.only(bottom: 16) :  const EdgeInsets.only(bottom: 8),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
