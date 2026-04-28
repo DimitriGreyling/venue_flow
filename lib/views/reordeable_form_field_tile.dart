@@ -118,7 +118,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
                     if (isClient == false) const Spacer(),
 
                     // Action buttons (show only when selected)
-                    // if (isSelected && (isClient == false))
+                    if (isSelected && (isClient == false))
                      ...[
                       IconButton(
                         onPressed: onEditClicked,
