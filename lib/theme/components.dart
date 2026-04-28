@@ -12,201 +12,251 @@ class EditorialComponents {
 
   // BUTTON THEMES
   /// Primary: Gradient from primary_container to primary at 135°, 8px corners
-  static ButtonStyle primaryButton(ColorScheme colorScheme) => ElevatedButton.styleFrom(
-    // Use gradient decoration via container - Flutter doesn't support gradient directly
-    backgroundColor: colorScheme.primary, // Fallback
-    foregroundColor: colorScheme.onPrimary,
-    textStyle: EditorialTypography.buttonTextStyle(colorScheme),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8), // 8px as specified in design.md
-    ),
-    padding: const EdgeInsets.symmetric(
-      horizontal: EditorialSpacing.buttonPadding,
-      vertical: EditorialSpacing.buttonPaddingVertical,
-    ),
-    elevation: EditorialElevation.level2,
-    shadowColor: colorScheme.brightness == Brightness.dark 
-        ? Colors.transparent 
-        : const Color(0xFF0b1c30).withOpacity(0.06), // Deep blue tint
-  );
+  static ButtonStyle primaryButton(ColorScheme colorScheme) =>
+      ElevatedButton.styleFrom(
+        // Use gradient decoration via container - Flutter doesn't support gradient directly
+        backgroundColor: colorScheme.primary, // Fallback
+        foregroundColor: colorScheme.onPrimary,
+        textStyle: EditorialTypography.buttonTextStyle(colorScheme),
+        shape: RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.circular(8), // 8px as specified in design.md
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: EditorialSpacing.buttonPadding,
+          vertical: EditorialSpacing.buttonPaddingVertical,
+        ),
+        elevation: EditorialElevation.level2,
+        shadowColor: colorScheme.brightness == Brightness.dark
+            ? Colors.transparent
+            : const Color(0xFF0b1c30).withOpacity(0.06), // Deep blue tint
+      );
 
   /// Secondary: surface-container-highest background with primary text. No border.
-  static ButtonStyle secondaryButton(ColorScheme colorScheme) => ElevatedButton.styleFrom(
-    backgroundColor: colorScheme.surfaceContainerHighest,
-    foregroundColor: colorScheme.primary,
-    textStyle: EditorialTypography.buttonTextStyle(colorScheme),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8), // 8px consistency
-    ),
-    padding: const EdgeInsets.symmetric(
-      horizontal: EditorialSpacing.buttonPadding,
-      vertical: EditorialSpacing.buttonPaddingVertical,
-    ),
-    elevation: 0,
-  );
+  static ButtonStyle secondaryButton(ColorScheme colorScheme) =>
+      ElevatedButton.styleFrom(
+        backgroundColor: colorScheme.surfaceContainerHighest,
+        foregroundColor: colorScheme.primary,
+        textStyle: EditorialTypography.buttonTextStyle(colorScheme),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8), // 8px consistency
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: EditorialSpacing.buttonPadding,
+          vertical: EditorialSpacing.buttonPaddingVertical,
+        ),
+        elevation: 0,
+      );
 
   /// Action Chips: Pill-shaped (full radius) to contrast architectural squareness
-  static ButtonStyle actionChipButton(ColorScheme colorScheme) => ElevatedButton.styleFrom(
-    backgroundColor: colorScheme.secondaryContainer,
-    foregroundColor: colorScheme.onSecondaryContainer,
-    textStyle: EditorialTypography.buttonTextStyle(colorScheme),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(9999), // Pill-shaped
-    ),
-    padding: const EdgeInsets.symmetric(
-      horizontal: EditorialSpacing.spacing4,
-      vertical: EditorialSpacing.spacing2,
-    ),
-    elevation: 0,
-  );
+  static ButtonStyle actionChipButton(ColorScheme colorScheme) =>
+      ElevatedButton.styleFrom(
+        backgroundColor: colorScheme.secondaryContainer,
+        foregroundColor: colorScheme.onSecondaryContainer,
+        textStyle: EditorialTypography.buttonTextStyle(colorScheme),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(9999), // Pill-shaped
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: EditorialSpacing.spacing4,
+          vertical: EditorialSpacing.spacing2,
+        ),
+        elevation: 0,
+      );
 
   /// Tertiary: Text-only in primary, clean and minimal
-  static ButtonStyle tertiaryButton(ColorScheme colorScheme) => TextButton.styleFrom(
-    foregroundColor: colorScheme.primary,
-    textStyle: EditorialTypography.titleSmall(colorScheme),
-    padding: const EdgeInsets.symmetric(
-      horizontal: EditorialSpacing.spacing4,
-      vertical: EditorialSpacing.spacing2,
-    ),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-  );
+  static ButtonStyle tertiaryButton(ColorScheme colorScheme) =>
+      TextButton.styleFrom(
+        foregroundColor: colorScheme.primary,
+        textStyle: EditorialTypography.titleSmall(colorScheme),
+        padding: const EdgeInsets.symmetric(
+          horizontal: EditorialSpacing.spacing4,
+          vertical: EditorialSpacing.spacing2,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      );
 
   // CARD THEMES - Tonal Layering System
   /// "A card should never have a border. Use tonal shift for boundaries."
   /// "On hover, shift from surface-container-low to surface-container-lowest"
   static CardTheme cardTheme(ColorScheme colorScheme) => CardTheme(
-    color: colorScheme.surfaceContainerLowest, // Top layer - high priority
-    shadowColor: Colors.transparent, // No shadows - use tonal layering
-    elevation: 0, // Tonal depth, not physical elevation
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12), // Premium feel
-    ),
-    margin: const EdgeInsets.symmetric(
-      vertical: EditorialSpacing.spacing2,
-    ),
-  );
+        color: colorScheme.surfaceContainerLowest, // Top layer - high priority
+        shadowColor: Colors.transparent, // No shadows - use tonal layering
+        elevation: 0, // Tonal depth, not physical elevation
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12), // Premium feel
+        ),
+        margin: const EdgeInsets.symmetric(
+          vertical: EditorialSpacing.spacing2,
+        ),
+      );
 
   // INPUT DECORATION THEMES - "No-Line" Rule
   /// "Minimalist. No background fill; only surface-variant bottom-stroke or Ghost Border"
   /// "Focus State: Transition border to secondary with soft secondary_fixed glow"
-  static InputDecorationTheme inputDecorationTheme(ColorScheme colorScheme) => InputDecorationTheme(
-    filled: false, // No background fill as specified
-    
-    // Only bottom stroke - Ghost Border approach
-    border: UnderlineInputBorder(
-      borderSide: BorderSide(
-        color: colorScheme.outline.withOpacity(0.15), // Ghost border at 15%
-        width: 1,
-      ),
-    ),
-    
-    enabledBorder: UnderlineInputBorder(
-      borderSide: BorderSide(
-        color: colorScheme.outline.withOpacity(0.15), // Ghost border
-        width: 1,
-      ),
-    ),
-    
-    focusedBorder: UnderlineInputBorder(
-      borderSide: BorderSide(
-        color: colorScheme.secondary, // Transition to secondary on focus
-        width: 2,
-      ),
-    ),
-    
-    errorBorder: UnderlineInputBorder(
-      borderSide: BorderSide(
-        color: colorScheme.error,
-        width: 1,
-      ),
-    ),
-    
-    focusedErrorBorder: UnderlineInputBorder(
-      borderSide: BorderSide(
-        color: colorScheme.error,
-        width: 2,
-      ),
-    ),
-    
-    contentPadding: const EdgeInsets.symmetric(
-      horizontal: EditorialSpacing.formFieldPadding,
-      vertical: EditorialSpacing.spacing3,
-    ),
-    
-    labelStyle: EditorialTypography.formFieldStyle(colorScheme),
-    hintStyle: EditorialTypography.formFieldStyle(colorScheme).copyWith(
-      color: colorScheme.onSurfaceVariant.withOpacity(0.6),
-    ),
-  );
+  static InputDecorationTheme inputDecorationTheme(ColorScheme colorScheme) =>
+      InputDecorationTheme(
+          filled: false, // No background fill as specified
+
+          // Only bottom stroke - Ghost Border approach
+          border: OutlineInputBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            borderSide: BorderSide(
+              color:
+                  colorScheme.outline.withOpacity(0.15), // Ghost border at 15%
+              width: 1,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            borderSide: BorderSide(
+              color: colorScheme.outline.withOpacity(0.15), // Ghost border
+              width: 1,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            borderSide: BorderSide(
+              color: colorScheme.secondary, // Transition to secondary on focus
+              width: 2,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            borderSide: BorderSide(
+              color: colorScheme.error,
+              width: 1,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            borderSide: BorderSide(
+              color: colorScheme.error,
+              width: 2,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: EditorialSpacing.formFieldPadding,
+            vertical: EditorialSpacing.spacing3,
+          ),
+          // labelStyle: EditorialTypography.formFieldStyle(colorScheme),
+          labelStyle: WidgetStateTextStyle.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return EditorialTypography.formFieldStyle(colorScheme).copyWith(
+                color: colorScheme.onSurfaceVariant.withOpacity(0.45),
+              );
+            }
+
+            if (states.contains(WidgetState.focused)) {
+              return EditorialTypography.formFieldStyle(colorScheme).copyWith(
+                color: colorScheme.secondary,
+              );
+            }
+
+            if (states.contains(WidgetState.error)) {
+              return EditorialTypography.formFieldStyle(colorScheme).copyWith(
+                color: colorScheme.error,
+              );
+            }
+
+            return EditorialTypography.formFieldStyle(colorScheme).copyWith(
+              color: colorScheme.onSurfaceVariant,
+            );
+          }),
+          floatingLabelStyle: WidgetStateTextStyle.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return EditorialTypography.formFieldStyle(colorScheme).copyWith(
+                color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+              );
+            }
+
+            if (states.contains(WidgetState.error)) {
+              return EditorialTypography.formFieldStyle(colorScheme).copyWith(
+                color: colorScheme.error,
+              );
+            }
+
+            return EditorialTypography.formFieldStyle(colorScheme).copyWith(
+              color: colorScheme.secondary,
+            );
+          }),
+          hintStyle: EditorialTypography.formFieldStyle(colorScheme).copyWith(
+            color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: const BorderRadius.all(Radius.circular(5)),
+            borderSide: BorderSide(
+              color: colorScheme.outline.withOpacity(0.15), // Ghost border
+              width: 1,
+            ),
+          ));
 
   // LIST TILE THEMES
   /// Implements "No-Line" rule - no dividers between list items
-  static ListTileThemeData listTileTheme(ColorScheme colorScheme) => ListTileThemeData(
-    contentPadding: const EdgeInsets.symmetric(
-      horizontal: EditorialSpacing.listItemPadding,
-      vertical: EditorialSpacing.spacing2,
-    ),
-    
-    // No divider color - implements "No-Line" rule
-    selectedColor: colorScheme.primary,
-    iconColor: colorScheme.onSurfaceVariant,
-    textColor: colorScheme.onSurface,
-    
-    titleTextStyle: EditorialTypography.titleMedium(colorScheme),
-    subtitleTextStyle: EditorialTypography.bodySmall(colorScheme),
-    leadingAndTrailingTextStyle: EditorialTypography.labelSmall(colorScheme),
-    
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(6),
-    ),
-  );
+  static ListTileThemeData listTileTheme(ColorScheme colorScheme) =>
+      ListTileThemeData(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: EditorialSpacing.listItemPadding,
+          vertical: EditorialSpacing.spacing2,
+        ),
+
+        // No divider color - implements "No-Line" rule
+        selectedColor: colorScheme.primary,
+        iconColor: colorScheme.onSurfaceVariant,
+        textColor: colorScheme.onSurface,
+
+        titleTextStyle: EditorialTypography.titleMedium(colorScheme),
+        subtitleTextStyle: EditorialTypography.bodySmall(colorScheme),
+        leadingAndTrailingTextStyle:
+            EditorialTypography.labelSmall(colorScheme),
+
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6),
+        ),
+      );
 
   // APP BAR THEMES
   /// Implements glassmorphism effect
   static AppBarTheme appBarTheme(ColorScheme colorScheme) => AppBarTheme(
-    backgroundColor: colorScheme.brightness == Brightness.dark
-        ? EditorialColors.darkGlassSurface
-        : EditorialColors.lightGlassSurface,
-    foregroundColor: colorScheme.onSurface,
-    elevation: 0,
-    shadowColor: Colors.transparent,
-    surfaceTintColor: Colors.transparent,
-    
-    titleTextStyle: EditorialTypography.venueNameStyle(colorScheme),
-    toolbarTextStyle: EditorialTypography.titleMedium(colorScheme),
-    
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.zero,
-    ),
-    
-    actionsIconTheme: IconThemeData(
-      color: colorScheme.onSurfaceVariant,
-      size: 24,
-    ),
-    
-    iconTheme: IconThemeData(
-      color: colorScheme.onSurfaceVariant,
-      size: 24,
-    ),
-  );
+        backgroundColor: colorScheme.brightness == Brightness.dark
+            ? EditorialColors.darkGlassSurface
+            : EditorialColors.lightGlassSurface,
+        foregroundColor: colorScheme.onSurface,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: EditorialTypography.venueNameStyle(colorScheme),
+        toolbarTextStyle: EditorialTypography.titleMedium(colorScheme),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
+        actionsIconTheme: IconThemeData(
+          color: colorScheme.onSurfaceVariant,
+          size: 24,
+        ),
+        iconTheme: IconThemeData(
+          color: colorScheme.onSurfaceVariant,
+          size: 24,
+        ),
+      );
 
   // CHIP THEMES
   /// "Use rounded-full for chips, using secondary-container for soft, pillowy look"
   static ChipThemeData chipTheme(ColorScheme colorScheme) => ChipThemeData(
-    backgroundColor: colorScheme.secondaryContainer,
-    selectedColor: colorScheme.primary,
-    labelStyle: EditorialTypography.labelSmall(colorScheme),
-    side: BorderSide.none, // No borders - follows "No-Line" rule
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(50)), // rounded-full
-    ),
-    padding: const EdgeInsets.symmetric(
-      horizontal: EditorialSpacing.spacing3,
-      vertical: EditorialSpacing.spacing1,
-    ),
-  );
+        backgroundColor: colorScheme.secondaryContainer,
+        selectedColor: colorScheme.primary,
+        labelStyle: EditorialTypography.labelSmall(colorScheme),
+        side: BorderSide.none, // No borders - follows "No-Line" rule
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(50)), // rounded-full
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: EditorialSpacing.spacing3,
+          vertical: EditorialSpacing.spacing1,
+        ),
+      );
 
   // SPECIALIZED COMPONENTS
 
@@ -219,7 +269,7 @@ class EditorialComponents {
   }) {
     Color backgroundColor;
     Color textColor;
-    
+
     switch (status) {
       case VenueStatus.available:
         backgroundColor = colorScheme.primaryContainer;
@@ -234,7 +284,7 @@ class EditorialComponents {
         textColor = colorScheme.onSecondary;
         break;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 12,
@@ -334,9 +384,11 @@ class EditorialComponents {
         borderRadius: BorderRadius.circular(EditorialSpacing.cardBorderRadius),
         hoverColor: showHover ? colorScheme.surfaceContainerLowest : null,
         child: Container(
-          padding: padding ?? const EdgeInsets.all(EditorialSpacing.cardPadding),
+          padding:
+              padding ?? const EdgeInsets.all(EditorialSpacing.cardPadding),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(EditorialSpacing.cardBorderRadius),
+            borderRadius:
+                BorderRadius.circular(EditorialSpacing.cardBorderRadius),
             boxShadow: EditorialElevation.cardShadow(
               colorScheme.brightness == Brightness.dark,
             ),
@@ -379,7 +431,8 @@ class EditorialComponents {
           ),
         ),
         icon: icon ?? const SizedBox.shrink(),
-        label: Text(text, style: EditorialTypography.buttonTextStyle(colorScheme)),
+        label:
+            Text(text, style: EditorialTypography.buttonTextStyle(colorScheme)),
       ),
     );
   }
@@ -489,16 +542,16 @@ enum VenueStatus {
 extension EditorialThemeExtensions on ThemeData {
   /// Creates theme with "No-Line" rule applied
   ThemeData get withNoLineRule => copyWith(
-    dividerTheme: const DividerThemeData(
-      thickness: 0,
-      space: 0,
-      color: Colors.transparent,
-    ),
-    listTileTheme: listTileTheme?.copyWith(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6),
-        side: BorderSide.none, // No borders
-      ),
-    ),
-  );
+        dividerTheme: const DividerThemeData(
+          thickness: 0,
+          space: 0,
+          color: Colors.transparent,
+        ),
+        listTileTheme: listTileTheme?.copyWith(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+            side: BorderSide.none, // No borders
+          ),
+        ),
+      );
 }
