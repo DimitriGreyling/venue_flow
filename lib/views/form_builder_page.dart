@@ -7,10 +7,12 @@ import 'package:venue_flow_app/constants/tooltip_message_constants.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
+import 'package:venue_flow_app/models/popup_position.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/providers/auth_provider.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/routing/app_router.dart';
+import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
 import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
 import 'package:venue_flow_app/views/reordeable_form_fields_list.dart';
 import 'package:venue_flow_app/views/tooltip_widget.dart';
@@ -114,7 +116,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
 
   @override
   Widget build(BuildContext context) {
-    
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final editorial = context.editorial;
@@ -208,6 +209,130 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
       elevation: 0,
       heroTag: "addField", // Unique hero tag to avoid conflicts
     );
+  }
+
+  Future<void> _editFieldDetails({
+    required BuildContext context,
+    required ColorScheme colorScheme,
+    required FormFieldModel selectedField,
+    required EditorialThemeData editorial,
+  }) async {
+    // final selectedFieldType = await showModalBottomSheet<FieldType>(
+    //   context: context,
+    //   shape: const RoundedRectangleBorder(
+    //     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    //   ),
+    //   builder: (BuildContext context) {
+    //     return Container(
+    //       padding: const EdgeInsets.all(20),
+    //       child: Scrollbar(
+    //         thumbVisibility: true,
+    //         child: SingleChildScrollView(
+    //           child: Column(
+    //             mainAxisSize: MainAxisSize.min,
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             children: [
+    //               Row(
+    //                 children: [
+    //                   Icon(
+    //                     Icons.add_circle_outline,
+    //                     color: colorScheme.primary,
+    //                     size: 28,
+    //                   ),
+    //                   const SizedBox(width: 12),
+    //                   Text(
+    //                     'Select Field Type',
+    //                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
+    //                           fontWeight: FontWeight.bold,
+    //                           color: colorScheme.onSurface,
+    //                         ),
+    //                   ),
+    //                 ],
+    //               ),
+    //               const SizedBox(height: 20),
+    //               ...fieldTypeMenuItems.map((item) {
+    //                 final fieldType = item.value as FieldType;
+    //                 final title = (item.child as Text).data ?? '';
+    //                 return ListTile(
+    //                   leading: Container(
+    //                     padding: const EdgeInsets.all(8),
+    //                     decoration: BoxDecoration(
+    //                       color: colorScheme.primaryContainer.withOpacity(0.2),
+    //                       borderRadius: BorderRadius.circular(8),
+    //                     ),
+    //                     child: Icon(
+    //                       _getIconForFieldType(fieldType),
+    //                       color: colorScheme.primary,
+    //                       size: 20,
+    //                     ),
+    //                   ),
+    //                   title: Text(
+    //                     title,
+    //                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+    //                           fontWeight: FontWeight.w500,
+    //                           color: colorScheme.onSurface,
+    //                         ),
+    //                   ),
+    //                   subtitle: Text(
+    //                     _getFieldDescription(fieldType),
+    //                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
+    //                           color: colorScheme.onSurfaceVariant,
+    //                         ),
+    //                   ),
+    //                   onTap: () {
+    //                     Navigator.pop(context, fieldType);
+    //                   },
+    //                   shape: RoundedRectangleBorder(
+    //                     borderRadius: BorderRadius.circular(12),
+    //                   ),
+    //                   contentPadding: const EdgeInsets.symmetric(
+    //                     horizontal: 16,
+    //                     vertical: 8,
+    //                   ),
+    //                 );
+    //               }).toList(),
+    //               const SizedBox(height: 10),
+    //             ],
+    //           ),
+    //         ),
+    //       ),
+    //     );
+    //   },
+    // );
+
+    final selectType = selectedField.type;
+
+    if (selectType == null) {
+      GlobalPopupService.showError(
+        title: 'Invalid Field Type',
+        message:
+            'Could not determine the field of the selected field. Please try again',
+        position: PopupPosition.bottomRight,
+      );
+    }
+
+    if (selectedFieldType != null) {
+      final result = await _showAddFieldDialog(
+        context: context,
+        editorial: editorial,
+        fieldType: selectType ?? FieldType.text,
+        isEdit: true,
+        selectedField: selectedField,
+      );
+
+      if (result != null) {
+        ref.watch(formBuilderViewModelProvider.notifier).addFormField(
+              formFieldModel: FormFieldModel(
+                label: result['name'],
+                placeholder: result['placeholder'],
+                type: result['fieldType'],
+                required: result['required'] ?? false,
+                options: result['options'],
+              ),
+              index: _currentTabIndex,
+            );
+      }
+    }
   }
 
   Future<void> _showFieldTypeBottomSheet({
@@ -342,7 +467,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
   PreferredSizeWidget _buildAppBar(
       BuildContext context, ColorScheme colorScheme, TextTheme textTheme) {
     return AppBar(
-      
       backgroundColor: colorScheme.surface,
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -457,15 +581,26 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
     required BuildContext context,
     required EditorialThemeData editorial,
     required FieldType fieldType,
+    FormFieldModel? selectedField,
+    bool? isEdit,
   }) async {
-    final nameController = TextEditingController();
-    final placeholderController = TextEditingController();
+    final nameController = isEdit == true && selectedField != null
+        ? TextEditingController(text: selectedField.label)
+        : TextEditingController();
+    final placeholderController = isEdit == true && selectedField != null
+        ? TextEditingController(text: selectedField.placeholder)
+        : TextEditingController();
     final formKey = GlobalKey<FormState>();
     bool isRequired = false;
 
     // Simple approach - track only what's needed for UI
-    List<String> fieldOptions = [''];
-    List<TextEditingController> optionControllers = [TextEditingController()];
+    List<String> fieldOptions = isEdit == true && selectedField != null
+        ? (selectedField.options ?? [])
+        : [''];
+    List<TextEditingController> optionControllers =
+        isEdit == true && fieldOptions.isNotEmpty
+            ? fieldOptions.map((x) => TextEditingController(text: x)).toList()
+            : [TextEditingController()];
 
     bool needsOptions = fieldType == FieldType.dropdown ||
         fieldType == FieldType.radio ||
@@ -801,7 +936,9 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                                     isLoading: ref
                                         .watch(formBuilderViewModelProvider)
                                         .isLoading,
-                                    actualLabel: 'Add Field'),
+                                    actualLabel: isEdit == true
+                                        ? 'Update Field'
+                                        : 'Add Field'),
                                 style: editorial.buttonTextStyle.copyWith(
                                   color:
                                       Theme.of(context).colorScheme.onPrimary,
@@ -1467,8 +1604,14 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                                     index,
                                   );
                             },
-                            onEditClicked: (field) {
+                            onEditClicked: (field) async {
                               // Handle field selection
+                              await _editFieldDetails(
+                                context: context,
+                                colorScheme: colorScheme,
+                                editorial: editorial,
+                                selectedField: field,
+                              );
                             },
                             onFieldDeleted: (field, fieldIndex) {
                               ref
