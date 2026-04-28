@@ -400,7 +400,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     }
   }
 
-  void duplicateFiel(FormFieldModel formFieldModel, int index) async {
+  void duplicateField(FormFieldModel formFieldModel, int index) async {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field

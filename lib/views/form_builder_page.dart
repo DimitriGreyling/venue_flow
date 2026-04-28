@@ -1482,7 +1482,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                               // Handle field duplication
                               ref
                                   .watch(formBuilderViewModelProvider.notifier)
-                                  .duplicateFiel(
+                                  .duplicateField(
                                     field,
                                     index,
                                   );
