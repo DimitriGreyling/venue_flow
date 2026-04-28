@@ -45,14 +45,17 @@ class ReorderableFormFieldTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           // onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.all(24),
+            padding:
+                isClient == true ? const EdgeInsets.all(10) : const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: colorScheme.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected ? colorScheme.secondary.withOpacity(0.5) : Colors.transparent,
+              border: isClient == false ? Border.all(
+                color: isSelected
+                    ? colorScheme.secondary.withOpacity(0.5)
+                    : Colors.transparent,
                 width: 0.5, //isSelected ? 1 : 1,
-              ),
+              ) : null,
               boxShadow: isSelected
                   ? [
                       BoxShadow(
@@ -107,7 +110,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
                     //     ],
                     //   ),
                     // ),
-                    const Spacer(),
+                    if (isClient == false) const Spacer(),
 
                     // Action buttons (show only when selected)
                     if (isSelected && (isClient == false)) ...[
