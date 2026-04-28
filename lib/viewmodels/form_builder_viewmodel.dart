@@ -244,8 +244,15 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       // For example, adding to the first form:
       if (updatedForms.isNotEmpty) {
         updatedForms[0].schema![index].fields ??= [];
-        
-        // updatedForms[0].schema![index].fields?.add(formFieldModel);
+
+        final fieldIndex = updatedForms[0].schema![index].fields?.indexWhere(
+              (x) =>
+                  x.id == formFieldModel.id,
+            );
+
+        if ((fieldIndex ?? -1) > -1) {
+          updatedForms[0].schema![index].fields![fieldIndex!] = formFieldModel;
+        }
       } else {
         updatedForms.add(
           DynamicFormModel(

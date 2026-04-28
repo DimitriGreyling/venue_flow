@@ -217,88 +217,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
     required FormFieldModel selectedField,
     required EditorialThemeData editorial,
   }) async {
-    // final selectedFieldType = await showModalBottomSheet<FieldType>(
-    //   context: context,
-    //   shape: const RoundedRectangleBorder(
-    //     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    //   ),
-    //   builder: (BuildContext context) {
-    //     return Container(
-    //       padding: const EdgeInsets.all(20),
-    //       child: Scrollbar(
-    //         thumbVisibility: true,
-    //         child: SingleChildScrollView(
-    //           child: Column(
-    //             mainAxisSize: MainAxisSize.min,
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: [
-    //               Row(
-    //                 children: [
-    //                   Icon(
-    //                     Icons.add_circle_outline,
-    //                     color: colorScheme.primary,
-    //                     size: 28,
-    //                   ),
-    //                   const SizedBox(width: 12),
-    //                   Text(
-    //                     'Select Field Type',
-    //                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-    //                           fontWeight: FontWeight.bold,
-    //                           color: colorScheme.onSurface,
-    //                         ),
-    //                   ),
-    //                 ],
-    //               ),
-    //               const SizedBox(height: 20),
-    //               ...fieldTypeMenuItems.map((item) {
-    //                 final fieldType = item.value as FieldType;
-    //                 final title = (item.child as Text).data ?? '';
-    //                 return ListTile(
-    //                   leading: Container(
-    //                     padding: const EdgeInsets.all(8),
-    //                     decoration: BoxDecoration(
-    //                       color: colorScheme.primaryContainer.withOpacity(0.2),
-    //                       borderRadius: BorderRadius.circular(8),
-    //                     ),
-    //                     child: Icon(
-    //                       _getIconForFieldType(fieldType),
-    //                       color: colorScheme.primary,
-    //                       size: 20,
-    //                     ),
-    //                   ),
-    //                   title: Text(
-    //                     title,
-    //                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-    //                           fontWeight: FontWeight.w500,
-    //                           color: colorScheme.onSurface,
-    //                         ),
-    //                   ),
-    //                   subtitle: Text(
-    //                     _getFieldDescription(fieldType),
-    //                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-    //                           color: colorScheme.onSurfaceVariant,
-    //                         ),
-    //                   ),
-    //                   onTap: () {
-    //                     Navigator.pop(context, fieldType);
-    //                   },
-    //                   shape: RoundedRectangleBorder(
-    //                     borderRadius: BorderRadius.circular(12),
-    //                   ),
-    //                   contentPadding: const EdgeInsets.symmetric(
-    //                     horizontal: 16,
-    //                     vertical: 8,
-    //                   ),
-    //                 );
-    //               }).toList(),
-    //               const SizedBox(height: 10),
-    //             ],
-    //           ),
-    //         ),
-    //       ),
-    //     );
-    //   },
-    // );
 
     final selectType = selectedField.type;
 
@@ -323,6 +241,10 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
       if (result != null) {
         ref.watch(formBuilderViewModelProvider.notifier).updateFormField(
               formFieldModel: FormFieldModel(
+                id: result['id'],
+                defaultValue: result['defaultValue'],
+                validations: result['validations'],
+                visibility: result['visibility'],
                 label: result['name'],
                 placeholder: result['placeholder'],
                 type: result['fieldType'],
@@ -591,7 +513,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
         ? TextEditingController(text: selectedField.placeholder)
         : TextEditingController();
     final formKey = GlobalKey<FormState>();
-    bool isRequired = false;
+    bool isRequired = selectedField?.required ?? false;
 
     // Simple approach - track only what's needed for UI
     List<String> fieldOptions = isEdit == true && selectedField != null
@@ -903,6 +825,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                                   }
 
                                   Navigator.pop(dialogContext, {
+                                    'id': selectedField?.id ?? '',
                                     'name': nameController.text.trim(),
                                     'placeholder': needsOptions
                                         ? null
