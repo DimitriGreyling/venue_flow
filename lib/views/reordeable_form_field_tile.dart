@@ -38,7 +38,9 @@ class ReorderableFormFieldTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: isClient == false?  const EdgeInsets.only(bottom: 16) :  const EdgeInsets.only(bottom: 8),
+      margin: isClient == false
+          ? const EdgeInsets.only(bottom: 16)
+          : const EdgeInsets.only(bottom: 8),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -118,8 +120,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
                     if (isClient == false) const Spacer(),
 
                     // Action buttons (show only when selected)
-                    if (isSelected && (isClient == false))
-                     ...[
+                    if (isSelected && (isClient == false)) ...[
                       IconButton(
                         onPressed: onEditClicked,
                         icon: const Icon(Icons.edit, size: 18),
@@ -172,7 +173,8 @@ class ReorderableFormFieldTile extends StatelessWidget {
                       : BoxDecoration(
                           color: colorScheme.surface,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: colorScheme.secondary.withOpacity(0.5)),
+                          border: Border.all(
+                              color: colorScheme.secondary.withOpacity(0.5)),
                         ),
                   child: Row(
                     children: [
@@ -442,7 +444,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildDropDownField(
     BuildContext context, {
     String? selectedValue,
@@ -481,57 +483,43 @@ class ReorderableFormFieldTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            DropdownMenu<String>(
-              initialSelection: fieldState.value,
-              enabled: enabled,
-              width: double.infinity,
-              menuHeight: 240,
-              // alignmentOffset: const Offset(0, 8),
-              hintText: field.placeholder ?? 'Select an option',
-              textStyle: theme.textTheme.bodyLarge?.copyWith(
-                color: scheme.onSurface,
-              ),
-              menuStyle: MenuStyle(
-                backgroundColor: WidgetStatePropertyAll(scheme.surface),
-                shape: WidgetStatePropertyAll(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final menuWidth = constraints.maxWidth;
+                return DropdownMenu<String>(
+                  initialSelection: fieldState.value,
+                  enabled: enabled,
+                  width: menuWidth,
+                  menuHeight: 240,
+                  // alignmentOffset: const Offset(0, 8),
+                  hintText: field.placeholder ?? 'Select an option',
+                  textStyle: theme.textTheme.bodyLarge?.copyWith(
+                    color: scheme.onSurface,
                   ),
-                ),
-              ),
-              inputDecorationTheme: InputDecorationTheme(
-                filled: true,
-                fillColor: scheme.surfaceContainerLowest,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide(
-                    color: scheme.primary.withOpacity(0.35),
-                    width: 2,
-                  ),
-                ),
-              ),
-              dropdownMenuEntries: dropdownOptions
-                  .map(
-                    (value) => DropdownMenuEntry<String>(
-                      value: value,
-                      label: value,
+                  menuStyle: MenuStyle(
+                    backgroundColor: WidgetStatePropertyAll(scheme.surface),
+                    shape: WidgetStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
-                  )
-                  .toList(),
-              onSelected: enabled
-                  ? (value) {
-                      fieldState.didChange(value);
-                      onChanged?.call(value);
-                    }
-                  : null,
+                  ),
+                  dropdownMenuEntries: dropdownOptions
+                      .map(
+                        (value) => DropdownMenuEntry<String>(
+                          value: value,
+                          label: value,
+                        ),
+                      )
+                      .toList(),
+                  onSelected: enabled
+                      ? (value) {
+                          fieldState.didChange(value);
+                          onChanged?.call(value);
+                        }
+                      : null,
+                );
+              },
             ),
             if (fieldState.hasError)
               Padding(
