@@ -20,12 +20,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: previousLocation ?? '/login',
+    initialLocation: previousLocation ?? '/home',
     redirect: (context, state) {
       final isAuthenticated = authState.isAuthenticated;
       final isLoading = authState.isLoading;
 
-      final isAuthPage = state.matchedLocation == '/login' ||
+      final isAuthPage = state.matchedLocation == '/home' ||
           state.matchedLocation == '/signup';
 
       if (isLoading) {
@@ -54,6 +54,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         name: 'login',
+        builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/home',
+        name: 'home',
         builder: (context, state) => const HomeLoggedOutPage(),
       ),
       GoRoute(
