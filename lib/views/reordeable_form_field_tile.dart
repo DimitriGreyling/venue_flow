@@ -45,17 +45,20 @@ class ReorderableFormFieldTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           // onTap: onTap,
           child: Container(
-            padding:
-                isClient == true ? const EdgeInsets.all(10) : const EdgeInsets.all(24),
+            padding: isClient == true
+                ? const EdgeInsets.all(10)
+                : const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: colorScheme.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(16),
-              border: isClient == false ? Border.all(
-                color: isSelected
-                    ? colorScheme.secondary.withOpacity(0.5)
-                    : Colors.transparent,
-                width: 0.5, //isSelected ? 1 : 1,
-              ) : null,
+              border: isClient == false
+                  ? Border.all(
+                      color: isSelected
+                          ? colorScheme.secondary.withOpacity(0.5)
+                          : Colors.transparent,
+                      width: 0.5, //isSelected ? 1 : 1,
+                    )
+                  : null,
               boxShadow: isSelected
                   ? [
                       BoxShadow(
@@ -425,45 +428,6 @@ class ReorderableFormFieldTile extends StatelessWidget {
                   )
                 : null,
             suffixIcon: suffix,
-            filled: true,
-            fillColor: scheme.surfaceContainerLowest,
-            hintStyle: theme.textTheme.bodyMedium?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-            errorMaxLines: 2,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 18,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(
-                color: scheme.primaryContainer.withOpacity(0.50),
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(
-                color: scheme.error.withOpacity(0.80),
-                width: 1.5,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(
-                color: scheme.error,
-                width: 2,
-              ),
-            ),
           ),
         ),
       ],
@@ -525,51 +489,11 @@ class ReorderableFormFieldTile extends StatelessWidget {
           }).toList(),
           decoration: InputDecoration(
             hintText: field.placeholder ?? 'Select an option',
-            filled: true,
-            fillColor: scheme.surfaceContainerLowest,
-            hintStyle: theme.textTheme.bodyMedium?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-            errorMaxLines: 2,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 18,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(
-                color: scheme.primaryContainer.withOpacity(0.50),
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(
-                color: scheme.error.withOpacity(0.80),
-                width: 1.5,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(
-                color: scheme.error,
-                width: 2,
-              ),
-            ),
           ),
           icon: Icon(
             Icons.arrow_drop_down,
             color: scheme.onSurfaceVariant,
           ),
-          dropdownColor: scheme.surfaceContainer,
         ),
       ],
     );
@@ -805,45 +729,6 @@ class ReorderableFormFieldTile extends StatelessWidget {
           ),
           decoration: InputDecoration(
             hintText: field.placeholder ?? 'Enter text...',
-            filled: true,
-            fillColor: scheme.surfaceContainerLowest,
-            hintStyle: theme.textTheme.bodyMedium?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-            errorMaxLines: 2,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 18,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(
-                color: scheme.primaryContainer.withOpacity(0.50),
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(
-                color: scheme.error.withOpacity(0.80),
-                width: 1.5,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(
-                color: scheme.error,
-                width: 2,
-              ),
-            ),
           ),
         ),
       ],
