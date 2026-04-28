@@ -117,7 +117,8 @@ class _TopNav extends StatelessWidget {
           children: [
             Image.asset(
               'assets/logo_white_transparent.png',
-              height: 28,
+              height: 100,
+              width: 100,
               errorBuilder: (_, __, ___) => Icon(
                 Icons.event_available_outlined,
                 color: colorScheme.primary,
@@ -143,13 +144,9 @@ class _TopNav extends StatelessWidget {
       spacing: EditorialSpacing.spacing3,
       runSpacing: EditorialSpacing.spacing3,
       children: [
-        TextButton(
-          onPressed: onLogin,
-          child: const Text('Sign In'),
-        ),
         ElevatedButton(
           onPressed: onLogin,
-          child: const Text('Open Workspace'),
+          child: const Text('Sign In'),
         ),
       ],
     );
