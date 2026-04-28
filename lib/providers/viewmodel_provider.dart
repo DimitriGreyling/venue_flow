@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/providers/auth_provider.dart';
 import 'package:venue_flow_app/providers/sotrage_provider.dart';
+import 'package:venue_flow_app/repositories/form_submission_repository.dart';
 import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
 import 'package:venue_flow_app/viewmodels/form_view_model.dart';
 import 'package:venue_flow_app/viewmodels/home_viewmodel.dart';
@@ -30,11 +31,12 @@ final formViewBuilderViewModelProvider =
         (ref) {
   final formRepository = ref.watch(formRepositoryProvider);
   final storageHelper = ref.watch(storageHelperProvider);
-  // final currentUser = ref.watch(currentUserProvider);
+  final formSubmissionRepository = ref.watch(formSubmissionRepositoryProvider);
 
   return FormViewBuilderViewModel(
     formRepo: formRepository,
     storageHelper: storageHelper,
+    formSubmissionRepository: formSubmissionRepository,
     getCurrentUser: () => ref.read(currentUserProvider),
   );
 });

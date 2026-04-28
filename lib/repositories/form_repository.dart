@@ -26,7 +26,7 @@ class FormRepository extends IFormRepository {
 
   //VARIABLES
   final SupabaseClient _client;
-  final _tableName = SupabaseTableNames.formTable;
+  final String _tableName = SupabaseTableNames.formTable;
 
   @override
   Future<List<DynamicFormModel>?> getFormById({

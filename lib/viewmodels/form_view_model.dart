@@ -12,6 +12,7 @@ import 'package:venue_flow_app/models/form_page_model.dart';
 import 'package:venue_flow_app/models/form_submission_model.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/repositories/form_repository.dart';
+import 'package:venue_flow_app/repositories/form_submission_repository.dart';
 import 'package:venue_flow_app/shared/helpers/storage_helper.dart';
 
 class FormViewBuilderViewState {
@@ -57,20 +58,19 @@ class FormViewBuilderViewState {
 class FormViewBuilderViewModel extends StateNotifier<FormViewBuilderViewState> {
   final IFormRepository _formRepository;
   final IStorageHelper _storageHelper;
-  // final UserModel? _user;
+  final IFormSubmissionRepository _formSubmissionRepository;
   final UserModel? Function() _getCurrentUser;
 
   FormViewBuilderViewModel({
     required IFormRepository formRepo,
     required IStorageHelper storageHelper,
-    // required UserModel? currentUser,
+    required IFormSubmissionRepository formSubmissionRepository,
     required UserModel? Function() getCurrentUser,
   })  : _formRepository = formRepo,
         _storageHelper = storageHelper,
         _getCurrentUser = getCurrentUser,
-        super(FormViewBuilderViewState(form: [], isLoading: false)) {
-    // _loadStoredForms();
-  }
+        _formSubmissionRepository = formSubmissionRepository,
+        super(FormViewBuilderViewState(form: [], isLoading: false)) {}
 
   Future<void> loadForm() async {
     try {
@@ -114,7 +114,7 @@ class FormViewBuilderViewModel extends StateNotifier<FormViewBuilderViewState> {
     //   return;
     // }
 
-    if(currentUser == null){
+    if (currentUser == null) {
       throw Exception('User cannot be found');
     }
 
@@ -126,6 +126,8 @@ class FormViewBuilderViewModel extends StateNotifier<FormViewBuilderViewState> {
 
     log('FORM VALUES :: $formValues');
     log('FORM SUBMISSION :: ${submission.toJsonString()}');
+
+    final response = await _formSubmissionRepository.saveFormSubmission(submittedForm: submission);
 
     // if (!mounted) {
     //   return;

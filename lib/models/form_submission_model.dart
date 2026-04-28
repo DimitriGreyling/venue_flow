@@ -10,6 +10,7 @@ class FormSubmission {
   int? formVersion;
   Map<String, dynamic>? data;
   DateTime? createdAt;
+  String? tenantId;
 
   FormSubmission({
     this.formId,
@@ -17,6 +18,7 @@ class FormSubmission {
     this.formVersion,
     this.data,
     this.createdAt,
+    this.tenantId,
   });
 
   factory FormSubmission.fromFormValues({
@@ -27,7 +29,8 @@ class FormSubmission {
     return FormSubmission(
       formId: form.id,
       userId: user.id,
-      formVersion: form.version,
+      tenantId: user.tenantId,
+      formVersion: form.version ?? 1,
       data: {
         'responses': _normalizeValues(values),
         'fields': _buildFieldSnapshots(form, values),
@@ -107,8 +110,9 @@ class FormSubmission {
   Map<String, dynamic> toJson() {
     return {
       'form_id': formId,
+      'tenant_id': tenantId,
       'user_id': userId,
-      'form_version': formVersion,
+      // 'form_version': formVersion,
       'data': data,
       'created_at': createdAt?.toIso8601String() ?? DateTime.now(),
       'modified_date': DateTime.now().toIso8601String(),
@@ -128,4 +132,38 @@ class FormSubmission {
       return '';
     }
   }
+
+factory FormSubmission.fromJson(Map<String, dynamic> json) {
+  DateTime? parseDate(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+    if (value is DateTime) {
+      return value;
+    }
+    return DateTime.tryParse(value.toString());
+  }
+
+  Map<String, dynamic>? parsedData;
+  final rawData = json['data'];
+
+  if (rawData is Map<String, dynamic>) {
+    parsedData = Map<String, dynamic>.from(rawData);
+  } else if (rawData is Map) {
+    parsedData = rawData.map(
+      (key, value) => MapEntry(key.toString(), value),
+    );
+  }
+
+  return FormSubmission(
+    formId: json['form_id']?.toString(),
+    userId: json['user_id']?.toString(),
+    tenantId: json['tenant_id']?.toString(),
+    formVersion: json['form_version'] is num
+        ? (json['form_version'] as num).toInt()
+        : int.tryParse(json['form_version']?.toString() ?? ''),
+    data: parsedData,
+    createdAt: parseDate(json['created_at']),
+  );
+}
 }
