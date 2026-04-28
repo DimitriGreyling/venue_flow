@@ -57,7 +57,11 @@ class GlobalPopupNotifier extends StateNotifier<GlobalPopupState> {
 
   // Show info popup
   void showInfo(String title, String message,
-      {Duration? duration, PopupPosition? position}) {
+      {Duration? duration,
+      PopupPosition? position,
+      double? width,
+      double? minWidth,
+      double? maxWidth}) {
     showPopup(PopupMessage(
       title: title,
       message: message,
@@ -65,12 +69,19 @@ class GlobalPopupNotifier extends StateNotifier<GlobalPopupState> {
       duration:
           duration ?? Duration(seconds: PopupConstants.informationPopupTimeOutInSeconds),
       position: position ?? PopupPosition.top,
+      width: width,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
     ));
   }
 
   // Show success popup
   void showSuccess(String title, String message,
-      {Duration? duration, PopupPosition? position}) {
+      {Duration? duration,
+      PopupPosition? position,
+      double? width,
+      double? minWidth,
+      double? maxWidth}) {
     showPopup(PopupMessage(
       title: title,
       message: message,
@@ -78,12 +89,19 @@ class GlobalPopupNotifier extends StateNotifier<GlobalPopupState> {
       duration:
           duration ?? Duration(seconds: PopupConstants.successPopupTimeOutInSeconds),
       position: position ?? PopupPosition.top,
+      width: width,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
     ));
   }
 
   // Show warning popup
   void showWarning(String title, String message,
-      {Duration? duration, PopupPosition? position}) {
+      {Duration? duration,
+      PopupPosition? position,
+      double? width,
+      double? minWidth,
+      double? maxWidth}) {
     showPopup(PopupMessage(
       title: title,
       message: message,
@@ -91,12 +109,19 @@ class GlobalPopupNotifier extends StateNotifier<GlobalPopupState> {
       duration:
           duration ?? Duration(seconds: PopupConstants.warningPopupTimeOutInSeconds),
       position: position ?? PopupPosition.top,
+      width: width,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
     ));
   }
 
   // Show error popup
   void showError(String title, String message,
-      {Duration? duration, PopupPosition? position}) {
+      {Duration? duration,
+      PopupPosition? position,
+      double? width,
+      double? minWidth,
+      double? maxWidth}) {
     showPopup(PopupMessage(
       title: title,
       message: message,
@@ -104,6 +129,9 @@ class GlobalPopupNotifier extends StateNotifier<GlobalPopupState> {
       duration:
           duration ?? Duration(seconds: PopupConstants.errorPopupTimeOutInSeconds),
       position: position ?? PopupPosition.top,
+      width: width,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
     ));
   }
 
@@ -118,6 +146,9 @@ class GlobalPopupNotifier extends StateNotifier<GlobalPopupState> {
     PopupType type = PopupType.info,
     Duration? duration,
     PopupPosition? position,
+    double? width,
+    double? minWidth,
+    double? maxWidth,
   }) {
     showPopup(PopupMessage(
       title: title,
@@ -129,6 +160,9 @@ class GlobalPopupNotifier extends StateNotifier<GlobalPopupState> {
       position: position ?? PopupPosition.center,
       secondaryActionText: secondaryActionText,
       onSecondaryAction: onSecondaryAction,
+      width: width,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
     ));
   }
 

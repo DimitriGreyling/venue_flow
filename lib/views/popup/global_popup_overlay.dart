@@ -52,95 +52,100 @@ class GlobalPopupOverlay extends ConsumerWidget {
 
   Widget _buildPositionedPopup(
       PopupMessage popup, GlobalPopupNotifier notifier) {
-    switch (popup.position) {
-      case PopupPosition.top:
-        return Positioned(
-          top: 50,
-          left: 0,
-          right: 0,
-          child: PopupMessageWidget(
-            popup: popup,
-            onDismiss: () => notifier.dismissPopup(popup.id),
-          ),
-        );
-
-      case PopupPosition.center:
-        return Positioned.fill(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: double.infinity * 0.8,
-                minWidth: double.infinity * 0.4,
-              ),
-              child: PopupMessageWidget(
-                popup: popup,
-                onDismiss: () => notifier.dismissPopup(popup.id),
+    return Positioned.fill(
+      child: LayoutBuilder(
+        builder: (context, viewport) {
+          return Padding(
+            padding: _paddingFor(popup.position),
+            child: Align(
+              alignment: _alignmentFor(popup.position),
+              child: IntrinsicWidth(
+                child: ConstrainedBox(
+                  constraints: _constraintsFor(viewport, popup),
+                  child: PopupMessageWidget(
+                    popup: popup,
+                    onDismiss: () => notifier.dismissPopup(popup.id),
+                  ),
+                ),
               ),
             ),
-          ),
-        );
+          );
+        },
+      ),
+    );
+  }
 
+  Alignment _alignmentFor(PopupPosition position) {
+    switch (position) {
+      case PopupPosition.top:
+        return Alignment.topCenter;
+      case PopupPosition.center:
+        return Alignment.center;
       case PopupPosition.bottom:
-        return Positioned(
-          bottom: 50,
-          left: 0,
-          right: 0,
-          child: PopupMessageWidget(
-            popup: popup,
-            onDismiss: () => notifier.dismissPopup(popup.id),
-          ),
-        );
-
+        return Alignment.bottomCenter;
       case PopupPosition.topLeft:
-        return Positioned(
-          top: 50,
-          left: 16,
-          child: PopupMessageWidget(
-            popup: popup,
-            onDismiss: () => notifier.dismissPopup(popup.id),
-          ),
-        );
-
+        return Alignment.topLeft;
       case PopupPosition.topRight:
-        return Positioned(
-          top: 50,
-          right: 16,
-          child: PopupMessageWidget(
-            popup: popup,
-            onDismiss: () => notifier.dismissPopup(popup.id),
-          ),
-        );
-
+        return Alignment.topRight;
       case PopupPosition.bottomLeft:
-        return Positioned(
-          bottom: 50,
-          left: 16,
-          child: PopupMessageWidget(
-            popup: popup,
-            onDismiss: () => notifier.dismissPopup(popup.id),
-          ),
-        );
-
+        return Alignment.bottomLeft;
       case PopupPosition.bottomRight:
-        return Positioned(
-          bottom: 50,
-          right: 16,
-          child: PopupMessageWidget(
-            popup: popup,
-            onDismiss: () => notifier.dismissPopup(popup.id),
-          ),
-        );
+        return Alignment.bottomRight;
+    }
+  }
 
-      default:
-        return Positioned(
-          top: 50,
-          left: 0,
-          right: 0,
-          child: PopupMessageWidget(
-            popup: popup,
-            onDismiss: () => notifier.dismissPopup(popup.id),
-          ),
-        );
+  EdgeInsets _paddingFor(PopupPosition position) {
+    switch (position) {
+      case PopupPosition.top:
+      case PopupPosition.topLeft:
+      case PopupPosition.topRight:
+        return const EdgeInsets.fromLTRB(16, 50, 16, 16);
+      case PopupPosition.bottom:
+      case PopupPosition.bottomLeft:
+      case PopupPosition.bottomRight:
+        return const EdgeInsets.fromLTRB(16, 16, 16, 50);
+      case PopupPosition.center:
+        return const EdgeInsets.all(16);
+    }
+  }
+
+  BoxConstraints _constraintsFor(
+    BoxConstraints viewport,
+    PopupMessage popup,
+  ) {
+    final availableWidth = (viewport.maxWidth - 32).clamp(0.0, double.infinity);
+    final minWidth =
+        (popup.minWidth ?? 0.0).clamp(0.0, availableWidth).toDouble();
+    final maxWidth =
+        (popup.maxWidth ?? _defaultMaxWidth(viewport.maxWidth, popup.position))
+            .clamp(minWidth, availableWidth)
+            .toDouble();
+
+    if (popup.width != null) {
+      final width = popup.width!.clamp(minWidth, maxWidth).toDouble();
+      return BoxConstraints.tightFor(width: width);
+    }
+
+    return BoxConstraints(
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+    );
+  }
+
+  double _defaultMaxWidth(double viewportWidth, PopupPosition position) {
+    final maxByViewport =
+        viewportWidth < 600 ? viewportWidth * 0.92 : viewportWidth * 0.6;
+
+    switch (position) {
+      case PopupPosition.topLeft:
+      case PopupPosition.topRight:
+      case PopupPosition.bottomLeft:
+      case PopupPosition.bottomRight:
+        return maxByViewport.clamp(220.0, 420.0).toDouble();
+      case PopupPosition.top:
+      case PopupPosition.bottom:
+      case PopupPosition.center:
+        return maxByViewport.clamp(260.0, 520.0).toDouble();
     }
   }
 }

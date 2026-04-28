@@ -8,8 +8,10 @@ import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/models/form_page_model.dart';
+import 'package:venue_flow_app/models/popup_position.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/repositories/form_repository.dart';
+import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
 import 'package:venue_flow_app/shared/helpers/storage_helper.dart';
 
 class FormBuilderViewState {
@@ -469,6 +471,12 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       if (result == null) {
         throw Exception('Something happend when saving form');
       }
+
+      GlobalPopupService.showSuccess(
+        title: 'Saved',
+        message: 'Form has been saved.',
+        position: PopupPosition.bottomRight,
+      );
 
       state = state.copyWith(
         forms: [result],

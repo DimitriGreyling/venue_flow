@@ -38,6 +38,9 @@ class PopupMessage {
   final Color? backgroundColor;
   final Color? textColor;
   final Widget? customContent;
+  final double? width;
+  final double? minWidth;
+  final double? maxWidth;
 
   PopupMessage({
     String? id,
@@ -59,6 +62,9 @@ class PopupMessage {
     this.onSecondaryAction,
     this.dismissOnSecondaryAction,
     this.dismissOnAction = true,
+    this.width,
+    this.minWidth,
+    this.maxWidth,
   }) : id = id ?? DateTime.now().millisecondsSinceEpoch.toString();
 
   PopupMessage copyWith({
@@ -81,6 +87,9 @@ class PopupMessage {
     VoidCallback? onSecondaryAction,
     bool? dismissOnSecondaryAction,
     bool? dismissOnAction,
+    double? width,
+    double? minWidth,
+    double? maxWidth,
   }) {
     return PopupMessage(
       id: id ?? this.id,
@@ -102,6 +111,9 @@ class PopupMessage {
       onSecondaryAction: onSecondaryAction ?? this.onSecondaryAction,
       dismissOnSecondaryAction: dismissOnSecondaryAction ?? this.dismissOnSecondaryAction,
       dismissOnAction: dismissOnAction ?? this.dismissOnAction,
+      width: width ?? this.width,
+      minWidth: minWidth ?? this.minWidth,
+      maxWidth: maxWidth ?? this.maxWidth,
     );
   }
 
