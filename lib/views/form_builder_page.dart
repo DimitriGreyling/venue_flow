@@ -321,7 +321,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
       );
 
       if (result != null) {
-        ref.watch(formBuilderViewModelProvider.notifier).addFormField(
+        ref.watch(formBuilderViewModelProvider.notifier).updateFormField(
               formFieldModel: FormFieldModel(
                 label: result['name'],
                 placeholder: result['placeholder'],

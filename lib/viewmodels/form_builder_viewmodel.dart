@@ -232,6 +232,48 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     }
   }
 
+  void updateFormField(
+      {required FormFieldModel formFieldModel, required int index}) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      // Create a new list with the existing forms plus the new field
+      final currentForms = state.form;
+      final updatedForms = [...currentForms];
+
+      // If you're adding a field to an existing form, you'd need to specify which form
+      // For example, adding to the first form:
+      if (updatedForms.isNotEmpty) {
+        updatedForms[0].schema![index].fields ??= [];
+        
+        // updatedForms[0].schema![index].fields?.add(formFieldModel);
+      } else {
+        updatedForms.add(
+          DynamicFormModel(
+            name: 'Form Name',
+            schema: [
+              FormPageModel(
+                title: 'Page 1',
+                fields: [
+                  formFieldModel,
+                ],
+              ),
+            ],
+          ),
+        );
+      }
+
+      await _storageHelper.saveForm(state.form.first);
+
+      state = state.copyWith(
+        forms: updatedForms,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      // Handle error
+    }
+  }
+
   //ADD NEW Page
   void addPage({
     required FormPageModel formPageModel,
