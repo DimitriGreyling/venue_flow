@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/validation_rule_model.dart';
 import 'package:venue_flow_app/models/visibility_rule_model.dart';
@@ -30,7 +31,7 @@ class FormFieldModel {
 
   factory FormFieldModel.fromJson(Map<String, dynamic> json) {
     return FormFieldModel(
-      id: json['id'],
+      id: json['id'] ?? const Uuid().v7(),
       type: json['type'] != null ? FieldType.values.byName(json['type']) : null,
       label: json['label'] ?? '',
       placeholder: json['placeholder'],

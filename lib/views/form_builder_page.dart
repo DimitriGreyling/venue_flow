@@ -1,17 +1,17 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/constants/tooltip_message_constants.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
+import 'package:venue_flow_app/models/popup_position.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/providers/auth_provider.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
-import 'package:venue_flow_app/routing/app_router.dart';
+import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
 import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
+import 'package:venue_flow_app/views/dialogs/confirm_delete_dialog.dart';
+import 'package:venue_flow_app/views/dialogs/form_field_dialog.dart';
 import 'package:venue_flow_app/views/reordeable_form_fields_list.dart';
 import 'package:venue_flow_app/views/tooltip_widget.dart';
 import '../theme/editorial_theme_data.dart';
@@ -36,7 +36,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
 
   // Floating Action Button variables
   TabController? _tabController;
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
   bool _showFAB = false;
   int _currentTabIndex = 0;
 
@@ -114,7 +114,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
 
   @override
   Widget build(BuildContext context) {
-    
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final editorial = context.editorial;
@@ -210,6 +209,51 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
     );
   }
 
+  Future<void> _editFieldDetails({
+    required BuildContext context,
+    required ColorScheme colorScheme,
+    required FormFieldModel selectedField,
+    required EditorialThemeData editorial,
+  }) async {
+    final selectType = selectedField.type;
+
+    if (selectType == null) {
+      GlobalPopupService.showError(
+        title: 'Invalid Field Type',
+        message:
+            'Could not determine the field of the selected field. Please try again',
+        position: PopupPosition.bottomRight,
+      );
+    }
+
+    if (selectType != null) {
+      final result = await showFormFieldDialog(
+        context: context,
+        editorial: editorial,
+        fieldType: selectType,
+        isEdit: true,
+        selectedField: selectedField,
+      );
+
+      if (result != null) {
+        ref.read(formBuilderViewModelProvider.notifier).updateFormField(
+              formFieldModel: FormFieldModel(
+                id: result.id,
+                defaultValue: result.defaultValue,
+                validations: result.validations?.cast(),
+                visibility: result.visibility,
+                label: result.label,
+                placeholder: result.placeholder,
+                type: result.fieldType,
+                required: result.isRequired,
+                options: result.options,
+              ),
+              index: _currentTabIndex,
+            );
+      }
+    }
+  }
+
   Future<void> _showFieldTypeBottomSheet({
     required BuildContext context,
     required ColorScheme colorScheme,
@@ -288,7 +332,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                         vertical: 8,
                       ),
                     );
-                  }).toList(),
+                  }),
                   const SizedBox(height: 10),
                 ],
               ),
@@ -299,20 +343,24 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
     );
 
     if (selectedFieldType != null) {
-      final result = await _showAddFieldDialog(
+      if (!context.mounted) {
+        return;
+      }
+
+      final result = await showFormFieldDialog(
         context: context,
         editorial: editorial,
         fieldType: selectedFieldType,
       );
 
       if (result != null) {
-        ref.watch(formBuilderViewModelProvider.notifier).addFormField(
+        ref.read(formBuilderViewModelProvider.notifier).addFormField(
               formFieldModel: FormFieldModel(
-                label: result['name'],
-                placeholder: result['placeholder'],
-                type: result['fieldType'],
-                required: result['required'] ?? false,
-                options: result['options'],
+                label: result.label,
+                placeholder: result.placeholder,
+                type: result.fieldType,
+                required: result.isRequired,
+                options: result.options,
               ),
               index: _currentTabIndex,
             );
@@ -342,7 +390,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
   PreferredSizeWidget _buildAppBar(
       BuildContext context, ColorScheme colorScheme, TextTheme textTheme) {
     return AppBar(
-      
       backgroundColor: colorScheme.surface,
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -453,406 +500,17 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
     );
   }
 
-  Future<Map<String, dynamic>?> _showAddFieldDialog({
-    required BuildContext context,
-    required EditorialThemeData editorial,
-    required FieldType fieldType,
-  }) async {
-    final nameController = TextEditingController();
-    final placeholderController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-    bool isRequired = false;
-
-    // Simple approach - track only what's needed for UI
-    List<String> fieldOptions = [''];
-    List<TextEditingController> optionControllers = [TextEditingController()];
-
-    bool needsOptions = fieldType == FieldType.dropdown ||
-        fieldType == FieldType.radio ||
-        fieldType == FieldType.checkbox;
-
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            void addOption() {
-              setState(() {
-                fieldOptions.add('');
-                optionControllers.add(TextEditingController());
-              });
-            }
-
-            void removeOption(int index) {
-              if (optionControllers.length > 1) {
-                setState(() {
-                  // Don't dispose - just remove from list
-                  optionControllers.removeAt(index);
-                  fieldOptions.removeAt(index);
-                });
-              }
-            }
-
-            final screenSize = MediaQuery.of(context).size;
-            final dialogWidth = screenSize.width > 768
-                ? screenSize.width * 0.4
-                : screenSize.width * 0.9;
-            final dialogHeight = screenSize.height * 0.6;
-
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Container(
-                width: dialogWidth,
-                height: dialogHeight,
-                padding: const EdgeInsets.all(24),
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header
-                      Row(
-                        children: [
-                          Icon(
-                            _getIconForFieldType(fieldType),
-                            color: Theme.of(context).colorScheme.primary,
-                            size: 24,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Add $fieldType',
-                            style: editorial.labelBold.copyWith(fontSize: 18),
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            onPressed: () => Navigator.pop(dialogContext),
-                            icon: const Icon(Icons.close),
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 32),
-
-                      // Form Fields
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              // Field Name
-                              _buildTextField(
-                                context,
-                                label: 'Field Label',
-                                controller: nameController,
-                                focusNode: FocusNode(),
-                                hint: 'e.g., First Name',
-                                enabled: true,
-                                textInputAction: TextInputAction.next,
-                                validator: (value) {
-                                  if (value?.trim().isEmpty ?? true) {
-                                    return 'Field label is required';
-                                  }
-                                  return null;
-                                },
-                              ),
-
-                              const SizedBox(height: 16),
-
-                              // Placeholder Text (only for non-option fields)
-                              if (!needsOptions) ...[
-                                _buildTextField(
-                                  context,
-                                  label: 'Placeholder Text',
-                                  controller: placeholderController,
-                                  focusNode: FocusNode(),
-                                  hint: 'e.g., Enter your first name',
-                                  enabled: true,
-                                  textInputAction: TextInputAction.done,
-                                  validator: (value) => null,
-                                ),
-                                const SizedBox(height: 24),
-                              ],
-
-                              // Options Management (for dropdown/radio)
-                              if (needsOptions) ...[
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          '${fieldType.name.toUpperCase()} Options',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelMedium
-                                              ?.copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .outline,
-                                                fontWeight: FontWeight.w900,
-                                                letterSpacing: 1.3,
-                                              ),
-                                        ),
-                                        TextButton.icon(
-                                          onPressed: addOption,
-                                          icon: const Icon(Icons.add, size: 16),
-                                          label: const Text('Add Option'),
-                                          style: TextButton.styleFrom(
-                                            foregroundColor: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    ...optionControllers
-                                        .asMap()
-                                        .entries
-                                        .map((entry) {
-                                      final index = entry.key;
-                                      final controller = entry.value;
-
-                                      return Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 8),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              child: TextFormField(
-                                                controller: controller,
-                                                decoration: InputDecoration(
-                                                  hintText:
-                                                      'Option ${index + 1}',
-                                                  filled: true,
-                                                  fillColor: Theme.of(context)
-                                                      .colorScheme
-                                                      .surfaceContainerLowest,
-                                                  border: OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12),
-                                                    borderSide: BorderSide.none,
-                                                  ),
-                                                  contentPadding:
-                                                      const EdgeInsets
-                                                          .symmetric(
-                                                    horizontal: 12,
-                                                    vertical: 12,
-                                                  ),
-                                                ),
-                                                validator: (value) {
-                                                  if (value?.trim().isEmpty ??
-                                                      true) {
-                                                    return 'Option cannot be empty';
-                                                  }
-                                                  return null;
-                                                },
-                                                onChanged: (value) {
-                                                  fieldOptions[index] = value;
-                                                },
-                                              ),
-                                            ),
-                                            if (optionControllers.length > 1)
-                                              IconButton(
-                                                onPressed: () =>
-                                                    removeOption(index),
-                                                icon: const Icon(Icons
-                                                    .remove_circle_outline),
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .error,
-                                              ),
-                                          ],
-                                        ),
-                                      );
-                                    }),
-                                  ],
-                                ),
-                                const SizedBox(height: 24),
-                              ],
-
-                              const SizedBox(height: 8),
-
-                              // Required Toggle
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerLowest,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.star,
-                                      color:
-                                          Theme.of(context).colorScheme.error,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        'Required Field',
-                                        style: editorial.labelSubtle.copyWith(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurface,
-                                        ),
-                                      ),
-                                    ),
-                                    Switch(
-                                      value: isRequired,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          isRequired = value;
-                                        });
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Action Buttons
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.pop(dialogContext),
-                              style: OutlinedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Text('Cancel',
-                                  style: editorial.buttonTextStyle),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                if (formKey.currentState?.validate() ?? false) {
-                                  if (needsOptions) {
-                                    final validOptions = optionControllers
-                                        .map((controller) =>
-                                            controller.text.trim())
-                                        .where((option) => option.isNotEmpty)
-                                        .toList();
-
-                                    if (validOptions.isEmpty) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: const Text(
-                                              'Please add at least one option'),
-                                          backgroundColor: Theme.of(context)
-                                              .colorScheme
-                                              .error,
-                                        ),
-                                      );
-                                      return;
-                                    }
-                                  }
-
-                                  Navigator.pop(dialogContext, {
-                                    'name': nameController.text.trim(),
-                                    'placeholder': needsOptions
-                                        ? null
-                                        : placeholderController.text.trim(),
-                                    'required': isRequired,
-                                    'fieldType': fieldType,
-                                    'options': needsOptions
-                                        ? optionControllers
-                                            .map((controller) =>
-                                                controller.text.trim())
-                                            .where(
-                                                (option) => option.isNotEmpty)
-                                            .toList()
-                                        : null,
-                                  });
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.onPrimary,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: Text(
-                                _buildLoadingString(
-                                    isLoading: ref
-                                        .watch(formBuilderViewModelProvider)
-                                        .isLoading,
-                                    actualLabel: 'Add Field'),
-                                style: editorial.buttonTextStyle.copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-
-    return result;
-  }
-
   Future<void> _showDeletePageDialog(
       BuildContext context, int pageIndex) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Delete Page'),
-          content: const Text(
-              'Are you sure you want to delete this page? This action cannot be undone.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
+    final confirmed = await showConfirmDeleteDialog(
+      context,
+      title: 'Delete Page',
+      message:
+          'Are you sure you want to delete this page? This action cannot be undone.',
     );
 
-    if (result == true) {
-      ref.watch(formBuilderViewModelProvider.notifier).removePage(pageIndex);
+    if (confirmed) {
+      ref.read(formBuilderViewModelProvider.notifier).removePage(pageIndex);
     }
   }
 
@@ -1467,8 +1125,14 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                                     index,
                                   );
                             },
-                            onEditClicked: (field) {
+                            onEditClicked: (field) async {
                               // Handle field selection
+                              await _editFieldDetails(
+                                context: context,
+                                colorScheme: colorScheme,
+                                editorial: editorial,
+                                selectedField: field,
+                              );
                             },
                             onFieldDeleted: (field, fieldIndex) {
                               ref
@@ -1482,7 +1146,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                               // Handle field duplication
                               ref
                                   .watch(formBuilderViewModelProvider.notifier)
-                                  .duplicateFiel(
+                                  .duplicateField(
                                     field,
                                     index,
                                   );

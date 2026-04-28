@@ -8,8 +8,10 @@ import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/models/form_page_model.dart';
+import 'package:venue_flow_app/models/popup_position.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/repositories/form_repository.dart';
+import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
 import 'package:venue_flow_app/shared/helpers/storage_helper.dart';
 
 class FormBuilderViewState {
@@ -230,6 +232,55 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     }
   }
 
+  void updateFormField(
+      {required FormFieldModel formFieldModel, required int index}) async {
+    try {
+      state = state.copyWith(isLoading: true);
+      // Create a new list with the existing forms plus the new field
+      final currentForms = state.form;
+      final updatedForms = [...currentForms];
+
+      // If you're adding a field to an existing form, you'd need to specify which form
+      // For example, adding to the first form:
+      if (updatedForms.isNotEmpty) {
+        updatedForms[0].schema![index].fields ??= [];
+
+        final fieldIndex = updatedForms[0].schema![index].fields?.indexWhere(
+              (x) =>
+                  x.id == formFieldModel.id,
+            );
+
+        if ((fieldIndex ?? -1) > -1) {
+          updatedForms[0].schema![index].fields![fieldIndex!] = formFieldModel;
+        }
+      } else {
+        updatedForms.add(
+          DynamicFormModel(
+            name: 'Form Name',
+            schema: [
+              FormPageModel(
+                title: 'Page 1',
+                fields: [
+                  formFieldModel,
+                ],
+              ),
+            ],
+          ),
+        );
+      }
+
+      await _storageHelper.saveForm(state.form.first);
+
+      state = state.copyWith(
+        forms: updatedForms,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false);
+      // Handle error
+    }
+  }
+
   //ADD NEW Page
   void addPage({
     required FormPageModel formPageModel,
@@ -398,7 +449,7 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     }
   }
 
-  void duplicateFiel(FormFieldModel formFieldModel, int index) async {
+  void duplicateField(FormFieldModel formFieldModel, int index) async {
     try {
       state = state.copyWith(isLoading: true);
       // Create a new list with the existing forms plus the new field
@@ -469,6 +520,12 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
       if (result == null) {
         throw Exception('Something happend when saving form');
       }
+
+      GlobalPopupService.showSuccess(
+        title: 'Saved',
+        message: 'Form has been saved.',
+        position: PopupPosition.bottomRight,
+      );
 
       state = state.copyWith(
         forms: [result],

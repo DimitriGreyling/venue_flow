@@ -38,7 +38,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: isClient == false?  const EdgeInsets.only(bottom: 16) :  const EdgeInsets.only(bottom: 8),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -48,27 +48,29 @@ class ReorderableFormFieldTile extends StatelessWidget {
             padding: isClient == true
                 ? const EdgeInsets.all(10)
                 : const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(16),
-              border: isClient == false
-                  ? Border.all(
-                      color: isSelected
-                          ? colorScheme.secondary.withOpacity(0.5)
-                          : Colors.transparent,
-                      width: 0.5, //isSelected ? 1 : 1,
-                    )
-                  : null,
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: colorScheme.secondary.withOpacity(0.1),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      ),
-                    ]
-                  : null,
-            ),
+            decoration: isClient == false
+                ? BoxDecoration(
+                    color: colorScheme.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(16),
+                    border: isClient == false
+                        ? Border.all(
+                            color: isSelected
+                                ? colorScheme.secondary.withOpacity(0.5)
+                                : Colors.transparent,
+                            width: 0.5, //isSelected ? 1 : 1,
+                          )
+                        : null,
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: colorScheme.secondary.withOpacity(0.1),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                            ),
+                          ]
+                        : null,
+                  )
+                : null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -116,7 +118,8 @@ class ReorderableFormFieldTile extends StatelessWidget {
                     if (isClient == false) const Spacer(),
 
                     // Action buttons (show only when selected)
-                    if (isSelected && (isClient == false)) ...[
+                    if (isSelected && (isClient == false))
+                     ...[
                       IconButton(
                         onPressed: onEditClicked,
                         icon: const Icon(Icons.edit, size: 18),
@@ -160,11 +163,17 @@ class ReorderableFormFieldTile extends StatelessWidget {
                   width: double.infinity,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8),
-                    // border: Border.all(color: colorScheme.outlineVariant),
-                  ),
+                  decoration: isClient == false
+                      ? BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(8),
+                          // border: Border.all(color: colorScheme.outlineVariant),
+                        )
+                      : BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: colorScheme.secondary.withOpacity(0.5)),
+                        ),
                   child: Row(
                     children: [
                       Expanded(

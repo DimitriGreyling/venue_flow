@@ -3,7 +3,7 @@ import 'package:venue_flow_app/providers/auth_provider.dart';
 import 'package:venue_flow_app/providers/sotrage_provider.dart';
 import 'package:venue_flow_app/repositories/form_submission_repository.dart';
 import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
-import 'package:venue_flow_app/viewmodels/form_view_model.dart';
+import 'package:venue_flow_app/viewmodels/form_view_builder_view_model.dart';
 import 'package:venue_flow_app/viewmodels/home_viewmodel.dart';
 import 'package:venue_flow_app/providers/repository_provider.dart';
 
