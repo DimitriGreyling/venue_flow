@@ -137,6 +137,7 @@ class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
                     ),
                     const SizedBox(width: EditorialSpacing.spacing2),
                     PopupMenuButton(
+                      offset: Offset(0, 50),
                       itemBuilder: (context) {
                         return [
                           PopupMenuItem(

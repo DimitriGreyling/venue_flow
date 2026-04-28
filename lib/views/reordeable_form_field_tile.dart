@@ -433,7 +433,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
       ],
     );
   }
-
+  
   Widget _buildDropDownField(
     BuildContext context, {
     String? selectedValue,
@@ -446,56 +446,97 @@ class ReorderableFormFieldTile extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
-    // Get options from field.options or use default
-    List<String> dropdownOptions;
-    if (field.options != null && field.options!.isNotEmpty) {
-      dropdownOptions = field.options!;
-    } else if (options != null && options.isNotEmpty) {
-      dropdownOptions = options;
-    } else {
-      dropdownOptions = ['Option 1', 'Option 2', 'Option 3'];
-    }
+    final dropdownOptions = (field.options != null && field.options!.isNotEmpty)
+        ? field.options!
+        : (options != null && options.isNotEmpty)
+            ? options
+            : ['Option 1', 'Option 2', 'Option 3'];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4),
-          child: Text(
-            field.label ?? '',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: scheme.outline,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.3,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: selectedValue,
-          onChanged: enabled ? (onChanged ?? (val) {}) : null,
-          onSaved: onSaved,
-          validator: validator,
-          items: dropdownOptions.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
+    return FormField<String>(
+      initialValue: selectedValue,
+      validator: validator,
+      onSaved: onSaved,
+      builder: (fieldState) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
               child: Text(
-                value,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: scheme.onSurface,
+                field.label ?? '',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: scheme.outline,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.3,
                 ),
               ),
-            );
-          }).toList(),
-          decoration: InputDecoration(
-            hintText: field.placeholder ?? 'Select an option',
-          ),
-          icon: Icon(
-            Icons.arrow_drop_down,
-            color: scheme.onSurfaceVariant,
-          ),
-        ),
-      ],
+            ),
+            const SizedBox(height: 8),
+            DropdownMenu<String>(
+              initialSelection: fieldState.value,
+              enabled: enabled,
+              width: double.infinity,
+              menuHeight: 240,
+              // alignmentOffset: const Offset(0, 8),
+              hintText: field.placeholder ?? 'Select an option',
+              textStyle: theme.textTheme.bodyLarge?.copyWith(
+                color: scheme.onSurface,
+              ),
+              menuStyle: MenuStyle(
+                backgroundColor: WidgetStatePropertyAll(scheme.surface),
+                shape: WidgetStatePropertyAll(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: scheme.surfaceContainerLowest,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: BorderSide(
+                    color: scheme.primary.withOpacity(0.35),
+                    width: 2,
+                  ),
+                ),
+              ),
+              dropdownMenuEntries: dropdownOptions
+                  .map(
+                    (value) => DropdownMenuEntry<String>(
+                      value: value,
+                      label: value,
+                    ),
+                  )
+                  .toList(),
+              onSelected: enabled
+                  ? (value) {
+                      fieldState.didChange(value);
+                      onChanged?.call(value);
+                    }
+                  : null,
+            ),
+            if (fieldState.hasError)
+              Padding(
+                padding: const EdgeInsets.only(left: 16, top: 8),
+                child: Text(
+                  fieldState.errorText ?? '',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.error,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
