@@ -48,27 +48,29 @@ class ReorderableFormFieldTile extends StatelessWidget {
             padding: isClient == true
                 ? const EdgeInsets.all(10)
                 : const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(16),
-              border: isClient == false
-                  ? Border.all(
-                      color: isSelected
-                          ? colorScheme.secondary.withOpacity(0.5)
-                          : Colors.transparent,
-                      width: 0.5, //isSelected ? 1 : 1,
-                    )
-                  : null,
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: colorScheme.secondary.withOpacity(0.1),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      ),
-                    ]
-                  : null,
-            ),
+            decoration: isClient == false
+                ? BoxDecoration(
+                    color: colorScheme.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(16),
+                    border: isClient == false
+                        ? Border.all(
+                            color: isSelected
+                                ? colorScheme.secondary.withOpacity(0.5)
+                                : Colors.transparent,
+                            width: 0.5, //isSelected ? 1 : 1,
+                          )
+                        : null,
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: colorScheme.secondary.withOpacity(0.1),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                            ),
+                          ]
+                        : null,
+                  )
+                : null,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -160,11 +162,17 @@ class ReorderableFormFieldTile extends StatelessWidget {
                   width: double.infinity,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8),
-                    // border: Border.all(color: colorScheme.outlineVariant),
-                  ),
+                  decoration: isClient == false
+                      ? BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(8),
+                          // border: Border.all(color: colorScheme.outlineVariant),
+                        )
+                      : BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: colorScheme.secondary.withOpacity(0.5)),
+                        ),
                   child: Row(
                     children: [
                       Expanded(
