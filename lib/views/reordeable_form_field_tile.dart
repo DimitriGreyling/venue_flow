@@ -50,8 +50,8 @@ class ReorderableFormFieldTile extends StatelessWidget {
               color: colorScheme.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isSelected ? colorScheme.secondary : Colors.transparent,
-                width: isSelected ? 2 : 1,
+                color: isSelected ? colorScheme.secondary.withOpacity(0.5) : Colors.transparent,
+                width: 0.5, //isSelected ? 1 : 1,
               ),
               boxShadow: isSelected
                   ? [
@@ -157,7 +157,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: colorScheme.outlineVariant),
+                    // border: Border.all(color: colorScheme.outlineVariant),
                   ),
                   child: Row(
                     children: [

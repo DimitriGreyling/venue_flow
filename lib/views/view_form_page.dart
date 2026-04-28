@@ -300,7 +300,7 @@ class _ViewFormPageState extends ConsumerState<ViewFormPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           sliver: SliverToBoxAdapter(
             child: Card(
-              color: colorScheme.surfaceContainer,
+              color: Colors.transparent, //colorScheme.surfaceContainer,
               child: Center(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
