@@ -118,7 +118,7 @@ class _PopupMessageWidgetState extends State<PopupMessageWidget>
     return GestureDetector(
       onTap: widget.popup.isDismissible ? _handleDismiss : null,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsets.symmetric(vertical: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: widget.popup.backgroundColor ?? _getBackgroundColor(),
@@ -136,19 +136,23 @@ class _PopupMessageWidgetState extends State<PopupMessageWidget>
           ),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Icon
             _buildIcon(),
             const SizedBox(width: 12),
 
             // Content
-            Expanded(
+            Flexible(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     widget.popup.title,
+                    softWrap: true,
+                    overflow: TextOverflow.visible,
                     style: TextStyle(
                       color: widget.popup.textColor ?? _getTextColor(),
                       fontSize: 16,
@@ -158,6 +162,8 @@ class _PopupMessageWidgetState extends State<PopupMessageWidget>
                   const SizedBox(height: 4),
                   Text(
                     widget.popup.message,
+                    softWrap: true,
+                    overflow: TextOverflow.visible,
                     style: TextStyle(
                       color: (widget.popup.textColor ?? _getTextColor())
                           .withOpacity(0.8),
@@ -175,7 +181,8 @@ class _PopupMessageWidgetState extends State<PopupMessageWidget>
             ),
 
             // Close button
-            if (widget.popup.showCloseButton)
+            if (widget.popup.showCloseButton) ...[
+              const SizedBox(width: 8),
               IconButton(
                 onPressed: _handleDismiss,
                 icon: Icon(
@@ -187,6 +194,7 @@ class _PopupMessageWidgetState extends State<PopupMessageWidget>
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
               ),
+            ],
           ],
         ),
       ),
@@ -194,10 +202,10 @@ class _PopupMessageWidgetState extends State<PopupMessageWidget>
   }
 
   Widget _buildButtonRow() {
-    return Row(
-      mainAxisAlignment: widget.popup.secondaryActionText != null
-          ? MainAxisAlignment.spaceBetween
-          : MainAxisAlignment.end,
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      alignment: WrapAlignment.end,
       children: [
         // Secondary button (left side)
         if (widget.popup.secondaryActionText != null) ...[
@@ -215,7 +223,6 @@ class _PopupMessageWidgetState extends State<PopupMessageWidget>
             ),
             child: Text(widget.popup.secondaryActionText!),
           ),
-          const SizedBox(width: 8),
         ],
 
         // Primary button (right side)

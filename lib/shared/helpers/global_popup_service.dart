@@ -24,14 +24,22 @@ class GlobalPopupService {
     required String title,
     required String message,
     Duration? duration,
-    PopupPosition? position= PopupPosition.center,
+    PopupPosition? position = PopupPosition.center,
+    double? width,
+    double? minWidth,
+    double? maxWidth,
   }) {
     try {
-      _notifier.showInfo(title, message,
-          duration: duration, position: position);
-    } catch (e) {
-
-    }
+      _notifier.showInfo(
+        title,
+        message,
+        duration: duration,
+        position: position,
+        width: width,
+        minWidth: minWidth,
+        maxWidth: maxWidth,
+      );
+    } catch (e) {}
   }
 
   // Show success message
@@ -40,9 +48,19 @@ class GlobalPopupService {
     required String message,
     Duration? duration,
     PopupPosition? position,
+    double? width,
+    double? minWidth,
+    double? maxWidth,
   }) {
-    _notifier.showSuccess(title, message,
-        duration: duration, position: position);
+    _notifier.showSuccess(
+      title,
+      message,
+      duration: duration,
+      position: position,
+      width: width,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+    );
   }
 
   // Show warning message
@@ -51,9 +69,19 @@ class GlobalPopupService {
     required String message,
     Duration? duration,
     PopupPosition? position = PopupPosition.center,
+    double? width,
+    double? minWidth,
+    double? maxWidth,
   }) {
-    _notifier.showWarning(title, message,
-        duration: duration, position: position);
+    _notifier.showWarning(
+      title,
+      message,
+      duration: duration,
+      position: position,
+      width: width,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+    );
   }
 
   // Show error message
@@ -61,9 +89,20 @@ class GlobalPopupService {
     required String title,
     required String message,
     Duration? duration,
-    PopupPosition? position= PopupPosition.center,
+    PopupPosition? position = PopupPosition.center,
+    double? width,
+    double? minWidth,
+    double? maxWidth,
   }) {
-    _notifier.showError(title, message, duration: duration, position: position);
+    _notifier.showError(
+      title,
+      message,
+      duration: duration,
+      position: position,
+      width: width,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+    );
   }
 
   // Show custom popup
@@ -79,7 +118,10 @@ class GlobalPopupService {
     required VoidCallback onAction,
     PopupType type = PopupType.info,
     Duration? duration,
-    PopupPosition? position= PopupPosition.center,
+    PopupPosition? position = PopupPosition.center,
+    double? width,
+    double? minWidth,
+    double? maxWidth,
   }) {
     _notifier.showAction(
       title: title,
@@ -89,6 +131,9 @@ class GlobalPopupService {
       type: type,
       duration: duration,
       position: position,
+      width: width,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
     );
   }
 

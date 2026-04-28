@@ -113,7 +113,7 @@ class _ReorderableFormFieldsListState extends State<ReorderableFormFieldsList> {
       buildDefaultDragHandles: false, // We'll build our own drag handles
       itemBuilder: (context, index) {
         final field = _fields[index];
-        final isSelected = field.id == widget.selectedFieldId;
+        final isSelected = field.id == _fields[index].id;
         final fieldKey = field.submissionKey(
           pageIndex: widget.pageIndex,
           fieldIndex: index,
