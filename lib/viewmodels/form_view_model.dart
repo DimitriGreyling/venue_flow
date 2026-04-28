@@ -10,9 +10,11 @@ import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/models/form_page_model.dart';
 import 'package:venue_flow_app/models/form_submission_model.dart';
+import 'package:venue_flow_app/models/popup_position.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/repositories/form_repository.dart';
 import 'package:venue_flow_app/repositories/form_submission_repository.dart';
+import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
 import 'package:venue_flow_app/shared/helpers/storage_helper.dart';
 
 class FormViewBuilderViewState {
@@ -127,11 +129,27 @@ class FormViewBuilderViewModel extends StateNotifier<FormViewBuilderViewState> {
     log('FORM VALUES :: $formValues');
     log('FORM SUBMISSION :: ${submission.toJsonString()}');
 
-    final response = await _formSubmissionRepository.saveFormSubmission(submittedForm: submission);
+    final response = await _formSubmissionRepository.saveFormSubmission(
+        submittedForm: submission);
 
-    // if (!mounted) {
-    //   return;
-    // }
+    if (response == null) {
+      GlobalPopupService.showAction(
+        title: 'Error',
+        message: 'Could not submit form. Please try again later.',
+        actionText: 'OK',
+        type: PopupType.error,
+        onAction: () {},
+      );
+      return;
+    }
+
+    GlobalPopupService.showAction(
+      title: 'Saved',
+      message: 'Form submission has been completed.',
+      actionText: 'OK',
+      type: PopupType.success,
+      onAction: () {},
+    );
 
     // ScaffoldMessenger.of(context).showSnackBar(
     //   SnackBar(content: Text('Captured ${_formValues.length} field values.')),
