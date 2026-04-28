@@ -4,6 +4,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:venue_flow_app/routing/app_router.dart';
+import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
+import 'package:venue_flow_app/views/popup/global_popup_overlay.dart';
 import 'theme/theme.dart';
 import 'theme/theme_provider.dart';
 import 'views/home_page.dart';
@@ -31,8 +33,12 @@ void main() async {
     anonKey: supabaseAnonKey,
   );
 
+  final container = ProviderContainer();
+  GlobalPopupService.initialize(container);
+
   runApp(
-    const ProviderScope(
+    UncontrolledProviderScope(
+      container: container,
       child: EditorialConciergeApp(),
     ),
   );
@@ -74,7 +80,7 @@ class EditorialConciergeApp extends ConsumerWidget {
       builder: (context, child) {
         if (child == null) return const SizedBox.shrink();
 
-        return child;
+        return GlobalPopupOverlay(child: child);
       },
     );
   }
