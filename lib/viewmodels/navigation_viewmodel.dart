@@ -42,6 +42,7 @@ class NavigationNotifier extends StateNotifier<NavigationState> {
       '/client': 'Dashboard',
       '/form-builder': 'Form Builder',
       '/form-list': 'Form Builder',
+      '/event-list': 'Events',
       '/events': 'Events',
       '/settings': 'Settings',
     };

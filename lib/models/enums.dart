@@ -24,4 +24,6 @@ enum EventStatus{
   awaitingClient,
   inprogress,
   cancelled,
+  draft,
+  unknown,
 }

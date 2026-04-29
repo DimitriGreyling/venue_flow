@@ -397,90 +397,354 @@ class _FormListPageState extends ConsumerState<FormListPage> {
         FutureBuilder(
           future: ref.watch(formBuilderViewModelProvider.notifier).loadForms(),
           builder: (context, snapshot) {
-            return Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerLowest,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: colorScheme.outline.withOpacity(0.05),
-                ),
-                boxShadow: EditorialElevation.cardShadow(
-                  colorScheme.brightness == Brightness.dark,
-                ),
-              ),
-              child: Column(
-                children: [
-                  // Table Header
-                  Container(
-                    padding: const EdgeInsets.all(EditorialSpacing.spacing6),
+            // if (snapshot.connectionState == ConnectionState.waiting) {
+            //   return const Center(
+            //     child: CircularProgressIndicator(),
+            //   );
+            // }
+
+            // if (!snapshot.hasData) {
+            //   return const Center(
+            //     child: CircularProgressIndicator(),
+            //   );
+            // }
+
+            final results = snapshot.data;
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  decoration: BoxDecoration(
+                    // color: Colors.red, //colorScheme.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: colorScheme.outline.withOpacity(0.05),
+                    ),
+                    boxShadow: EditorialElevation.cardShadow(
+                      colorScheme.brightness == Brightness.dark,
+                    ),
+                  ),
+                  child: DataTable(
                     decoration: BoxDecoration(
                       color: colorScheme.surfaceContainerLow,
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(16),
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 3,
-                          child: Text(
-                            'FORM NAME',
-                            style:
-                                editorial.metadataStyle.copyWith(fontSize: 10),
-                          ),
-                        ),
-                        // Expanded(
-                        //   flex: 2,
-                        //   child: Text(
-                        //     'CLIENT',
-                        //     style:
-                        //         editorial.metadataStyle.copyWith(fontSize: 10),
-                        //   ),
-                        // ),
-                        Expanded(
-                          child: Text(
-                            'LAST MODIFIED',
-                            style:
-                                editorial.metadataStyle.copyWith(fontSize: 10),
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            'STATUS',
-                            style:
-                                editorial.metadataStyle.copyWith(fontSize: 10),
-                          ),
-                        ),
-                        const SizedBox(width: 40),
-                      ],
-                    ),
+                    headingTextStyle:
+                        editorial.metadataStyle.copyWith(fontSize: 16),
+                    dataTextStyle:
+                        editorial.metadataStyle.copyWith(fontSize: 12),
+                    dataRowColor:
+                        WidgetStateProperty.resolveWith<Color?>((states) {
+                      // if (states.contains(WidgetState.selected))
+                      //   return Colors.blue.withOpacity(0.08);
+                      // return null; // Default color
+
+                      return colorScheme.surface;
+                    }),
+                    columns:
+                        snapshot.connectionState == ConnectionState.waiting ||
+                                (results != null && results.isEmpty)
+                            ? const [
+                                DataColumn(
+                                  label: Expanded(
+                                    flex: 3,
+                                    child: Text(
+                                      'Form Name',
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Expanded(
+                                    flex: 3,
+                                    child: Text(
+                                      'Form Name',
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Expanded(
+                                    flex: 3,
+                                    child: Text(
+                                      'Form Name',
+                                    ),
+                                  ),
+                                ),
+                              ]
+                            : const [
+                                DataColumn(
+                                  label: Expanded(
+                                    flex: 3,
+                                    child: Text(
+                                      'Form Name',
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Expanded(
+                                    child: Text(
+                                      'Last Modified',
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Expanded(
+                                    child: Text(
+                                      'Status',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                    rows: snapshot.connectionState == ConnectionState.waiting ||
+                            (results != null && results.isEmpty)
+                        ? const [
+                            DataRow(
+                              cells: [
+                                DataCell(
+                                  Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1,
+                                    ),
+                                  ),
+                                ),
+                                DataCell(
+                                  Center(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1,
+                                    ),
+                                  ),
+                                ),
+                                DataCell(
+                                  Center(
+                                    child: CircularProgressIndicator(strokeWidth: 1,),
+                                  ),
+                                ),
+                              ],
+                            )
+                          ]
+                        : results!.map((event) {
+                            return DataRow(
+                              cells: [
+                                DataCell(
+                                  Text(
+                                    event.name ?? 'Unknown',
+                                  ),
+                                ),
+                                DataCell(
+                                  Text(
+                                    event.modifiedDate?.toIso8601String() ??
+                                        '-',
+                                  ),
+                                ),
+                                DataCell(
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: EditorialSpacing.spacing3,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: (_getStatusColor(
+                                              event.formStatus ??
+                                                  FormStatus.inactive))
+                                          .withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      event.formStatus?.name.toUpperCase() ??
+                                          '',
+                                      style: editorial.metadataStyle.copyWith(
+                                        color: _getStatusColor(
+                                            event.formStatus ??
+                                                FormStatus.inactive),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
                   ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    child: Column(
-                      children: [
-                        if (snapshot.connectionState == ConnectionState.waiting)
-                          const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        if (snapshot.connectionState != ConnectionState.waiting)
-                          // Table Rows
-                          ...List.generate(
-                            snapshot.data?.length ?? 0,
-                            (index) => _buildFormRow(
-                              formModel: snapshot.data![index],
-                              colorScheme: colorScheme,
-                              editorial: editorial,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             );
+
+            // return Container(
+            //   decoration: BoxDecoration(
+            //     color: colorScheme.surfaceContainerLowest,
+            //     borderRadius: BorderRadius.circular(16),
+            //     border: Border.all(
+            //       color: colorScheme.outline.withOpacity(0.05),
+            //     ),
+            //     boxShadow: EditorialElevation.cardShadow(
+            //       colorScheme.brightness == Brightness.dark,
+            //     ),
+            //   ),
+            //   child: Column(
+            //     children: [
+            //       // Table Header
+            //       Container(
+            //         padding: const EdgeInsets.all(EditorialSpacing.spacing6),
+            //         decoration: BoxDecoration(
+            //           color: colorScheme.surfaceContainerLow,
+            //           borderRadius: const BorderRadius.vertical(
+            //             top: Radius.circular(16),
+            //           ),
+            //         ),
+            //         child: Row(
+            //           children: [
+            //             Expanded(
+            //               flex: 3,
+            //               child: Text(
+            //                 'FORM NAME',
+            //                 style:
+            //                     editorial.metadataStyle.copyWith(fontSize: 10),
+            //               ),
+            //             ),
+            //             // Expanded(
+            //             //   flex: 2,
+            //             //   child: Text(
+            //             //     'CLIENT',
+            //             //     style:
+            //             //         editorial.metadataStyle.copyWith(fontSize: 10),
+            //             //   ),
+            //             // ),
+            //             Expanded(
+            //               child: Text(
+            //                 'LAST MODIFIED',
+            //                 style:
+            //                     editorial.metadataStyle.copyWith(fontSize: 10),
+            //               ),
+            //             ),
+            //             Expanded(
+            //               child: Text(
+            //                 'STATUS',
+            //                 style:
+            //                     editorial.metadataStyle.copyWith(fontSize: 10),
+            //               ),
+            //             ),
+            //             const SizedBox(width: 40),
+            //           ],
+            //         ),
+            //       ),
+            //       SizedBox(
+            //         height: MediaQuery.of(context).size.height * 0.5,
+            //         child: Column(
+            //           children: [
+            //             if (snapshot.connectionState == ConnectionState.waiting)
+            //               const Center(
+            //                 child: CircularProgressIndicator(),
+            //               ),
+            //             if (snapshot.connectionState != ConnectionState.waiting)
+            //               // Table Rows
+            //               ...List.generate(
+            //                 snapshot.data?.length ?? 0,
+            //                 (index) => _buildFormRow(
+            //                   formModel: snapshot.data![index],
+            //                   colorScheme: colorScheme,
+            //                   editorial: editorial,
+            //                 ),
+            //               ),
+            //           ],
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // );
           },
         ),
+        // FutureBuilder(
+        //   future: ref.watch(formBuilderViewModelProvider.notifier).loadForms(),
+        //   builder: (context, snapshot) {
+        //     return Container(
+        //       decoration: BoxDecoration(
+        //         color: colorScheme.surfaceContainerLowest,
+        //         borderRadius: BorderRadius.circular(16),
+        //         border: Border.all(
+        //           color: colorScheme.outline.withOpacity(0.05),
+        //         ),
+        //         boxShadow: EditorialElevation.cardShadow(
+        //           colorScheme.brightness == Brightness.dark,
+        //         ),
+        //       ),
+        //       child: Column(
+        //         children: [
+        //           // Table Header
+        //           Container(
+        //             padding: const EdgeInsets.all(EditorialSpacing.spacing6),
+        //             decoration: BoxDecoration(
+        //               color: colorScheme.surfaceContainerLow,
+        //               borderRadius: const BorderRadius.vertical(
+        //                 top: Radius.circular(16),
+        //               ),
+        //             ),
+        //             child: Row(
+        //               children: [
+        //                 Expanded(
+        //                   flex: 3,
+        //                   child: Text(
+        //                     'FORM NAME',
+        //                     style:
+        //                         editorial.metadataStyle.copyWith(fontSize: 10),
+        //                   ),
+        //                 ),
+        //                 // Expanded(
+        //                 //   flex: 2,
+        //                 //   child: Text(
+        //                 //     'CLIENT',
+        //                 //     style:
+        //                 //         editorial.metadataStyle.copyWith(fontSize: 10),
+        //                 //   ),
+        //                 // ),
+        //                 Expanded(
+        //                   child: Text(
+        //                     'LAST MODIFIED',
+        //                     style:
+        //                         editorial.metadataStyle.copyWith(fontSize: 10),
+        //                   ),
+        //                 ),
+        //                 Expanded(
+        //                   child: Text(
+        //                     'STATUS',
+        //                     style:
+        //                         editorial.metadataStyle.copyWith(fontSize: 10),
+        //                   ),
+        //                 ),
+        //                 const SizedBox(width: 40),
+        //               ],
+        //             ),
+        //           ),
+        //           SizedBox(
+        //             height: MediaQuery.of(context).size.height * 0.5,
+        //             child: Column(
+        //               children: [
+        //                 if (snapshot.connectionState == ConnectionState.waiting)
+        //                   const Center(
+        //                     child: CircularProgressIndicator(),
+        //                   ),
+        //                 if (snapshot.connectionState != ConnectionState.waiting)
+        //                   // Table Rows
+        //                   ...List.generate(
+        //                     snapshot.data?.length ?? 0,
+        //                     (index) => _buildFormRow(
+        //                       formModel: snapshot.data![index],
+        //                       colorScheme: colorScheme,
+        //                       editorial: editorial,
+        //                     ),
+        //                   ),
+        //               ],
+        //             ),
+        //           ),
+        //         ],
+        //       ),
+        //     );
+        //   },
+        // ),
       ],
     );
   }

@@ -30,7 +30,7 @@ class EventRepository extends IEventRepository {
     final response =
         await _client.from(_tableName).select().eq('tenant_id', tenantId);
 
-    return response.cast<EventModel>();
+    return response.map((x)=> EventModel.fromJson(x)).toList();
   }
 
   @override

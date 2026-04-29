@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/providers/auth_provider.dart';
 import 'package:venue_flow_app/providers/sotrage_provider.dart';
-import 'package:venue_flow_app/repositories/form_submission_repository.dart';
+import 'package:venue_flow_app/viewmodels/event_list_viewmodel.dart';
 import 'package:venue_flow_app/viewmodels/form_builder_viewmodel.dart';
 import 'package:venue_flow_app/viewmodels/form_view_builder_view_model.dart';
 import 'package:venue_flow_app/viewmodels/home_viewmodel.dart';
@@ -17,7 +17,6 @@ final formBuilderViewModelProvider =
     StateNotifierProvider<FormBuilderViewModel, FormBuilderViewState>((ref) {
   final formRepository = ref.watch(formRepositoryProvider);
   final storageHelper = ref.watch(storageHelperProvider);
-  final currentUser = ref.watch(currentUserProvider);
 
   return FormBuilderViewModel(
     formRepo: formRepository,
@@ -37,6 +36,16 @@ final formViewBuilderViewModelProvider =
     formRepo: formRepository,
     storageHelper: storageHelper,
     formSubmissionRepository: formSubmissionRepository,
+    getCurrentUser: () => ref.read(currentUserProvider),
+  );
+});
+
+final eventListViewModelProvider =
+    StateNotifierProvider<EventListViewModel, EventListState>((ref) {
+  final eventRepoProvider = ref.watch(eventRepositoryProvider);
+
+  return EventListViewModel(
+    eventRepository: eventRepoProvider,
     getCurrentUser: () => ref.read(currentUserProvider),
   );
 });
