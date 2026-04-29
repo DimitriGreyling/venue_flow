@@ -38,36 +38,14 @@ class _EventListPageState extends ConsumerState<EventListPage> {
         children: [
           const SideNavWidget(),
           Expanded(
-            child: Builder(
-              builder: (context) {
-                if (state.isLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-
-                if (state.error != null) {
-                  return Center(
-                    child: Text(state.error!),
-                  );
-                }
-
-                if (state.events.isEmpty) {
-                  return const Center(
-                    child: Text('No events found'),
-                  );
-                }
-
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Center(
-                      child: _buildTable(state: state),
-                    ),
-                  ),
-                );
-              },
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Center(
+                  child: _buildTable(state: state),
+                ),
+              ),
             ),
           ),
         ],
@@ -137,45 +115,91 @@ class _EventListPageState extends ConsumerState<EventListPage> {
                 ),
               ),
             ],
-            rows: state.events.map((event) {
-              return DataRow(
-                cells: [
-                  DataCell(
-                    Text(
-                      event.name ?? 'Unknown',
-                    ),
-                  ),
-                  DataCell(
-                    Text(
-                      event.eventDate?.toIso8601String() ?? '-',
-                    ),
-                  ),
-                  DataCell(
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: EditorialSpacing.spacing3,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: (_getStatusColor(
-                                status: event.status ?? EventStatus.unknown))
-                            .withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        event.status?.name.toUpperCase() ?? '',
-                        style: editorial.metadataStyle.copyWith(
-                          color: _getStatusColor(
-                              status: event.status ?? EventStatus.unknown),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+            rows: state.isLoading
+                ? const [
+                    DataRow(
+                      cells: [
+                        DataCell(
+                          Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }).toList(),
+                        DataCell(
+                          Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1,
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ]
+                : (state.events.isEmpty)
+                    ? const [
+                        DataRow(
+                          cells: [
+                            DataCell(
+                              Text(''),
+                            ),
+                            DataCell(
+                              Text(''),
+                            ),
+                            DataCell(
+                              Text(''),
+                            ),
+                          ],
+                        )
+                      ]
+                    : state.events.map((event) {
+                        return DataRow(
+                          cells: [
+                            DataCell(
+                              Text(
+                                event.name ?? 'Unknown',
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                event.eventDate?.toIso8601String() ?? '-',
+                              ),
+                            ),
+                            DataCell(
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: EditorialSpacing.spacing3,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: (_getStatusColor(
+                                          status: event.status ??
+                                              EventStatus.unknown))
+                                      .withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  event.status?.name.toUpperCase() ?? '',
+                                  style: editorial.metadataStyle.copyWith(
+                                    color: _getStatusColor(
+                                        status: event.status ??
+                                            EventStatus.unknown),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
           ),
         ),
       ],

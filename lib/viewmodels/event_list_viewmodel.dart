@@ -49,7 +49,7 @@ class EventListViewModel extends StateNotifier<EventListState> {
         tenantId: currentUser?.tenantId ?? '',
       );
       state = state.copyWith(
-        events: events,
+        events: [],//events,
         isLoading: false,
         error: null,
       );

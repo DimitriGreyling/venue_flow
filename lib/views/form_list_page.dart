@@ -446,86 +446,74 @@ class _FormListPageState extends ConsumerState<FormListPage> {
 
                       return colorScheme.surface;
                     }),
-                    columns:
-                        snapshot.connectionState == ConnectionState.waiting ||
-                                (results != null && results.isEmpty)
+                    columns: const [
+                      DataColumn(
+                        label: Expanded(
+                          flex: 3,
+                          child: Text(
+                            'Form Name',
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Text(
+                            'Last Modified',
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Expanded(
+                          child: Text(
+                            'Status',
+                          ),
+                        ),
+                      ),
+                    ],
+                    rows: snapshot.connectionState == ConnectionState.waiting
+                        ? (results != null && results.isEmpty)
                             ? const [
-                                DataColumn(
-                                  label: Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      'Form Name',
+                                DataRow(
+                                  cells: [
+                                    DataCell(
+                                      Text(''),
                                     ),
-                                  ),
-                                ),
-                                DataColumn(
-                                  label: Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      'Form Name',
+                                    DataCell(
+                                      Text(''),
                                     ),
-                                  ),
-                                ),
-                                DataColumn(
-                                  label: Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      'Form Name',
+                                    DataCell(
+                                      Text(''),
                                     ),
-                                  ),
-                                ),
+                                  ],
+                                )
                               ]
                             : const [
-                                DataColumn(
-                                  label: Expanded(
-                                    flex: 3,
-                                    child: Text(
-                                      'Form Name',
+                                DataRow(
+                                  cells: [
+                                    DataCell(
+                                      Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                DataColumn(
-                                  label: Expanded(
-                                    child: Text(
-                                      'Last Modified',
+                                    DataCell(
+                                      Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                DataColumn(
-                                  label: Expanded(
-                                    child: Text(
-                                      'Status',
+                                    DataCell(
+                                      Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 1,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              ],
-                    rows: snapshot.connectionState == ConnectionState.waiting ||
-                            (results != null && results.isEmpty)
-                        ? const [
-                            DataRow(
-                              cells: [
-                                DataCell(
-                                  Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 1,
-                                    ),
-                                  ),
-                                ),
-                                DataCell(
-                                  Center(
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 1,
-                                    ),
-                                  ),
-                                ),
-                                DataCell(
-                                  Center(
-                                    child: CircularProgressIndicator(strokeWidth: 1,),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ]
+                                  ],
+                                )
+                              ]
                         : results!.map((event) {
                             return DataRow(
                               cells: [
