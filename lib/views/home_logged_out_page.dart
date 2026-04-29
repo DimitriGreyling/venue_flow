@@ -96,7 +96,8 @@ class _TopNav extends StatelessWidget {
     final isCompact = width < 720;
 
     final brand = ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 260),
+      constraints:
+          BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.3),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: EditorialSpacing.spacing3,
@@ -116,9 +117,25 @@ class _TopNav extends StatelessWidget {
         child: Row(
           children: [
             Image.asset(
-              'assets/logo_white_transparent.png',
+              'assets/log_white_background.jpeg',
               height: 100,
               width: 100,
+              frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                if (wasSynchronouslyLoaded) {
+                  return child;
+                }
+
+                if (frame == null) {
+                  return const SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1,
+                    ),
+                  );
+                }
+                return child;
+              },
               errorBuilder: (_, __, ___) => Icon(
                 Icons.event_available_outlined,
                 color: colorScheme.primary,
