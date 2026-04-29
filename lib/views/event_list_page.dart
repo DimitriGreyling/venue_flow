@@ -80,6 +80,7 @@ class _EventListPageState extends ConsumerState<EventListPage> {
               color: colorScheme.surfaceContainerLow,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
+                bottom: Radius.circular(16)
               ),
             ),
             headingTextStyle: editorial.metadataStyle.copyWith(fontSize: 16),
@@ -114,11 +115,25 @@ class _EventListPageState extends ConsumerState<EventListPage> {
                   ),
                 ),
               ),
+              DataColumn(
+                label: Expanded(
+                  child: Text(
+                    '',
+                  ),
+                ),
+              ),
             ],
             rows: state.isLoading
                 ? const [
                     DataRow(
                       cells: [
+                        DataCell(
+                          Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1,
+                            ),
+                          ),
+                        ),
                         DataCell(
                           Center(
                             child: CircularProgressIndicator(
@@ -147,6 +162,9 @@ class _EventListPageState extends ConsumerState<EventListPage> {
                     ? const [
                         DataRow(
                           cells: [
+                            DataCell(
+                              Text(''),
+                            ),
                             DataCell(
                               Text(''),
                             ),
@@ -197,6 +215,15 @@ class _EventListPageState extends ConsumerState<EventListPage> {
                                 ),
                               ),
                             ),
+                            DataCell(PopupMenuButton(
+                              itemBuilder: (context) {
+                                return [
+                                  const PopupMenuItem(
+                                    child: Text('Update'),
+                                  )
+                                ];
+                              },
+                            )),
                           ],
                         );
                       }).toList(),
