@@ -16,9 +16,6 @@ class EventListPage extends ConsumerStatefulWidget {
 }
 
 class _EventListPageState extends ConsumerState<EventListPage> {
-  int? _sortColumnIndex;
-  bool _sortAscending = true;
-
   @override
   void initState() {
     super.initState();
@@ -34,18 +31,30 @@ class _EventListPageState extends ConsumerState<EventListPage> {
 
     return Scaffold(
       body: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SideNavWidget(),
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Center(
-                  child: _buildTable(state: state),
-                ),
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                const pagePadding = 16.0;
+                final availableWidth = constraints.maxWidth - (pagePadding * 2);
+                final tableWidth =
+                    constraints.maxWidth >= 900 ? availableWidth * 0.8 : availableWidth;
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(pagePadding),
+                  child: Center(
+                    child: SizedBox(
+                      width: tableWidth,
+                      child: _buildTable(
+                        context: context,
+                        state: state,
+                        tableWidth: tableWidth,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -54,197 +63,324 @@ class _EventListPageState extends ConsumerState<EventListPage> {
   }
 
   Widget _buildTable({
+    required BuildContext context,
     required EventListState state,
+    required double tableWidth,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final editorial = context.editorial;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Container(
-          width: MediaQuery.of(context).size.width * 0.8,
-          height: MediaQuery.of(context).size.height * 0.7,
-          decoration: BoxDecoration(
-            // color: Colors.red, //colorScheme.surfaceContainerLowest,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: colorScheme.outline.withOpacity(0.05),
-            ),
-            boxShadow: EditorialElevation.cardShadow(
-              colorScheme.brightness == Brightness.dark,
-            ),
-          ),
-          child: DataTable(
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLow,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-                bottom: Radius.circular(16)
-              ),
-            ),
-            headingTextStyle: editorial.metadataStyle.copyWith(fontSize: 16),
-            dataTextStyle: editorial.metadataStyle.copyWith(fontSize: 12),
-            dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
-              // if (states.contains(WidgetState.selected))
-              //   return Colors.blue.withOpacity(0.08);
-              // return null; // Default color
+    final actionWidth = 72.0;
+    final contentWidth = tableWidth - actionWidth;
+    final nameWidth = contentWidth * 0.45;
+    final dateWidth = contentWidth * 0.30;
+    final statusWidth = contentWidth * 0.25;
 
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.08),
+        ),
+        boxShadow: EditorialElevation.cardShadow(
+          colorScheme.brightness == Brightness.dark,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            columnSpacing: 0,
+            horizontalMargin: 16,
+            headingRowColor: WidgetStatePropertyAll(
+              colorScheme.surfaceContainerLow,
+            ),
+            dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
+              if (states.contains(WidgetState.selected)) {
+                return colorScheme.primaryContainer.withOpacity(0.25);
+              }
               return colorScheme.surface;
             }),
-            columns: const [
+            headingTextStyle: editorial.metadataStyle.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: colorScheme.onSurface,
+            ),
+            dataTextStyle: editorial.metadataStyle.copyWith(
+              fontSize: 12,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            dividerThickness: 0.6,
+            dataRowMinHeight: 60,
+            dataRowMaxHeight: 72,
+            columns: [
               DataColumn(
-                label: Expanded(
-                  flex: 3,
-                  child: Text(
-                    'Name',
-                  ),
+                label: SizedBox(
+                  width: nameWidth,
+                  child: const Text('Name'),
                 ),
               ),
               DataColumn(
-                label: Expanded(
-                  child: Text(
-                    'Event Date',
-                  ),
+                label: SizedBox(
+                  width: dateWidth,
+                  child: const Text('Event Date'),
                 ),
               ),
               DataColumn(
-                label: Expanded(
-                  child: Text(
-                    'Status',
-                  ),
+                label: SizedBox(
+                  width: statusWidth,
+                  child: const Text('Status'),
                 ),
               ),
               DataColumn(
-                label: Expanded(
-                  child: Text(
-                    '',
-                  ),
+                label: SizedBox(
+                  width: actionWidth,
+                  child: const SizedBox.shrink(),
                 ),
               ),
             ],
-            rows: state.isLoading
-                ? const [
-                    DataRow(
-                      cells: [
-                        DataCell(
-                          Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1,
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1,
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1,
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1,
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  ]
-                : (state.events.isEmpty)
-                    ? const [
-                        DataRow(
-                          cells: [
-                            DataCell(
-                              Text(''),
-                            ),
-                            DataCell(
-                              Text(''),
-                            ),
-                            DataCell(
-                              Text(''),
-                            ),
-                            DataCell(
-                              Text(''),
-                            ),
-                          ],
-                        )
-                      ]
-                    : state.events.map((event) {
-                        return DataRow(
-                          cells: [
-                            DataCell(
-                              Text(
-                                event.name ?? 'Unknown',
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                event.eventDate?.toIso8601String() ?? '-',
-                              ),
-                            ),
-                            DataCell(
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: EditorialSpacing.spacing3,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: (_getStatusColor(
-                                          status: event.status ??
-                                              EventStatus.unknown))
-                                      .withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  event.status?.name.toUpperCase() ?? '',
-                                  style: editorial.metadataStyle.copyWith(
-                                    color: _getStatusColor(
-                                        status: event.status ??
-                                            EventStatus.unknown),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            DataCell(PopupMenuButton(
-                              itemBuilder: (context) {
-                                return [
-                                  const PopupMenuItem(
-                                    child: Text('Update'),
-                                  )
-                                ];
-                              },
-                            )),
-                          ],
-                        );
-                      }).toList(),
+            rows: _buildRows(
+              context: context,
+              state: state,
+              nameWidth: nameWidth,
+              dateWidth: dateWidth,
+              statusWidth: statusWidth,
+              actionWidth: actionWidth,
+            ),
           ),
         ),
-      ],
+      ),
     );
+  }
+
+  List<DataRow> _buildRows({
+    required BuildContext context,
+    required EventListState state,
+    required double nameWidth,
+    required double dateWidth,
+    required double statusWidth,
+    required double actionWidth,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final editorial = context.editorial;
+
+    if (state.isLoading) {
+      return [
+        DataRow(
+          cells: [
+            DataCell(
+              SizedBox(
+                width: nameWidth,
+                child: const Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              ),
+            ),
+            DataCell(
+              SizedBox(
+                width: dateWidth,
+                child: Text(
+                  'Loading events...',
+                  style: editorial.metadataStyle.copyWith(fontSize: 12),
+                ),
+              ),
+            ),
+            DataCell(
+              SizedBox(
+                width: statusWidth,
+                child: const SizedBox.shrink(),
+              ),
+            ),
+            DataCell(
+              SizedBox(
+                width: actionWidth,
+                child: const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
+
+    if (state.error != null) {
+      return [
+        DataRow(
+          cells: [
+            DataCell(
+              SizedBox(
+                width: nameWidth,
+                child: Text(
+                  'Unable to load events',
+                  style: editorial.metadataStyle.copyWith(
+                    fontSize: 12,
+                    color: colorScheme.error,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            DataCell(
+              SizedBox(
+                width: dateWidth,
+                child: Text(
+                  state.error!,
+                  overflow: TextOverflow.ellipsis,
+                  style: editorial.metadataStyle.copyWith(
+                    fontSize: 12,
+                    color: colorScheme.error,
+                  ),
+                ),
+              ),
+            ),
+            DataCell(
+              SizedBox(
+                width: statusWidth,
+                child: const SizedBox.shrink(),
+              ),
+            ),
+            DataCell(
+              SizedBox(
+                width: actionWidth,
+                child: const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
+
+    if (state.events.isEmpty) {
+      return [
+        DataRow(
+          cells: [
+            DataCell(
+              SizedBox(
+                width: nameWidth,
+                child: Text(
+                  'No events found',
+                  style: editorial.metadataStyle.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            DataCell(
+              SizedBox(
+                width: dateWidth,
+                child: Text(
+                  'Create an event to see results here',
+                  overflow: TextOverflow.ellipsis,
+                  style: editorial.metadataStyle.copyWith(fontSize: 12),
+                ),
+              ),
+            ),
+            DataCell(
+              SizedBox(
+                width: statusWidth,
+                child: const SizedBox.shrink(),
+              ),
+            ),
+            DataCell(
+              SizedBox(
+                width: actionWidth,
+                child: const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ),
+      ];
+    }
+
+    return state.events.map((event) {
+      final status = event.status ?? EventStatus.unknown;
+      final statusColor = _getStatusColor(status: status);
+
+      return DataRow(
+        cells: [
+          DataCell(
+            SizedBox(
+              width: nameWidth,
+              child: Text(event.name ?? 'Unknown'),
+            ),
+          ),
+          DataCell(
+            SizedBox(
+              width: dateWidth,
+              child: Text(event.eventDate?.toIso8601String() ?? '-'),
+            ),
+          ),
+          DataCell(
+            SizedBox(
+              width: statusWidth,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: EditorialSpacing.spacing3,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    status.name.toUpperCase(),
+                    style: editorial.metadataStyle.copyWith(
+                      color: statusColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          DataCell(
+            SizedBox(
+              width: actionWidth,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: PopupMenuButton<String>(
+                  onSelected: (value) {},
+                  itemBuilder: (context) {
+                    return const [
+                      PopupMenuItem<String>(
+                        value: 'update',
+                        child: Text('Update'),
+                      ),
+                    ];
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }).toList();
   }
 
   Color _getStatusColor({
     required EventStatus status,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     switch (status) {
       case EventStatus.booked:
-        return Theme.of(context).colorScheme.primary;
+        return colorScheme.primary;
       case EventStatus.inprogress:
-        return Theme.of(context).colorScheme.secondary;
+        return colorScheme.secondary;
       case EventStatus.draft:
-        return Theme.of(context).colorScheme.outline;
+        return colorScheme.outline;
       default:
-        return Theme.of(context).colorScheme.inversePrimary;
+        return colorScheme.inversePrimary;
     }
   }
 }
