@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
+import 'package:venue_flow_app/shared/helpers/date_extensions.dart';
 import 'package:venue_flow_app/theme/elevation.dart';
 import 'package:venue_flow_app/theme/spacing.dart';
 import 'package:venue_flow_app/viewmodels/event_list_viewmodel.dart';
@@ -31,32 +32,58 @@ class _EventListPageState extends ConsumerState<EventListPage> {
 
     return Scaffold(
       body: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SideNavWidget(),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                const pagePadding = 16.0;
-                final availableWidth = constraints.maxWidth - (pagePadding * 2);
-                final tableWidth =
-                    constraints.maxWidth >= 900 ? availableWidth * 0.8 : availableWidth;
+          Expanded(child: LayoutBuilder(
+            builder: (context, constraints) {
+              const pagePadding = 16.0;
+              final availableWidth = constraints.maxWidth - (pagePadding * 2);
+              final availableHeight = constraints.maxHeight - (pagePadding * 2);
+              final tableWidth = constraints.maxWidth >= 900
+                  ? availableWidth * 0.8
+                  : availableWidth;
+              final tableHeight = constraints.maxHeight >= 900
+                  ? availableHeight * 0.8
+                  : availableHeight;
 
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(pagePadding),
-                  child: Center(
-                    child: SizedBox(
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(pagePadding),
+                child: Center(
+                  child: SizedBox(
                       width: tableWidth,
-                      child: _buildTable(
-                        context: context,
-                        state: state,
-                        tableWidth: tableWidth,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+                      height: tableHeight,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Events',
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Manage all venue events from one place.',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                          const SizedBox(height: 24),
+                          _buildTable(
+                            context: context,
+                            state: state,
+                            tableWidth: tableWidth,
+                          ),
+                        ],
+                      )),
+                ),
+              );
+            },
+          ))
         ],
       ),
     );
@@ -314,7 +341,7 @@ class _EventListPageState extends ConsumerState<EventListPage> {
           DataCell(
             SizedBox(
               width: dateWidth,
-              child: Text(event.eventDate?.toIso8601String() ?? '-'),
+              child: Text(event.eventDate?.toDateString() ?? '-'),
             ),
           ),
           DataCell(
