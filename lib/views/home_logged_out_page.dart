@@ -97,7 +97,7 @@ class _TopNav extends StatelessWidget {
 
     final brand = ConstrainedBox(
       constraints:
-          BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.3),
+          BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.2),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: EditorialSpacing.spacing3,
