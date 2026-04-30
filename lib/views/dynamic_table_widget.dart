@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:venue_flow_app/theme/editorial_theme_data.dart';
 
 class DynamicTableColumn<T> {
   const DynamicTableColumn({
@@ -218,10 +219,8 @@ class _TableHeader<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textStyle = Theme.of(context).textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: colorScheme.onSurface,
-        );
+    final editorial = context.editorial;
+    final textStyle = editorial.metadataStyle.copyWith(fontSize: 16);
 
     return Container(
       color: colorScheme.surfaceContainerLow,

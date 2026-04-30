@@ -106,6 +106,9 @@ class _EventListPageState extends ConsumerState<EventListPage> {
     final dateWidth = contentWidth * 0.30;
     final statusWidth = contentWidth * 0.25;
 
+    final editorial = context.editorial;
+    final textStyle = editorial.metadataStyle.copyWith(fontSize: 12);
+
     return DynamicTable(
       isLoading: state.isLoading,
       headerHeight: 50,
@@ -118,7 +121,7 @@ class _EventListPageState extends ConsumerState<EventListPage> {
           flex: 1,
           cellBuilder: (context, row) {
             return Container(
-              child: Text((row as EventModel).name ?? ''),
+              child: Text((row as EventModel).name ?? '', style: textStyle,),
             );
           },
         ),
@@ -128,7 +131,7 @@ class _EventListPageState extends ConsumerState<EventListPage> {
           flex: 1,
           cellBuilder: (context, row) {
             return Container(
-              child: Text((row as EventModel).eventDate.toDateString()),
+              child: Text((row as EventModel).eventDate.toDateString(), style: textStyle,),
             );
           },
         ),
@@ -158,11 +161,13 @@ class _EventListPageState extends ConsumerState<EventListPage> {
                   ),
                   child: Text(
                     status?.name.toUpperCase() ?? 'UNKNOWN',
-                    style: editorial.metadataStyle.copyWith(
-                      color: statusColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    // style: editorial.metadataStyle.copyWith(
+                    //   color: statusColor,
+                    //   fontSize: 10,
+                    //   fontWeight: FontWeight.bold,
+                    // ),
+
+                    style: textStyle,
                   ),
                 ),
               ),
