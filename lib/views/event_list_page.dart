@@ -107,6 +107,7 @@ class _EventListPageState extends ConsumerState<EventListPage> {
     final statusWidth = contentWidth * 0.25;
 
     return DynamicTable(
+      isLoading: state.isLoading,
       headerHeight: 50,
       rowHeight: 100,
       rows: state.events,

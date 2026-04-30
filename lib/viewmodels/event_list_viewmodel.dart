@@ -43,7 +43,7 @@ class EventListViewModel extends StateNotifier<EventListState> {
 
   Future<void> loadEvents() async {
     state = state.copyWith(isLoading: true, error: null);
-
+    await Future.delayed(Duration(seconds: 5));
     try {
       final events = await _eventRepository.getEventsbyTenant(
         tenantId: currentUser?.tenantId ?? '',
