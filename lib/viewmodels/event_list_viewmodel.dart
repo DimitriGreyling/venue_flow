@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/event_model.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/repositories/event_repository.dart';
@@ -42,14 +43,24 @@ class EventListViewModel extends StateNotifier<EventListState> {
 
   Future<void> loadEvents() async {
     state = state.copyWith(isLoading: true, error: null);
-    
+
     try {
-      
       final events = await _eventRepository.getEventsbyTenant(
         tenantId: currentUser?.tenantId ?? '',
       );
       state = state.copyWith(
-        events: events,
+        events: List.generate(
+          50,
+          (index) {
+            return EventModel(
+              eventDate: DateTime.now(),
+              createdAt: DateTime.now(),
+              guestCount: index,
+              name: 'test ${index}',
+              status: EventStatus.inprogress,
+            );
+          },
+        ),
         isLoading: false,
         error: null,
       );
@@ -60,6 +71,4 @@ class EventListViewModel extends StateNotifier<EventListState> {
       );
     }
   }
-
-  
 }

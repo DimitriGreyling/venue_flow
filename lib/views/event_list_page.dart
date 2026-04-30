@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/models/enums.dart';
+import 'package:venue_flow_app/models/event_model.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/shared/helpers/date_extensions.dart';
 import 'package:venue_flow_app/theme/elevation.dart';
 import 'package:venue_flow_app/theme/spacing.dart';
 import 'package:venue_flow_app/viewmodels/event_list_viewmodel.dart';
+import 'package:venue_flow_app/views/dynamic_table_widget.dart';
 import 'package:venue_flow_app/views/side_nav_widget.dart';
 import '../theme/theme.dart';
 
@@ -77,6 +79,7 @@ class _EventListPageState extends ConsumerState<EventListPage> {
                             context: context,
                             state: state,
                             tableWidth: tableWidth,
+                            tableHeight: tableHeight,
                           ),
                         ],
                       )),
@@ -93,259 +96,53 @@ class _EventListPageState extends ConsumerState<EventListPage> {
     required BuildContext context,
     required EventListState state,
     required double tableWidth,
+    required double tableHeight,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    final editorial = context.editorial;
 
-    final actionWidth = 72.0;
+    const actionWidth = 20.0;
     final contentWidth = tableWidth - actionWidth;
     final nameWidth = contentWidth * 0.45;
     final dateWidth = contentWidth * 0.30;
     final statusWidth = contentWidth * 0.25;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.08),
+    return DynamicTable(
+      headerHeight: 50,
+      rowHeight: 100,
+      rows: state.events,
+      columns: [
+        DynamicTableColumn(
+          title: 'Name',
+          minWidth: 30,
+          flex: 1,
+          cellBuilder: (context, row) {
+            return Container(
+              child: Text((row as EventModel).name ?? ''),
+            );
+          },
         ),
-        boxShadow: EditorialElevation.cardShadow(
-          colorScheme.brightness == Brightness.dark,
+        DynamicTableColumn(
+          title: 'Event Date',
+          minWidth: 30,
+          flex: 1,
+          cellBuilder: (context, row) {
+            return Container(
+              child: Text((row as EventModel).eventDate.toDateString()),
+            );
+          },
         ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columnSpacing: 0,
-            horizontalMargin: 16,
-            headingRowColor: WidgetStatePropertyAll(
-              colorScheme.surfaceContainerLow,
-            ),
-            dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
-              if (states.contains(WidgetState.selected)) {
-                return colorScheme.primaryContainer.withOpacity(0.25);
-              }
-              return colorScheme.surface;
-            }),
-            headingTextStyle: editorial.metadataStyle.copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: colorScheme.onSurface,
-            ),
-            dataTextStyle: editorial.metadataStyle.copyWith(
-              fontSize: 12,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            dividerThickness: 0.6,
-            dataRowMinHeight: 60,
-            dataRowMaxHeight: 72,
-            columns: [
-              DataColumn(
-                label: SizedBox(
-                  width: nameWidth,
-                  child: const Text('Name'),
-                ),
-              ),
-              DataColumn(
-                label: SizedBox(
-                  width: dateWidth,
-                  child: const Text('Event Date'),
-                ),
-              ),
-              DataColumn(
-                label: SizedBox(
-                  width: statusWidth,
-                  child: const Text('Status'),
-                ),
-              ),
-              DataColumn(
-                label: SizedBox(
-                  width: actionWidth,
-                  child: const SizedBox.shrink(),
-                ),
-              ),
-            ],
-            rows: _buildRows(
-              context: context,
-              state: state,
-              nameWidth: nameWidth,
-              dateWidth: dateWidth,
-              statusWidth: statusWidth,
-              actionWidth: actionWidth,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+        DynamicTableColumn(
+          title: 'Status',
+          minWidth: 30,
+          flex: 1,
+          cellBuilder: (context, row) {
+            final status = (row as EventModel).status;
+            final statusColor =
+                _getStatusColor(status: status ?? EventStatus.unknown);
+            final colorScheme = Theme.of(context).colorScheme;
+            final editorial = context.editorial;
 
-  List<DataRow> _buildRows({
-    required BuildContext context,
-    required EventListState state,
-    required double nameWidth,
-    required double dateWidth,
-    required double statusWidth,
-    required double actionWidth,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final editorial = context.editorial;
-
-    if (state.isLoading) {
-      return [
-        DataRow(
-          cells: [
-            DataCell(
-              SizedBox(
-                width: nameWidth,
-                child: const Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-              ),
-            ),
-            DataCell(
-              SizedBox(
-                width: dateWidth,
-                child: Text(
-                  'Loading events...',
-                  style: editorial.metadataStyle.copyWith(fontSize: 12),
-                ),
-              ),
-            ),
-            DataCell(
-              SizedBox(
-                width: statusWidth,
-                child: const SizedBox.shrink(),
-              ),
-            ),
-            DataCell(
-              SizedBox(
-                width: actionWidth,
-                child: const SizedBox.shrink(),
-              ),
-            ),
-          ],
-        ),
-      ];
-    }
-
-    if (state.error != null) {
-      return [
-        DataRow(
-          cells: [
-            DataCell(
-              SizedBox(
-                width: nameWidth,
-                child: Text(
-                  'Unable to load events',
-                  style: editorial.metadataStyle.copyWith(
-                    fontSize: 12,
-                    color: colorScheme.error,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            DataCell(
-              SizedBox(
-                width: dateWidth,
-                child: Text(
-                  state.error!,
-                  overflow: TextOverflow.ellipsis,
-                  style: editorial.metadataStyle.copyWith(
-                    fontSize: 12,
-                    color: colorScheme.error,
-                  ),
-                ),
-              ),
-            ),
-            DataCell(
-              SizedBox(
-                width: statusWidth,
-                child: const SizedBox.shrink(),
-              ),
-            ),
-            DataCell(
-              SizedBox(
-                width: actionWidth,
-                child: const SizedBox.shrink(),
-              ),
-            ),
-          ],
-        ),
-      ];
-    }
-
-    if (state.events.isEmpty) {
-      return [
-        DataRow(
-          cells: [
-            DataCell(
-              SizedBox(
-                width: nameWidth,
-                child: Text(
-                  'No events found',
-                  style: editorial.metadataStyle.copyWith(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            DataCell(
-              SizedBox(
-                width: dateWidth,
-                child: Text(
-                  'Create an event to see results here',
-                  overflow: TextOverflow.ellipsis,
-                  style: editorial.metadataStyle.copyWith(fontSize: 12),
-                ),
-              ),
-            ),
-            DataCell(
-              SizedBox(
-                width: statusWidth,
-                child: const SizedBox.shrink(),
-              ),
-            ),
-            DataCell(
-              SizedBox(
-                width: actionWidth,
-                child: const SizedBox.shrink(),
-              ),
-            ),
-          ],
-        ),
-      ];
-    }
-
-    return state.events.map((event) {
-      final status = event.status ?? EventStatus.unknown;
-      final statusColor = _getStatusColor(status: status);
-
-      return DataRow(
-        cells: [
-          DataCell(
-            SizedBox(
-              width: nameWidth,
-              child: Text(event.name ?? 'Unknown'),
-            ),
-          ),
-          DataCell(
-            SizedBox(
-              width: dateWidth,
-              child: Text(event.eventDate?.toDateString() ?? '-'),
-            ),
-          ),
-          DataCell(
-            SizedBox(
+            return SizedBox(
               width: statusWidth,
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -359,7 +156,7 @@ class _EventListPageState extends ConsumerState<EventListPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    status.name.toUpperCase(),
+                    status?.name.toUpperCase() ?? 'UNKNOWN',
                     style: editorial.metadataStyle.copyWith(
                       color: statusColor,
                       fontSize: 10,
@@ -368,30 +165,12 @@ class _EventListPageState extends ConsumerState<EventListPage> {
                   ),
                 ),
               ),
-            ),
-          ),
-          DataCell(
-            SizedBox(
-              width: actionWidth,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: PopupMenuButton<String>(
-                  onSelected: (value) {},
-                  itemBuilder: (context) {
-                    return const [
-                      PopupMenuItem<String>(
-                        value: 'update',
-                        child: Text('Update'),
-                      ),
-                    ];
-                  },
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    }).toList();
+            );
+          },
+        ),
+      ],
+      height: tableHeight * 0.5,
+    );
   }
 
   Color _getStatusColor({
