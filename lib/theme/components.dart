@@ -81,7 +81,7 @@ class EditorialComponents {
   // CARD THEMES - Tonal Layering System
   /// "A card should never have a border. Use tonal shift for boundaries."
   /// "On hover, shift from surface-container-low to surface-container-lowest"
-  static CardTheme cardTheme(ColorScheme colorScheme) => CardTheme(
+  static CardThemeData cardTheme(ColorScheme colorScheme) => CardThemeData(
         color: colorScheme.surfaceContainerLowest, // Top layer - high priority
         shadowColor: Colors.transparent, // No shadows - use tonal layering
         elevation: 0, // Tonal depth, not physical elevation
