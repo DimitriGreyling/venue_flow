@@ -121,7 +121,10 @@ class _EventListPageState extends ConsumerState<EventListPage> {
           flex: 1,
           cellBuilder: (context, row) {
             return Container(
-              child: Text((row as EventModel).name ?? '', style: textStyle,),
+              child: Text(
+                (row as EventModel).name ?? '',
+                style: textStyle,
+              ),
             );
           },
         ),
@@ -131,7 +134,10 @@ class _EventListPageState extends ConsumerState<EventListPage> {
           flex: 1,
           cellBuilder: (context, row) {
             return Container(
-              child: Text((row as EventModel).eventDate.toDateString(), style: textStyle,),
+              child: Text(
+                (row as EventModel).eventDate.toDateString(),
+                style: textStyle,
+              ),
             );
           },
         ),
@@ -143,8 +149,6 @@ class _EventListPageState extends ConsumerState<EventListPage> {
             final status = (row as EventModel).status;
             final statusColor =
                 _getStatusColor(status: status ?? EventStatus.unknown);
-            final colorScheme = Theme.of(context).colorScheme;
-            final editorial = context.editorial;
 
             return SizedBox(
               width: statusWidth,
@@ -161,13 +165,9 @@ class _EventListPageState extends ConsumerState<EventListPage> {
                   ),
                   child: Text(
                     status?.name.toUpperCase() ?? 'UNKNOWN',
-                    // style: editorial.metadataStyle.copyWith(
-                    //   color: statusColor,
-                    //   fontSize: 10,
-                    //   fontWeight: FontWeight.bold,
-                    // ),
-
-                    style: textStyle,
+                    style: textStyle.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
