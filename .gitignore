@@ -31,6 +31,20 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Generated plugin registrants
+**/generated_plugin_registrant.cc
+**/generated_plugin_registrant.h
+**/generated_plugins.cmake
+lib/generated_plugin_registrant.dart
+
+# Flutter generated platform files
+ios/Flutter/ephemeral/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+macos/Flutter/ephemeral/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+
 # Symbolication related
 app.*.symbols
 
