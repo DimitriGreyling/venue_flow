@@ -148,7 +148,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           isSelected: selectedItem == 'Events',
           colorScheme: colorScheme,
           editorial: editorial,
-          onTap: () => _navigateToItem('Events', 'events'),
+          onTap: () => _navigateToItem('Events', 'event-list'),
         ),
         _buildNavItem(
           icon: Icons.analytics_outlined,

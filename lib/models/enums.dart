@@ -18,3 +18,12 @@ enum UserRole {
   coordinator,
   admin,
 }
+
+enum EventStatus{
+  booked,
+  awaitingClient,
+  inprogress,
+  cancelled,
+  draft,
+  unknown,
+}
