@@ -1,38 +1,54 @@
 // lib/repositories/auth_repository.dart
+import 'package:dio/dio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:venue_flow_app/models/enums.dart';
+import 'package:venue_flow_app/shared/helpers/api_client.dart';
 import 'dart:developer';
 import '../models/user_model.dart';
 import '../models/tenant_model.dart';
 
 class AuthRepository {
   final SupabaseClient _client;
+  final ApiClient _apiClient;
 
-  AuthRepository({required SupabaseClient client}) : _client = client;
+  AuthRepository({required SupabaseClient client, required ApiClient apiClient})
+      : _apiClient = apiClient,
+        _client = client;
+
+  Future<String> login(String email, String password) async {
+    final response = await _apiClient.dio.post("/auth/login", data: {
+      "email": email,
+      "password": password,
+    }).onError((error, stackTrace) {
+      throw Exception('${(error as DioException).response ?? 'Login failed'}');
+    });
+
+    return response.data["token"];
+  }
 
   // Sign in with email and password
-  Future<UserModel?> signIn({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      //  await createTestUsers();
+  // Future<UserModel?> signIn({
+  //   required String email,
+  //   required String password,
+  // }) async {
+  //   try {
+  //     //  await createTestUsers();
 
-      final response = await _client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
+  //     final response = await _client.auth.signInWithPassword(
+  //       email: email,
+  //       password: password,
+  //     );
 
-      if (response.user != null) {
-        final userData = await _getUserProfile(response.user!.id);
-        return userData;
-      }
-      return null;
-    } catch (error) {
-      log('Sign in error: $error');
-      rethrow;
-    }
-  }
+  //     if (response.user != null) {
+  //       final userData = await _getUserProfile(response.user!.id);
+  //       return userData;
+  //     }
+  //     return null;
+  //   } catch (error) {
+  //     log('Sign in error: $error');
+  //     rethrow;
+  //   }
+  // }
 
   // Sign up with role and tenant
   Future<UserModel?> signUp({

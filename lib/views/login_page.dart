@@ -1,4 +1,5 @@
 // lib/views/auth/login_page.dart
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -62,9 +63,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.asset(
-                    "assets/logo_white_transparent.png"
-                  ),
+                  Image.asset("assets/logo_white_transparent.png"),
                   // Header
                   Text(
                     'Welcome Back',

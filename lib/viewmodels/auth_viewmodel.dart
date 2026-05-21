@@ -1,4 +1,6 @@
 // lib/viewmodels/auth_viewmodel.dart
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/auth_state_model.dart';
 import '../models/enums.dart';
@@ -15,7 +17,7 @@ class AuthViewModel extends StateNotifier<AuthStateModel> {
 
   Future<void> _initializeAuth() async {
     state = state.copyWith(isLoading: true);
-    
+
     try {
       final user = await _authRepository.getCurrentUser();
       if (user != null) {
@@ -44,25 +46,28 @@ class AuthViewModel extends StateNotifier<AuthStateModel> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final user = await _authRepository.signIn(
-        email: email,
-        password: password,
-      );
+      final token = await _authRepository.login(email, password);
 
-      if (user != null) {
-        final tenant = await _authRepository.getTenantById(user.tenantId ?? '');
-        state = state.copyWith(
-          user: user,
-          tenant: tenant,
-          isAuthenticated: true,
-          isLoading: false,
-        );
-      } else {
-        state = state.copyWith(
-          error: 'Invalid credentials',
-          isLoading: false,
-        );
-      }
+      log('Login successful, token: $token');
+      // final user = await _authRepository.signIn(
+      //   email: email,
+      //   password: password,
+      // );
+
+      // if (user != null) {
+      //   final tenant = await _authRepository.getTenantById(user.tenantId ?? '');
+      //   state = state.copyWith(
+      //     user: user,
+      //     tenant: tenant,
+      //     isAuthenticated: true,
+      //     isLoading: false,
+      //   );
+      // } else {
+      //   state = state.copyWith(
+      //     error: 'Invalid credentials',
+      //     isLoading: false,
+      //   );
+      // }
     } catch (error) {
       state = state.copyWith(
         error: error.toString(),
