@@ -1,3 +1,13 @@
 {
-    "cmake.ignoreCMakeListsMissing": true
+  "name": "Flutter Web (Fixed Port)",
+  "request": "launch",
+  "type": "dart",
+  "args": [
+    "-d",
+    "chrome",
+    "--web-port",
+    "49427",
+    "--web-hostname",
+    "0.0.0.0"
+  ]
 }
