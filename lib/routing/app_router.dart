@@ -12,6 +12,19 @@ import '../views/login_page.dart';
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter? _previousRouter;
 
+class _AuthLoadingPage extends StatelessWidget {
+  const _AuthLoadingPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authViewModelProvider);
 
@@ -24,9 +37,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isAuthenticated = authState.isAuthenticated;
       final isLoading = authState.isLoading;
+      final isProfileHydrated = authState.user != null;
 
       final isAuthPage = state.matchedLocation == '/home' ||
-          state.matchedLocation == '/signup';
+          state.matchedLocation == '/signup' ||
+          state.matchedLocation == '/login';
+
+      if (isAuthenticated && !isProfileHydrated) {
+        if (state.matchedLocation != '/auth-loading') {
+          return '/auth-loading';
+        }
+        return null;
+      }
+
+      if (!isAuthenticated && state.matchedLocation == '/auth-loading') {
+        return '/login';
+      }
 
       if (isLoading) {
         return null;
@@ -60,6 +86,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/home',
         name: 'home',
         builder: (context, state) => const HomeLoggedOutPage(),
+      ),
+      GoRoute(
+        path: '/auth-loading',
+        name: 'auth-loading',
+        builder: (context, state) => const _AuthLoadingPage(),
       ),
       GoRoute(
         path: '/signup',
@@ -101,7 +132,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: '/view-form',
             name: 'view-form',
             builder: (context, state) {
-              final id = state.uri.queryParameters['id'];
               return ViewFormPage();
             },
           ),

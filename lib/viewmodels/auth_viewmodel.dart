@@ -1,6 +1,7 @@
 // lib/viewmodels/auth_viewmodel.dart
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/auth_state_model.dart';
 import '../models/enums.dart';
@@ -19,6 +20,18 @@ class AuthViewModel extends StateNotifier<AuthStateModel> {
     state = state.copyWith(isLoading: true);
 
     try {
+      final restoredSession = await _authRepository.restoreApiSession();
+      if (restoredSession != null && restoredSession.user != null) {
+        state = state.copyWith(
+          user: restoredSession.user,
+          tenant: restoredSession.tenant,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        );
+        return;
+      }
+
       final user = await _authRepository.getCurrentUser();
       if (user != null) {
         final tenant = await _authRepository.getTenantById(user.tenantId ?? '');
@@ -46,31 +59,37 @@ class AuthViewModel extends StateNotifier<AuthStateModel> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final token = await _authRepository.login(email, password);
+      final loginResult = await _authRepository.login(email, password);
+      final user = loginResult.user;
+      final tenant = loginResult.tenant;
 
-      log('Login successful, token: $token');
-      // final user = await _authRepository.signIn(
-      //   email: email,
-      //   password: password,
-      // );
+      log('Login successful, token: ${loginResult.token}');
 
-      // if (user != null) {
-      //   final tenant = await _authRepository.getTenantById(user.tenantId ?? '');
-      //   state = state.copyWith(
-      //     user: user,
-      //     tenant: tenant,
-      //     isAuthenticated: true,
-      //     isLoading: false,
-      //   );
-      // } else {
-      //   state = state.copyWith(
-      //     error: 'Invalid credentials',
-      //     isLoading: false,
-      //   );
-      // }
-    } catch (error) {
+      if (user == null) {
+        await _authRepository.clearStoredSession();
+        state = state.copyWith(
+          error: 'Unable to load your account profile. Please sign in again.',
+          isLoading: false,
+          isAuthenticated: false,
+        );
+        return;
+      }
+
       state = state.copyWith(
-        error: error.toString(),
+        user: user,
+        tenant: tenant,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      );
+    } on DioException catch (error) {
+      state = state.copyWith(
+        error: _getUserFriendlyError(error),
+        isLoading: false,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        error: 'Unable to sign in right now. Please try again.',
         isLoading: false,
       );
     }
@@ -118,7 +137,30 @@ class AuthViewModel extends StateNotifier<AuthStateModel> {
       await _authRepository.signOut();
       state = const AuthStateModel();
     } catch (error) {
-      state = state.copyWith(error: error.toString());
+      state = state.copyWith(
+        error: 'Unable to sign out right now. Please try again.',
+      );
+    }
+  }
+
+  String _getUserFriendlyError(DioException error) {
+    final message = error.error;
+    if (message is String && message.isNotEmpty) {
+      return message;
+    }
+
+    switch (error.response?.statusCode) {
+      case 400:
+      case 422:
+        return 'Please check your information and try again.';
+      case 401:
+        return 'Invalid email or password.';
+      case 403:
+        return 'You do not have permission to access this account.';
+      case 404:
+        return 'Account not found.';
+      default:
+        return 'Unable to sign in right now. Please try again.';
     }
   }
 

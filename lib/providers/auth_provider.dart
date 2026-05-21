@@ -6,13 +6,11 @@ import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/providers/api_client_provider.dart';
 import '../repositories/auth_repository.dart';
 import '../viewmodels/auth_viewmodel.dart';
-import 'supbase_provider.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final supabaseClient = ref.watch(supabaseProvider);
   final apiClient = ref.watch(apiClientProvider);
-  
-  return AuthRepository(client: supabaseClient, apiClient: apiClient);
+
+  return AuthRepository(apiClient: apiClient);
 });
 
 final authViewModelProvider = StateNotifierProvider<AuthViewModel, AuthStateModel>((ref) {

@@ -1,5 +1,4 @@
 // lib/views/auth/login_page.dart
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +31,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (next.isAuthenticated) {
         // Navigate based on user role
         final user = next.user;
-        if (user?.isCoordinator == true) {
+        if (user == null) {
+          return;
+        }
+        if (user.isCoordinator) {
           context.pushNamed('coordinator-dashboard');
         } else {
           context.pushNamed('client-dashboard');

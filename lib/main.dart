@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:venue_flow_app/routing/app_router.dart';
 import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
 import 'package:venue_flow_app/views/popup/global_popup_overlay.dart';
@@ -17,21 +16,6 @@ void main() async {
   SystemChrome.setSystemUIOverlayStyle(lightSystemUiStyle);
 
   await dotenv.load(fileName: ".env");
-
-  final supabaseUrl = dotenv.env['SUPABASE_URL'];
-  if (supabaseUrl == null) {
-    throw Exception('SUPABASE_URL not found in .env');
-  }
-
-  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
-  if (supabaseAnonKey == null) {
-    throw Exception('SUPABASE_ANON_KEY not found in .env');
-  }
-
-  await Supabase.initialize(
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
-  );
 
   final container = ProviderContainer();
   GlobalPopupService.initialize(container);

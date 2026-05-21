@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:venue_flow_app/constants/supabase_table_names.dart';
+import 'package:venue_flow_app/constants/api_contract.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
+import 'package:venue_flow_app/shared/helpers/api_client.dart';
 
 abstract class IFormRepository {
   Future<List<DynamicFormModel>?> getForms();
@@ -19,14 +19,9 @@ abstract class IFormRepository {
 }
 
 class FormRepository extends IFormRepository {
-  //CONSTRUCTOR
-  FormRepository({
-    required SupabaseClient client,
-  }) : _client = client;
+  FormRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  //VARIABLES
-  final SupabaseClient _client;
-  final String _tableName = SupabaseTableNames.formTable;
+  final ApiClient _apiClient;
 
   @override
   Future<List<DynamicFormModel>?> getFormById({
@@ -35,19 +30,15 @@ class FormRepository extends IFormRepository {
     try {
       if (formId == null) return null;
 
-      final response =
-          await _client.from(_tableName).select().eq('id', formId ?? '');
+      final response = await _apiClient.dio.get(ApiEndpoints.formById(formId));
+      final form = _extractForm(response.data);
+      if (form == null) {
+        return null;
+      }
 
-      final forms = response
-          .map(
-            (json) => DynamicFormModel.fromJson(json),
-          )
-          .toList();
-
-      log('done');
-      return forms; // Return the transformed data
-    } catch (erro, stackTrace) {
-      log('assfsd');
+      return [form];
+    } catch (error) {
+      log('getFormById error: $error');
       return null;
     }
   }
@@ -55,18 +46,13 @@ class FormRepository extends IFormRepository {
   @override
   Future<List<DynamicFormModel>?> getFormNames() async {
     try {
-      final response = await _client.from(_tableName).select('id, name');
+      final response = await _apiClient.dio.get(ApiEndpoints.forms, queryParameters: {
+        ApiQueryKeys.fields: 'id,name',
+      });
 
-      final forms = response
-          .map(
-            (json) => DynamicFormModel.fromJson(json),
-          )
-          .toList();
-
-      log('done');
-      return forms; // Return the transformed data
-    } catch (erro, stackTrace) {
-      log('assfsd');
+      return _extractFormList(response.data);
+    } catch (error) {
+      log('getFormNames error: $error');
       return null;
     }
   }
@@ -74,18 +60,10 @@ class FormRepository extends IFormRepository {
   @override
   Future<List<DynamicFormModel>?> getForms() async {
     try {
-      final response = await _client.from(_tableName).select();
-
-      final forms = response
-          .map(
-            (json) => DynamicFormModel.fromJson(json),
-          )
-          .toList();
-
-      log('done');
-      return forms; // Return the transformed data
-    } catch (erro, stackTrace) {
-      log('assfsd');
+      final response = await _apiClient.dio.get(ApiEndpoints.forms);
+      return _extractFormList(response.data);
+    } catch (error) {
+      log('getForms error: $error');
       return null;
     }
   }
@@ -95,18 +73,10 @@ class FormRepository extends IFormRepository {
     required DynamicFormModel formModel,
   }) async {
     try {
-      final test = formModel.toJson();
-      final result = await _client
-          .from(_tableName)
-          .insert(
-            formModel.toJson(),
-          )
-          .select();
-
-      log('testing');
-      return DynamicFormModel.fromJson(result[0]);
-    } catch (error, stackTrace) {
-      log('ERROR :: ${error}');
+      final response = await _apiClient.dio.post(ApiEndpoints.forms, data: formModel.toJson());
+      return _extractForm(response.data);
+    } catch (error) {
+      log('addForm error: $error');
       throw Exception(error);
     }
   }
@@ -116,18 +86,48 @@ class FormRepository extends IFormRepository {
     required DynamicFormModel formModel,
   }) async {
     try {
-      final result = await _client
-          .from(_tableName)
-          .update(
-            formModel.toJson(),
-          )
-          .eq('id', formModel.id ?? '')
-          .select();
+      final formId = formModel.id;
+      if (formId == null || formId.isEmpty) {
+        throw Exception('Form id is required for updates.');
+      }
 
-      log('testing');
-      return DynamicFormModel.fromJson(result[0]);
-    } catch (error, stackTrace) {
+      final response = await _apiClient.dio.put(ApiEndpoints.formById(formId), data: formModel.toJson());
+      return _extractForm(response.data);
+    } catch (error) {
       throw Exception(error);
     }
+  }
+
+  DynamicFormModel? _extractForm(dynamic body) {
+    if (body is Map<String, dynamic>) {
+      if (body['data'] is Map<String, dynamic>) {
+        return DynamicFormModel.fromJson(body['data'] as Map<String, dynamic>);
+      }
+      return DynamicFormModel.fromJson(body);
+    }
+
+    if (body is List && body.isNotEmpty && body.first is Map<String, dynamic>) {
+      return DynamicFormModel.fromJson(body.first as Map<String, dynamic>);
+    }
+
+    return null;
+  }
+
+  List<DynamicFormModel>? _extractFormList(dynamic body) {
+    if (body is List) {
+      return body
+          .whereType<Map<String, dynamic>>()
+          .map(DynamicFormModel.fromJson)
+          .toList();
+    }
+
+    if (body is Map<String, dynamic> && body['data'] is List) {
+      return (body['data'] as List)
+          .whereType<Map<String, dynamic>>()
+          .map(DynamicFormModel.fromJson)
+          .toList();
+    }
+
+    return null;
   }
 }

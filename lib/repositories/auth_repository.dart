@@ -1,6 +1,7 @@
 // lib/repositories/auth_repository.dart
 import 'package:dio/dio.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:venue_flow_app/constants/api_contract.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/shared/helpers/api_client.dart';
 import 'dart:developer';
@@ -8,49 +9,256 @@ import '../models/user_model.dart';
 import '../models/tenant_model.dart';
 
 class AuthRepository {
-  final SupabaseClient _client;
   final ApiClient _apiClient;
 
-  AuthRepository({required SupabaseClient client, required ApiClient apiClient})
-      : _apiClient = apiClient,
-        _client = client;
-
-  Future<String> login(String email, String password) async {
-    final response = await _apiClient.dio.post("/auth/login", data: {
-      "email": email,
-      "password": password,
-    }).onError((error, stackTrace) {
-      throw Exception('${(error as DioException).response ?? 'Login failed'}');
-    });
-
-    return response.data["token"];
+  AuthRepository({required ApiClient apiClient}) : _apiClient = apiClient {
+    _apiClient.configureAuthHandlers(
+      onRefreshToken: refreshAccessToken,
+      onUnauthorized: clearStoredSession,
+    );
   }
 
-  // Sign in with email and password
-  // Future<UserModel?> signIn({
-  //   required String email,
-  //   required String password,
-  // }) async {
-  //   try {
-  //     //  await createTestUsers();
+  Future<ApiLoginResult> login(String email, String password) async {
+    final response = await _apiClient.dio.post(
+      ApiEndpoints.authLogin,
+      data: {
+        "email": email,
+        "password": password,
+      },
+      options: Options(extra: {
+        'requiresAuth': false,
+        'skipAuthRefresh': true,
+      }),
+    );
 
-  //     final response = await _client.auth.signInWithPassword(
-  //       email: email,
-  //       password: password,
-  //     );
+    final responseData = response.data;
+    final token = _extractToken(responseData);
 
-  //     if (response.user != null) {
-  //       final userData = await _getUserProfile(response.user!.id);
-  //       return userData;
-  //     }
-  //     return null;
-  //   } catch (error) {
-  //     log('Sign in error: $error');
-  //     rethrow;
-  //   }
-  // }
+    final refreshToken = _extractRefreshToken(responseData);
 
-  // Sign up with role and tenant
+    if (token.isEmpty) {
+      throw Exception('Login succeeded but token was not returned.');
+    }
+
+    await _saveToken(token);
+    await _saveRefreshToken(refreshToken);
+    _apiClient.setAuthToken(token);
+
+    final hydratedProfile = await fetchCurrentProfileFromApi();
+
+    return ApiLoginResult(
+      token: token,
+      user: hydratedProfile?.user ?? _extractUser(responseData),
+      tenant: hydratedProfile?.tenant ?? _extractTenant(responseData),
+    );
+  }
+
+  Future<ApiLoginResult?> restoreApiSession() async {
+    final token = await _loadToken();
+    if (token == null || token.isEmpty) {
+      return null;
+    }
+
+    _apiClient.setAuthToken(token);
+    final profile = await fetchCurrentProfileFromApi();
+
+    if (profile?.user == null) {
+      return null;
+    }
+
+    return ApiLoginResult(
+      token: token,
+      user: profile?.user,
+      tenant: profile?.tenant,
+    );
+  }
+
+  Future<ApiAuthProfile?> fetchCurrentProfileFromApi() async {
+    try {
+      final response = await _apiClient.dio.get(ApiEndpoints.authMe);
+      final responseData = response.data;
+
+      return ApiAuthProfile(
+        user: _extractUser(responseData),
+        tenant: _extractTenant(responseData),
+      );
+    } on DioException catch (error) {
+      log('Fetch current profile error: ${error.response?.statusCode} ${error.error}');
+      return null;
+    } catch (error) {
+      log('Fetch current profile error: $error');
+      return null;
+    }
+  }
+
+  Future<String?> refreshAccessToken() async {
+    final refreshToken = await _loadRefreshToken();
+    if (refreshToken == null || refreshToken.isEmpty) {
+      return null;
+    }
+
+    try {
+      final response = await _apiClient.dio.post(
+        ApiEndpoints.authRefresh,
+        data: {
+          ApiPayloadKeys.refreshToken: refreshToken,
+        },
+        options: Options(extra: {
+          'requiresAuth': false,
+          'skipAuthRefresh': true,
+        }),
+      );
+
+      final responseData = response.data;
+      final newAccessToken = _extractToken(responseData);
+      final newRefreshToken = _extractRefreshToken(responseData);
+
+      if (newAccessToken.isEmpty) {
+        return null;
+      }
+
+      await _saveToken(newAccessToken);
+      await _saveRefreshToken(newRefreshToken.isNotEmpty ? newRefreshToken : refreshToken);
+      _apiClient.setAuthToken(newAccessToken);
+
+      return newAccessToken;
+    } on DioException catch (error) {
+      log('Refresh token error: ${error.response?.statusCode} ${error.error}');
+      if (error.response?.statusCode == 401 || error.response?.statusCode == 403) {
+        await clearStoredSession();
+      }
+      return null;
+    } catch (error) {
+      log('Refresh token error: $error');
+      return null;
+    }
+  }
+
+  Future<void> clearStoredSession() async {
+    _apiClient.clearAuthToken();
+    await _clearToken();
+    await _clearRefreshToken();
+  }
+
+  Future<void> _saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(AuthStorageKeys.accessToken, token);
+  }
+
+  Future<String?> _loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(AuthStorageKeys.accessToken);
+  }
+
+  Future<void> _clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(AuthStorageKeys.accessToken);
+  }
+
+  Future<void> _saveRefreshToken(String refreshToken) async {
+    if (refreshToken.isEmpty) {
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(AuthStorageKeys.refreshToken, refreshToken);
+  }
+
+  Future<String?> _loadRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(AuthStorageKeys.refreshToken);
+  }
+
+  Future<void> _clearRefreshToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(AuthStorageKeys.refreshToken);
+  }
+
+  String _extractToken(dynamic body) {
+    if (body is! Map<String, dynamic>) {
+      return '';
+    }
+
+    if (body['token'] is String) {
+      return body['token'] as String;
+    }
+
+    final data = body['data'];
+    if (data is Map<String, dynamic> && data['token'] is String) {
+      return data['token'] as String;
+    }
+
+    return '';
+  }
+
+  String _extractRefreshToken(dynamic body) {
+    if (body is! Map<String, dynamic>) {
+      return '';
+    }
+
+    if (body['refreshToken'] is String) {
+      return body['refreshToken'] as String;
+    }
+
+    if (body['refresh_token'] is String) {
+      return body['refresh_token'] as String;
+    }
+
+    final data = body['data'];
+    if (data is Map<String, dynamic>) {
+      if (data['refreshToken'] is String) {
+        return data['refreshToken'] as String;
+      }
+      if (data['refresh_token'] is String) {
+        return data['refresh_token'] as String;
+      }
+    }
+
+    return '';
+  }
+
+  UserModel? _extractUser(dynamic body) {
+    if (body is! Map<String, dynamic>) {
+      return null;
+    }
+
+    final directUser = body['user'];
+    if (directUser is Map<String, dynamic>) {
+      return UserModel.fromJson(directUser);
+    }
+
+    final data = body['data'];
+    if (data is Map<String, dynamic>) {
+      final nestedUser = data['user'];
+      if (nestedUser is Map<String, dynamic>) {
+        return UserModel.fromJson(nestedUser);
+      }
+    }
+
+    return null;
+  }
+
+  TenantModel? _extractTenant(dynamic body) {
+    if (body is! Map<String, dynamic>) {
+      return null;
+    }
+
+    final directTenant = body['tenant'];
+    if (directTenant is Map<String, dynamic>) {
+      return TenantModel.fromJson(directTenant);
+    }
+
+    final data = body['data'];
+    if (data is Map<String, dynamic>) {
+      final nestedTenant = data['tenant'];
+      if (nestedTenant is Map<String, dynamic>) {
+        return TenantModel.fromJson(nestedTenant);
+      }
+    }
+
+    return null;
+  }
+
   Future<UserModel?> signUp({
     required String email,
     required String password,
@@ -60,231 +268,108 @@ class AuthRepository {
     required String tenantSlug,
   }) async {
     try {
-      // Get tenant by slug
-      final tenantResponse = await _client
-          .from('tenants')
-          .select()
-          .eq('slug', tenantSlug)
-          .single();
-
-      final tenant = TenantModel.fromJson(tenantResponse);
-
-      final response = await _client.auth.signUp(
-        email: email,
-        password: password,
+      final response = await _apiClient.dio.post(
+        ApiEndpoints.authSignup,
+        data: {
+          'email': email,
+          'password': password,
+          'firstName': firstName,
+          'lastName': lastName,
+          'role': role.name,
+          'tenantSlug': tenantSlug,
+        },
+        options: Options(extra: {
+          'requiresAuth': false,
+          'skipAuthRefresh': true,
+        }),
       );
 
-      if (response.user != null) {
-        // Create user profile
-        await _client.from('users').insert({
-          'id': response.user!.id,
-          'email': email,
-          'first_name': firstName,
-          'last_name': lastName,
-          'role': role.name,
-          'tenant_id': tenant.id,
-        });
-
-        return await _getUserProfile(response.user!.id);
-      }
-      return null;
+      return _extractUser(response.data);
+    } on DioException catch (error) {
+      log('Sign up error: ${error.response?.statusCode} ${error.error}');
+      rethrow;
     } catch (error) {
       log('Sign up error: $error');
       rethrow;
     }
   }
 
-  // Add this method to create test users programmatically
-  // Future<void> createTestUsers() async {
-  //   final testUsers = [
-  //     // Elegant Events Venue users
-  //     {
-  //       'email': 'coordinator@elegant-events.com',
-  //       'password': 'TestPassword123!',
-  //       'firstName': 'Sarah',
-  //       'lastName': 'Johnson',
-  //       'role': UserRole.coordinator,
-  //       'tenantId': 'a0000000-0000-0000-0000-000000000001',
-  //     },
-  //     {
-  //       'email': 'admin@elegant-events.com',
-  //       'password': 'TestPassword123!',
-  //       'firstName': 'Michael',
-  //       'lastName': 'Chen',
-  //       'role': UserRole.admin,
-  //       'tenantId': 'a0000000-0000-0000-0000-000000000001',
-  //     },
-  //     {
-  //       'email': 'client@elegant-events.com',
-  //       'password': 'TestPassword123!',
-  //       'firstName': 'Emma',
-  //       'lastName': 'Davis',
-  //       'role': UserRole.client,
-  //       'tenantId': 'a0000000-0000-0000-0000-000000000001',
-  //     },
-
-  //     // Garden Paradise users
-  //     {
-  //       'email': 'coordinator@garden-paradise.com',
-  //       'password': 'TestPassword123!',
-  //       'firstName': 'James',
-  //       'lastName': 'Wilson',
-  //       'role': UserRole.coordinator,
-  //       'tenantId': 'a0000000-0000-0000-0000-000000000002',
-  //     },
-  //     {
-  //       'email': 'client@garden-paradise.com',
-  //       'password': 'TestPassword123!',
-  //       'firstName': 'Lisa',
-  //       'lastName': 'Thompson',
-  //       'role': UserRole.client,
-  //       'tenantId': 'a0000000-0000-0000-0000-000000000002',
-  //     },
-
-  //     // Metro Conference users
-  //     {
-  //       'email': 'coordinator@metro-conference.com',
-  //       'password': 'TestPassword123!',
-  //       'firstName': 'Robert',
-  //       'lastName': 'Martinez',
-  //       'role': UserRole.coordinator,
-  //       'tenantId': 'a0000000-0000-0000-0000-000000000003',
-  //     },
-
-  //     // Quick test user
-  //     {
-  //       'email': 'test@test.com',
-  //       'password': 'TestPassword123!',
-  //       'firstName': 'Test',
-  //       'lastName': 'User',
-  //       'role': UserRole.coordinator,
-  //       'tenantId': 'a0000000-0000-0000-0000-000000000001',
-  //     },
-  //   ];
-
-  //   print('🚀 Creating ${testUsers.length} test users...');
-
-  //   for (final userData in testUsers) {
-  //     try {
-  //       // Create auth user
-  //       final response = await _client.auth.signUp(
-  //         email: userData['email'] as String,
-  //         password: userData['password'] as String,
-  //       );
-
-  //       if (response.user != null) {
-  //         // Create user profile
-  //         await _client.from('users').insert({
-  //           'id': response.user!.id,
-  //           'email': userData['email'],
-  //           'first_name': userData['firstName'],
-  //           'last_name': userData['lastName'],
-  //           'role': (userData['role'] as UserRole).name,
-  //           'tenant_id': userData['tenantId'],
-  //           'is_active': true,
-  //         });
-
-  //         print('✅ Created user: ${userData['email']}');
-
-  //         // Sign out to prepare for next user
-  //         await _client.auth.signOut();
-  //       } else {
-  //         print('❌ Failed to create auth user: ${userData['email']}');
-  //       }
-  //     } catch (error) {
-  //       print('❌ Error creating ${userData['email']}: $error');
-  //     }
-  //   }
-
-  //   print('🎉 Test user creation completed!');
-  // }
-
-// Method to verify all users were created
-  Future<void> verifyTestUsers() async {
-    try {
-      final users =
-          await _client.from('users').select('*, tenants(name, slug)');
-
-      print('📊 === USER VERIFICATION ===');
-      print('Total users created: ${users.length}');
-
-      for (final user in users) {
-        print(
-            '  📧 ${user['email']} - ${user['role']} at ${user['tenants']['name']}');
-      }
-
-      final tenants = await _client.from('tenants').select('*');
-      print('📊 Total tenants: ${tenants.length}');
-    } catch (error) {
-      print('❌ Verification failed: $error');
-    }
-  }
-
-  // Get current user session
   Future<UserModel?> getCurrentUser() async {
     try {
-      final user = _client.auth.currentUser;
-      if (user != null) {
-        return await _getUserProfile(user.id);
-      }
-      return null;
+      final profile = await fetchCurrentProfileFromApi();
+      return profile?.user;
     } catch (error) {
       log('Get current user error: $error');
       return null;
     }
   }
 
-  // Get user profile with tenant info
-  Future<UserModel?> _getUserProfile(String userId) async {
-    try {
-      final response = await _client
-          .from('users')
-          .select('*, tenant:tenants(*)')
-          .eq('id', userId)
-          .single();
-
-      return UserModel.fromJson(response);
-    } catch (error) {
-      log('Get user profile error: $error');
-      return null;
-    }
-  }
-
-  // Get tenant by slug
   Future<TenantModel?> getTenantBySlug(String slug) async {
     try {
-      final response =
-          await _client.from('tenants').select().eq('slug', slug).single();
-
-      return TenantModel.fromJson(response);
+      final response = await _apiClient.dio.get(ApiEndpoints.tenantBySlug(slug));
+      return _extractTenant(response.data);
+    } on DioException catch (error) {
+      log('Get tenant by slug error: ${error.response?.statusCode} ${error.error}');
+      return null;
     } catch (error) {
-      log('Get tenant error: $error');
+      log('Get tenant by slug error: $error');
       return null;
     }
   }
 
   Future<TenantModel?> getTenantById(String tenantId) async {
-    try {
-      final response =
-          await _client.from('tenants').select().eq('id', tenantId).single();
+    if (tenantId.isEmpty) {
+      return null;
+    }
 
-      return TenantModel.fromJson(response);
+    try {
+      final response = await _apiClient.dio.get(ApiEndpoints.tenantById(tenantId));
+      return _extractTenant(response.data);
+    } on DioException catch (error) {
+      log('Get tenant by id error: ${error.response?.statusCode} ${error.error}');
+      return null;
     } catch (error) {
-      log('Get tenant error: $error');
+      log('Get tenant by id error: $error');
       return null;
     }
   }
 
-  // Sign out
   Future<void> signOut() async {
     try {
-      await _client.auth.signOut();
+      await clearStoredSession();
+      await _apiClient.dio.post(
+        ApiEndpoints.authLogout,
+        options: Options(extra: {
+          'skipAuthRefresh': true,
+        }),
+      );
+    } on DioException {
+      // Logout should still complete locally even if API call fails.
     } catch (error) {
       log('Sign out error: $error');
       rethrow;
     }
   }
+}
 
-  // Listen to auth changes
-  Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
+class ApiLoginResult {
+  final String token;
+  final UserModel? user;
+  final TenantModel? tenant;
+
+  const ApiLoginResult({
+    required this.token,
+    this.user,
+    this.tenant,
+  });
+}
+
+class ApiAuthProfile {
+  final UserModel? user;
+  final TenantModel? tenant;
+
+  const ApiAuthProfile({
+    this.user,
+    this.tenant,
+  });
 }

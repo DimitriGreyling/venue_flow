@@ -1,7 +1,6 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:venue_flow_app/constants/supabase_table_names.dart';
-import 'package:venue_flow_app/models/dynamic_form_model.dart';
+import 'package:venue_flow_app/constants/api_contract.dart';
 import 'package:venue_flow_app/models/form_submission_model.dart';
+import 'package:venue_flow_app/shared/helpers/api_client.dart';
 
 abstract class IFormSubmissionRepository {
    Future<FormSubmission?> saveFormSubmission({
@@ -10,21 +9,33 @@ abstract class IFormSubmissionRepository {
 }
 
 class FormSubmissionRepository extends IFormSubmissionRepository {
-  final SupabaseClient _client;
+  final ApiClient _apiClient;
 
   FormSubmissionRepository({
-    required SupabaseClient client,
-  }) : _client = client;
-
-  final String _tableName = SupabaseTableNames.formSubmissionTable;
+    required ApiClient apiClient,
+  }) : _apiClient = apiClient;
 
   @override
   Future<FormSubmission?> saveFormSubmission({
     required FormSubmission submittedForm,
   }) async {
-    final response =
-        await _client.from(_tableName).insert(submittedForm.toJson()).select();
+    final response = await _apiClient.dio.post(
+      ApiEndpoints.formSubmissions,
+      data: submittedForm.toJson(),
+    );
 
-    return response.map((x)=> FormSubmission.fromJson(x)).firstOrNull;
+    final body = response.data;
+    if (body is Map<String, dynamic>) {
+      if (body['data'] is Map<String, dynamic>) {
+        return FormSubmission.fromJson(body['data'] as Map<String, dynamic>);
+      }
+      return FormSubmission.fromJson(body);
+    }
+
+    if (body is List && body.isNotEmpty && body.first is Map<String, dynamic>) {
+      return FormSubmission.fromJson(body.first as Map<String, dynamic>);
+    }
+
+    return null;
   }
 }
