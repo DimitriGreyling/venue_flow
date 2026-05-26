@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/providers/auth_provider.dart';
-import 'package:venue_flow_app/routing/app_router.dart';
+import 'package:venue_flow_app/routing/app_routes.dart';
 import 'package:venue_flow_app/theme/editorial_theme_data.dart';
 import 'package:venue_flow_app/theme/spacing.dart';
 
@@ -143,8 +143,8 @@ class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
                           PopupMenuItem(
                             child: Text('Logout'),
                             onTap: () {
-                              ref.watch(authRepositoryProvider).signOut();
-                              context.pushNamed('login');
+                              ref.read(authRepositoryProvider).signOut();
+                              context.goNamed(AppRouteNames.login);
                             },
                           ),
                         ];
@@ -163,7 +163,7 @@ class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
                                 ),
                           ),
                           Text(
-                            currentUser?.role.name.toUpperCase() ?? '',
+                            currentUser?.role?.name.toUpperCase() ?? '',
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall

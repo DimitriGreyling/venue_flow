@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/routing/app_routes.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/theme.dart';
 import '../../theme/components.dart';
@@ -31,10 +32,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (next.isAuthenticated) {
         // Navigate based on user role
         final user = next.user;
-        if (user?.isCoordinator == true) {
-          context.pushNamed('coordinator-dashboard');
+        if (user == null) {
+          return;
+        }
+        if (user.isCoordinator) {
+          context.goNamed(AppRouteNames.coordinatorDashboard);
         } else {
-          context.pushNamed('client-dashboard');
+          context.goNamed(AppRouteNames.clientDashboard);
         }
       }
     });
@@ -62,9 +66,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.asset(
-                    "assets/logo_white_transparent.png"
-                  ),
+                  Image.asset("assets/logo_white_transparent.png"),
                   // Header
                   Text(
                     'Welcome Back',

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
+import 'package:venue_flow_app/routing/app_routes.dart';
 import 'package:venue_flow_app/views/side_nav_widget.dart';
 import '../theme/theme.dart';
 import '../theme/spacing.dart';
@@ -211,7 +212,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            context.pushNamed('form-builder', extra: {
+            context.pushNamed(AppRouteNames.formBuilder, extra: {
               'formModel': formModel,
             }, queryParameters: {
               'id': formModel.id,
@@ -346,7 +347,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                 children: [
                   OutlinedButton.icon(
                     onPressed: () {
-                      context.pushNamed('form-builder');
+                      context.pushNamed(AppRouteNames.formBuilder);
                     },
                     icon: const Icon(Icons.description_outlined, size: 18),
                     label: const Text('Create Form'),

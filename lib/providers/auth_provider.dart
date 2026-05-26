@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/models/auth_state_model.dart';
 import 'package:venue_flow_app/models/tenant_model.dart';
 import 'package:venue_flow_app/models/user_model.dart';
+import 'package:venue_flow_app/providers/api_client_provider.dart';
 import '../repositories/auth_repository.dart';
 import '../viewmodels/auth_viewmodel.dart';
-import 'supbase_provider.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final supabaseClient = ref.watch(supabaseProvider);
-  return AuthRepository(client: supabaseClient);
+  final apiClient = ref.watch(apiClientProvider);
+
+  return AuthRepository(apiClient: apiClient);
 });
 
 final authViewModelProvider = StateNotifierProvider<AuthViewModel, AuthStateModel>((ref) {
