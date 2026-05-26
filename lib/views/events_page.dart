@@ -33,6 +33,8 @@ class _EventsPageState extends ConsumerState<EventsPage> {
 
     await ref.read(eventListViewModelProvider.notifier).addEvent(model);
 
+    ref.read(eventListViewModelProvider.notifier).loadEvents();
+
     final error = ref.read(eventListViewModelProvider).error;
     if (error == null) {
       GlobalPopupService.showSuccess(
@@ -58,6 +60,7 @@ class _EventsPageState extends ConsumerState<EventsPage> {
     if (model == null) return;
 
     await ref.read(eventListViewModelProvider.notifier).updateEvent(model);
+    ref.read(eventListViewModelProvider.notifier).loadEvents();
 
     final error = ref.read(eventListViewModelProvider).error;
     if (error == null) {
@@ -137,8 +140,8 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                             ),
                             GenericTableColumn<EventModel>(
                               header: 'Status',
-                              cellBuilder: (context, row) =>
-                                  Text(row.status?.name.toUpperCase() ?? 'UNKNOWN'),
+                              cellBuilder: (context, row) => Text(
+                                  row.status?.name.toUpperCase() ?? 'UNKNOWN'),
                             ),
                           ],
                           rows: state.events,
