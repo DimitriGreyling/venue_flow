@@ -49,14 +49,33 @@ class EventModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'createdDate': createdAt?.toIso8601String(),
-      'modifiedDate': modifiedDate?.toIso8601String(),
-      'eventDate': eventDate?.toIso8601String(),
+      // 'createdDate': createdAt?.toIso8601String(),
+      // 'modifiedDate': modifiedDate?.toIso8601String(),
+      'eventDate': eventDate?.toUtc().toIso8601String(),
       'guestCount': guestCount,
       'name': name,
       'status': status?.index ?? 0,
       'tenantId': tenantId,
     };
+  }
+
+  DateTime? parseEventDate(dynamic value) {
+    if (value == null) return null;
+
+    if (value is String) {
+      var normalized = value.trim();
+
+      // "2026-05-21 07:19:52.427+02" -> "2026-05-21T07:19:52.427+02:00"
+      normalized = normalized.replaceFirst(' ', 'T');
+      normalized = normalized.replaceAllMapped(
+        RegExp(r'([+-]\d{2})$'),
+        (match) => '${match.group(1)}:00',
+      );
+
+      return DateTime.tryParse(normalized);
+    }
+
+    return null;
   }
 
   //toString
