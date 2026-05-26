@@ -43,32 +43,47 @@ class EventListViewModel extends StateNotifier<EventListState> {
 
   Future<void> loadEvents() async {
     state = state.copyWith(isLoading: true, error: null);
-    await Future.delayed(Duration(seconds: 5));
     try {
-      final events = await _eventRepository.getEventsbyTenant(
-        tenantId: currentUser?.tenantId ?? '',
+      final events = await _eventRepository.search(
+        searchString: null,
+        pageNumber: 1,
+        pageSize: 10,
       );
-      state = state.copyWith(
-        events: List.generate(
-          50,
-          (index) {
-            return EventModel(
-              eventDate: DateTime.now(),
-              createdAt: DateTime.now(),
-              guestCount: index,
-              name: 'test ${index}',
-              status: EventStatus.inprogress,
-            );
-          },
-        ),
-        isLoading: false,
-        error: null,
-      );
+
+      state = state.copyWith(events: events.data, isLoading: false, error: null);
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  // Future<void> loadEvents() async {
+  //   state = state.copyWith(isLoading: true, error: null);
+  //   await Future.delayed(Duration(seconds: 5));
+  //   try {
+  //     final events = await _eventRepository.getEventsbyTenant(
+  //       tenantId: currentUser?.tenantId ?? '',
+  //     );
+  //     state = state.copyWith(
+  //       events: List.generate(
+  //         50,
+  //         (index) {
+  //           return EventModel(
+  //             eventDate: DateTime.now(),
+  //             createdAt: DateTime.now(),
+  //             guestCount: index,
+  //             name: 'test ${index}',
+  //             status: EventStatus.inprogress,
+  //           );
+  //         },
+  //       ),
+  //       isLoading: false,
+  //       error: null,
+  //     );
+  //   } catch (e) {
+  //     state = state.copyWith(
+  //       isLoading: false,
+  //       error: e.toString(),
+  //     );
+  //   }
+  // }
 }

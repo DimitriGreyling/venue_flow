@@ -27,21 +27,22 @@ class EventModel {
   factory EventModel.fromJson(Map<String, dynamic> json) {
     final object = EventModel(
       id: json['id'],
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
+      createdAt: json['createdDate'] != null
+          ? DateTime.tryParse(json['createdDate'])
           : null,
-      modifiedDate: json['modified_date'] != null
-          ? DateTime.tryParse(json['modified_date'])
+      modifiedDate: json['modifiedDate'] != null
+          ? DateTime.tryParse(json['modifiedDate'])
           : null,
-      eventDate: json['event_date'] != null
-          ? DateTime.tryParse(json['event_date'])
+      eventDate: json['eventDate'] != null
+          ? DateTime.tryParse(json['eventDate'])
           : null,
-      guestCount: json['guest_count'],
+      guestCount: json['guestCount'],
       name: json['name'],
-      status: json['status'] != null
-          ? EventStatus.values.byName(json['status'].toString().toLowerCase())
-          : null,
-      tenantId: json['tenant_id'],
+      status: null,//TODO : FIX THIS 
+      //  json['status'] != null
+      //     ? EventStatus.values.byName(json['status'].toString().toLowerCase())
+      //     : null,
+      tenantId: json['tenantId'],
     );
 
     return object;
@@ -50,13 +51,13 @@ class EventModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'created_at': createdAt?.toIso8601String(),
-      'modified_date': modifiedDate?.toIso8601String(),
-      'event_date': eventDate?.toIso8601String(),
-      'guest_count': guestCount,
+      'createdDate': createdAt?.toIso8601String(),
+      'modifiedDate': modifiedDate?.toIso8601String(),
+      'eventDate': eventDate?.toIso8601String(),
+      'guestCount': guestCount,
       'name': name,
       'status': status,
-      'tenant_id': tenantId,
+      'tenantId': tenantId,
     };
   }
 

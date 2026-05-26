@@ -5,6 +5,7 @@ class ApiEndpoints {
   static const String authMe = '/auth/me';
   static const String authRefresh = '/auth/refresh';
 
+  static const String events = '/event';
   static const String forms = '/form';
   static const String formSubmissions = '/form-submissions';
 
@@ -18,6 +19,9 @@ class ApiEndpoints {
 }
 
 class ApiQueryKeys {
+  static const String search = 'search';
+  static const String pageNumber = 'pageNumber';
+  static const String pageSize = 'pageSize';
   static const String fields = 'fields';
 }
 
