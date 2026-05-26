@@ -1,0 +1,29 @@
+image: ghcr.io/cirruslabs/flutter:3.41.0
+
+stages:
+  - analyze
+  - test
+
+variables:
+  PUB_CACHE: "$CI_PROJECT_DIR/.pub-cache"
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .pub-cache/
+    - .dart_tool/
+
+before_script:
+  - flutter --version
+  - dart --version
+  - flutter pub get
+
+analyze:
+  stage: analyze
+  script:
+    - flutter analyze
+
+test:
+  stage: test
+  script:
+    - flutter test --no-pub
