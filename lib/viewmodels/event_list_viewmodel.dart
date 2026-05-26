@@ -88,4 +88,59 @@ class EventListViewModel extends StateNotifier<EventListState> {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
+
+  Future<EventModel?> deleteEvent(EventModel eventModel) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      if (eventModel.id == null || eventModel.id!.isEmpty) {
+        throw Exception('Event id is missing');
+      }
+
+      await _eventRepository.deleteEvent(eventId: eventModel.id!);
+
+      final updatedEvents = state.events
+          .where((event) => event.id != eventModel.id)
+          .toList();
+
+      state = state.copyWith(
+        events: updatedEvents,
+        isLoading: false,
+        error: null,
+      );
+
+      return eventModel;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return null;
+    }
+  }
+
+  Future<void> restoreEvent(EventModel eventModel) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final restored = await _eventRepository.addEvent(
+        eventModel: EventModel(
+          createdAt: eventModel.createdAt,
+          modifiedDate: eventModel.modifiedDate,
+          eventDate: eventModel.eventDate,
+          guestCount: eventModel.guestCount,
+          name: eventModel.name,
+          status: eventModel.status,
+          tenantId: eventModel.tenantId,
+        ),
+      );
+
+      if (restored != null) {
+        state = state.copyWith(
+          events: [...state.events, restored],
+          isLoading: false,
+          error: null,
+        );
+      } else {
+        throw Exception('Failed to restore event');
+      }
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
 }

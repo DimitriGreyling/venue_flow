@@ -12,6 +12,9 @@ abstract class IEventRepository {
   Future<EventModel?> updateEvent({
     required EventModel eventModel,
   });
+  Future<void> deleteEvent({
+    required String eventId,
+  });
 }
 
 class EventRepository extends IEventRepository {
@@ -66,6 +69,19 @@ class EventRepository extends IEventRepository {
       return EventModel.fromJson(response.data);
     } else {
       throw Exception('Failed to update event');
+    }
+  }
+
+  @override
+  Future<void> deleteEvent({
+    required String eventId,
+  }) async {
+    final response = await _apiClient.dio.delete(
+      '${ApiEndpoints.events}/$eventId',
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to delete event');
     }
   }
 }

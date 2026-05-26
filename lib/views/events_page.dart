@@ -6,6 +6,7 @@ import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
 import 'package:venue_flow_app/theme/spacing.dart';
 import 'package:venue_flow_app/theme/theme.dart';
+import 'package:venue_flow_app/views/dialogs/event_delete_dialog.dart';
 import 'package:venue_flow_app/views/dialogs/event_dialogs.dart';
 import 'package:venue_flow_app/views/side_nav_widget.dart';
 import 'package:venue_flow_app/views/top_bar_widget.dart';
@@ -77,6 +78,41 @@ class _EventsPageState extends ConsumerState<EventsPage> {
     }
   }
 
+  Future<void> _deleteEvent(EventModel event) async {
+    final confirmed = await showDeleteEventDialog(
+      context,
+      event: event,
+    );
+
+    if (!confirmed) return;
+
+    final deletedEvent = await ref
+        .read(eventListViewModelProvider.notifier)
+        .deleteEvent(event);
+
+    if (deletedEvent == null) {
+      GlobalPopupService.showError(
+        title: 'Delete failed',
+        message:
+            ref.read(eventListViewModelProvider).error ?? 'Unable to delete event.',
+        position: PopupPosition.bottomRight,
+      );
+      return;
+    }
+
+    GlobalPopupService.showAction(
+      title: 'Event deleted',
+      message: '"${deletedEvent.name ?? 'Event'}" was removed.',
+      actionText: 'Undo',
+      type: PopupType.success,
+      position: PopupPosition.bottomRight,
+      onAction: () async {
+        await ref.read(eventListViewModelProvider.notifier).restoreEvent(deletedEvent);
+        ref.read(eventListViewModelProvider.notifier).loadEvents();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -141,6 +177,24 @@ class _EventsPageState extends ConsumerState<EventsPage> {
                               header: 'Status',
                               cellBuilder: (context, row) => Text(
                                   row.status?.name.toUpperCase() ?? 'UNKNOWN'),
+                            ),
+                            GenericTableColumn<EventModel>(
+                              header: '',
+                              flex: 0,
+                              cellBuilder: (context, row) {
+                                return Align(
+                                  alignment: Alignment.centerRight,
+                                  child: IconButton(
+                                    tooltip: 'Delete event',
+                                    onPressed: () => _deleteEvent(row),
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      color:
+                                          Theme.of(context).colorScheme.error,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                           rows: state.events,

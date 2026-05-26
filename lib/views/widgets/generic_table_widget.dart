@@ -235,20 +235,28 @@ class _HoverableTableRowState<T> extends State<_HoverableTableRow<T>> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return MouseRegion(
+      opaque: true,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       cursor: widget.onTap == null
           ? SystemMouseCursors.basic
           : SystemMouseCursors.click,
-      child: Material(
-        color:  _isHovered
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        curve: Curves.easeOut,
+        width: double.infinity,
+        color: _isHovered
             ? colorScheme.primary.withValues(alpha: 0.06)
             : Colors.transparent,
-        child: InkWell(
-          onTap: widget.onTap,
-          child: SizedBox(
-            height: widget.rowHeight,
-            child: widget.child,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.onTap,
+            child: SizedBox(
+              width: double.infinity,
+              height: widget.rowHeight,
+              child: widget.child,
+            ),
           ),
         ),
       ),
