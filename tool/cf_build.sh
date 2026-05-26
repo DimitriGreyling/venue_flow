@@ -20,7 +20,24 @@ ls -la
 
 version_ge() {
   # usage: version_ge <current> <required>
-  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
+  # returns 0 if current >= required
+  local current="$1"
+  local required="$2"
+
+  IFS='.' read -r c1 c2 c3 <<< "$current"
+  IFS='.' read -r r1 r2 r3 <<< "$required"
+
+  c1=${c1:-0}; c2=${c2:-0}; c3=${c3:-0}
+  r1=${r1:-0}; r2=${r2:-0}; r3=${r3:-0}
+
+  if [ "$c1" -gt "$r1" ]; then return 0; fi
+  if [ "$c1" -lt "$r1" ]; then return 1; fi
+
+  if [ "$c2" -gt "$r2" ]; then return 0; fi
+  if [ "$c2" -lt "$r2" ]; then return 1; fi
+
+  if [ "$c3" -ge "$r3" ]; then return 0; fi
+  return 1
 }
 
 # Download Flutter SDK (Linux) into .flutter/
@@ -57,8 +74,11 @@ FLUTTER_BIN="${FLUTTER_DIR}/bin/flutter"
 echo "Flutter at: ${FLUTTER_BIN}"
 "${FLUTTER_BIN}" --version
 
-CURRENT_DART_VERSION="$(${FLUTTER_BIN} dart --version 2>&1 | sed -n 's/.*version: \([0-9][0-9.]*\).*/\1/p')"
-REQUIRED_DART_VERSION="$(grep -E '^[[:space:]]*sdk:[[:space:]]*\^?[0-9]+\.[0-9]+\.[0-9]+' "${ROOT_DIR}/pubspec.yaml" | head -n1 | sed -E 's/.*\^?([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+CURRENT_DART_VERSION="$(${FLUTTER_BIN} dart --version 2>&1 | sed -n 's/.*version: \([0-9][0-9.]*\).*/\1/p' || true)"
+REQUIRED_DART_VERSION="$(grep -E '^[[:space:]]*sdk:[[:space:]]*\^?[0-9]+\.[0-9]+\.[0-9]+' "${ROOT_DIR}/pubspec.yaml" | head -n1 | sed -E 's/.*\^?([0-9]+\.[0-9]+\.[0-9]+).*/\1/' || true)"
+
+echo "Detected Dart in Flutter bundle: ${CURRENT_DART_VERSION:-unknown}"
+echo "Required minimum Dart from pubspec: ${REQUIRED_DART_VERSION:-unknown}"
 
 if [ -n "${CURRENT_DART_VERSION}" ] && [ -n "${REQUIRED_DART_VERSION}" ]; then
   if ! version_ge "${CURRENT_DART_VERSION}" "${REQUIRED_DART_VERSION}"; then
@@ -66,6 +86,8 @@ if [ -n "${CURRENT_DART_VERSION}" ] && [ -n "${REQUIRED_DART_VERSION}" ]; then
     echo "Set FLUTTER_VERSION in Cloudflare to a newer release or lower pubspec sdk constraint."
     exit 1
   fi
+else
+  echo "WARNING: Skipping Dart SDK compatibility check because one or both versions could not be parsed."
 fi
 
 # Reduce noise in Cloudflare logs
