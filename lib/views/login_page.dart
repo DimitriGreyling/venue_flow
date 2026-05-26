@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/routing/app_routes.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/theme.dart';
 import '../../theme/components.dart';
@@ -35,9 +36,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           return;
         }
         if (user.isCoordinator) {
-          context.pushNamed('coordinator-dashboard');
+          context.goNamed(AppRouteNames.coordinatorDashboard);
         } else {
-          context.pushNamed('client-dashboard');
+          context.goNamed(AppRouteNames.clientDashboard);
         }
       }
     });

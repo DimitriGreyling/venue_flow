@@ -8,6 +8,7 @@ import 'package:venue_flow_app/models/popup_position.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/providers/auth_provider.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
+import 'package:venue_flow_app/routing/app_routes.dart';
 import 'package:venue_flow_app/routing/app_router.dart';
 import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
 import 'package:venue_flow_app/views/side_nav_widget.dart';
@@ -99,7 +100,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                 children: [
                   OutlinedButton.icon(
                     onPressed: () {
-                      context.pushNamed('form-builder');
+                      context.pushNamed(AppRouteNames.formBuilder);
                     },
                     icon: const Icon(Icons.description_outlined, size: 18),
                     label: const Text('Create Form'),

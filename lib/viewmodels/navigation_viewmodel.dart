@@ -1,6 +1,6 @@
 // lib/providers/navigation_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/routing/app_routes.dart';
 
 // Navigation state model
 class NavigationState {
@@ -27,7 +27,7 @@ class NavigationState {
 class NavigationNotifier extends StateNotifier<NavigationState> {
   NavigationNotifier() : super(const NavigationState(
     selectedItem: 'Dashboard',
-    selectedRoute: '/dashboard',
+    selectedRoute: AppRoutePaths.home,
   ));
 
   void selectNavItem(String item, String route) {
@@ -37,13 +37,14 @@ class NavigationNotifier extends StateNotifier<NavigationState> {
   void updateFromRoute(String currentRoute) {
     // Map routes to navigation items
     final routeToItemMap = {
-      '/dashboard': 'Dashboard',
-      '/coordinator': 'Dashboard',
-      '/client': 'Dashboard',
-      '/form-builder': 'Form Builder',
-      '/form-list': 'Form Builder',
-      '/events': 'Events',
-      '/settings': 'Settings',
+      AppRoutePaths.coordinatorDashboard: 'Dashboard',
+      AppRoutePaths.clientDashboard: 'Dashboard',
+      AppRoutePaths.coordinatorFormBuilder: 'Form Builder',
+      AppRoutePaths.coordinatorFormList: 'Form Builder',
+      AppRoutePaths.clientViewForm: 'Forms',
+      AppRoutePaths.coordinatorEvents: 'Events',
+      AppRoutePaths.coordinatorAnalytics: 'Analytics',
+      AppRoutePaths.settings: 'Settings',
     };
 
     String selectedItem = 'Dashboard';
@@ -74,4 +75,4 @@ final navigationStateProvider = StateNotifierProvider<NavigationNotifier, Naviga
 });
 
 // Provider for current route tracking
-final currentRouteProvider = StateProvider<String>((ref) => '/dashboard');
+final currentRouteProvider = StateProvider<String>((ref) => AppRoutePaths.home);

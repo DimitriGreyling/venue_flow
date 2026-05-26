@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/routing/app_routes.dart';
 import 'package:venue_flow_app/theme/spacing.dart';
 import 'package:venue_flow_app/theme/theme.dart';
 
@@ -38,7 +39,7 @@ class HomeLoggedOutPage extends StatelessWidget {
                 child: Column(
                   children: [
                     _TopNav(
-                      onLogin: () => context.goNamed('signup'),
+                      onLogin: () => context.goNamed(AppRouteNames.signup),
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(
@@ -50,7 +51,8 @@ class HomeLoggedOutPage extends StatelessWidget {
                         children: [
                           _HeroSection(
                             isDesktop: isDesktop,
-                            onLogin: () => context.goNamed('signup'),
+                            onLogin: () =>
+                                context.goNamed(AppRouteNames.signup),
                           ),
                           const SizedBox(height: EditorialSpacing.spacing16),
                           const _TrustMetrics(),
@@ -64,7 +66,8 @@ class HomeLoggedOutPage extends StatelessWidget {
                           const _TestimonialSection(),
                           const SizedBox(height: EditorialSpacing.spacing16),
                           _BottomCta(
-                            onLogin: () => context.goNamed('signup'),
+                            onLogin: () =>
+                                context.goNamed(AppRouteNames.signup),
                           ),
                           const SizedBox(height: EditorialSpacing.spacing12),
                         ],
