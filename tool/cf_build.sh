@@ -75,11 +75,12 @@ if [ "${needs_download}" = "1" ]; then
 fi
 
 FLUTTER_BIN="${FLUTTER_DIR}/bin/flutter"
+DART_BIN="${FLUTTER_DIR}/bin/dart"
 
 echo "Flutter at: ${FLUTTER_BIN}"
 "${FLUTTER_BIN}" --version
 
-CURRENT_DART_VERSION="$(${FLUTTER_BIN} dart --version 2>&1 | sed -n 's/.*version: \([0-9][0-9.]*\).*/\1/p' || true)"
+CURRENT_DART_VERSION="$(${DART_BIN} --version 2>&1 | sed -n 's/.*version: \([0-9][0-9.]*\).*/\1/p' || true)"
 REQUIRED_DART_VERSION="$(grep -E '^[[:space:]]*sdk:[[:space:]]*\^?[0-9]+\.[0-9]+\.[0-9]+' "${ROOT_DIR}/pubspec.yaml" | head -n1 | sed -E 's/.*\^?([0-9]+\.[0-9]+\.[0-9]+).*/\1/' || true)"
 
 echo "Detected Dart in Flutter bundle: ${CURRENT_DART_VERSION:-unknown}"
@@ -128,7 +129,15 @@ fi
 
 # Build
 "${FLUTTER_BIN}" pub get
-"${FLUTTER_BIN}" build web --release --web-renderer canvaskit
+
+WEB_BUILD_HELP="$(${FLUTTER_BIN} build web -h 2>&1 || true)"
+if echo "${WEB_BUILD_HELP}" | grep -q -- "--web-renderer"; then
+  echo "Building web with explicit renderer flag..."
+  "${FLUTTER_BIN}" build web --release --web-renderer canvaskit
+else
+  echo "Building web with default renderer (current Flutter CLI does not support --web-renderer)..."
+  "${FLUTTER_BIN}" build web --release
+fi
 
 # if you do not need offline/PWA behavior, disable the Flutter service worker.
 # This is the simplest way to guarantee users see the latest deployment.
