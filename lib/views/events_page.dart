@@ -9,7 +9,7 @@ import 'package:venue_flow_app/theme/theme.dart';
 import 'package:venue_flow_app/views/dialogs/event_dialogs.dart';
 import 'package:venue_flow_app/views/side_nav_widget.dart';
 import 'package:venue_flow_app/views/top_bar_widget.dart';
-import 'package:venue_flow_app/views/widgets/table_widget.dart';
+import 'package:venue_flow_app/views/widgets/generic_table_widget.dart';
 
 class EventsPage extends ConsumerStatefulWidget {
   const EventsPage({super.key});
