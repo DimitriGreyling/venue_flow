@@ -66,7 +66,12 @@ if [ "${needs_download}" = "1" ]; then
   tar xf "${ARCHIVE}" -C "${ROOT_DIR}"
   rm -f "${ARCHIVE}"
 
-  mv "${ROOT_DIR}/flutter" "${FLUTTER_DIR}"
+  if ! mv "${ROOT_DIR}/flutter" "${FLUTTER_DIR}"; then
+    echo "Direct move failed (likely Windows/Git Bash permissions). Falling back to copy..."
+    mkdir -p "${FLUTTER_DIR}"
+    cp -a "${ROOT_DIR}/flutter/." "${FLUTTER_DIR}/"
+    rm -rf "${ROOT_DIR}/flutter"
+  fi
 fi
 
 FLUTTER_BIN="${FLUTTER_DIR}/bin/flutter"
