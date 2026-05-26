@@ -56,6 +56,18 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Local secrets / env files
+# Environment and secrets
 .env
 .env.*
+!.env.example
+
+# Cloudflare / Wrangler local files
+.dev.vars
+.wrangler/
+
+# Local editor settings
+.vscode/
+
+# Coverage and test artifacts
+coverage/
+test_driver/
