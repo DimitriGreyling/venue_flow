@@ -78,6 +78,8 @@ class AuthRepository {
       final response = await _apiClient.dio.get(ApiEndpoints.authMe);
       final responseData = response.data;
 
+      final usr = _extractUser(responseData);
+
       return ApiAuthProfile(
         user: _extractUser(responseData),
         tenant: _extractTenant(responseData),

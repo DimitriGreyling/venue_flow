@@ -2,25 +2,25 @@
 import 'package:venue_flow_app/models/enums.dart';
 
 class UserModel {
-  final String id;
-  final String email;
+  final String? id;
+  final String? email;
   final String? firstName;
   final String? lastName;
-  final UserRole role;
+  final UserRole? role;
   final String? tenantId;
   final bool isActive;
-  final DateTime createdAt;
+  final DateTime? createdAt;
   final DateTime? updatedAt;
 
   UserModel({
-    required this.id,
-    required this.email,
+    this.id,
+    this.email,
     this.firstName,
     this.lastName,
-    required this.role,
+    this.role,
     this.tenantId,
     this.isActive = true,
-    required this.createdAt,
+    this.createdAt,
     this.updatedAt,
   });
 
@@ -30,10 +30,10 @@ class UserModel {
       email: json['email'],
       firstName: json['first_name'],
       lastName: json['last_name'],
-      role: UserRole.values.byName(json['role']),
+      role: UserRole.values.byName(json['role'].toString().toLowerCase()),
       tenantId: json['tenant_id'],
       isActive: json['is_active'] ?? true,
-      createdAt: DateTime.parse(json['created_at']),
+      createdAt: json['created_at'] == null  ? null :  DateTime.parse(json['created_at']),
       updatedAt: json['updated_at'] != null 
           ? DateTime.parse(json['updated_at']) 
           : null,
@@ -46,10 +46,10 @@ class UserModel {
       'email': email,
       'first_name': firstName,
       'last_name': lastName,
-      'role': role.name,
+      'role': role?.name,
       'tenant_id': tenantId,
       'is_active': isActive,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
   }
@@ -58,7 +58,7 @@ class UserModel {
     if (firstName != null && lastName != null) {
       return '$firstName $lastName';
     }
-    return email;
+    return email ?? '';
   }
 
   bool get isCoordinator => role == UserRole.coordinator || role == UserRole.admin;

@@ -1,21 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:venue_flow_app/constants/api_contract.dart';
 
-// class ApiClient {
-//   final Dio dio;
-
-//   ApiClient()
-//       : dio = Dio(BaseOptions(
-//           baseUrl: "http://localhost:5082/api/",
-//           connectTimeout: const Duration(seconds: 10),
-//           receiveTimeout: const Duration(seconds: 10),
-//           headers: {
-//             'Content-Type': 'application/json',
-
-//           },
-//         ));
-// }
-
 class ApiClient {
   late final Dio dio;
   String? _authToken;
@@ -25,7 +10,8 @@ class ApiClient {
 
   ApiClient() {
     dio = Dio(BaseOptions(
-      baseUrl: "http://localhost:5082/api",
+      // baseUrl: ApiEndpoints.productionUrl,
+      baseUrl: ApiEndpoints.localUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
 

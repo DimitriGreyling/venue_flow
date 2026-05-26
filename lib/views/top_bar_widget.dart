@@ -163,7 +163,7 @@ class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
                                 ),
                           ),
                           Text(
-                            currentUser?.role.name.toUpperCase() ?? '',
+                            currentUser?.role?.name.toUpperCase() ?? '',
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall

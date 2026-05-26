@@ -5,12 +5,16 @@ class ApiEndpoints {
   static const String authMe = '/auth/me';
   static const String authRefresh = '/auth/refresh';
 
-  static const String forms = '/forms';
+  static const String forms = '/form';
   static const String formSubmissions = '/form-submissions';
 
   static String formById(String id) => '$forms/$id';
   static String tenantById(String id) => '/tenants/$id';
   static String tenantBySlug(String slug) => '/tenants/slug/$slug';
+
+  //TODO:: Move this to env variables
+  static String localUrl = "http://localhost:5082/api";
+  static String productionUrl = "https://venue-flow-api.onrender.com/api";
 }
 
 class ApiQueryKeys {
