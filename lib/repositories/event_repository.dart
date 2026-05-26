@@ -41,13 +41,31 @@ class EventRepository extends IEventRepository {
   Future<EventModel?> addEvent({
     required EventModel eventModel,
   }) async {
-    return null;
+    final response = await _apiClient.dio.post(
+      ApiEndpoints.events,
+      data: eventModel.toJson(),
+    );
+
+    if (response.statusCode == 201) {
+      return EventModel.fromJson(response.data);
+    } else {
+      throw Exception('Failed to create event');
+    }
   }
 
   @override
   Future<EventModel?> updateEvent({
     required EventModel eventModel,
   }) async {
-    return null;
+    final response = await _apiClient.dio.put(
+      '${ApiEndpoints.events}/${eventModel.id}',
+      data: eventModel.toJson(),
+    );
+
+    if (response.statusCode == 200) {
+      return EventModel.fromJson(response.data);
+    } else {
+      throw Exception('Failed to update event');
+    }
   }
 }

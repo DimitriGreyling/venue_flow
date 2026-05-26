@@ -56,34 +56,36 @@ class EventListViewModel extends StateNotifier<EventListState> {
     }
   }
 
-  // Future<void> loadEvents() async {
-  //   state = state.copyWith(isLoading: true, error: null);
-  //   await Future.delayed(Duration(seconds: 5));
-  //   try {
-  //     final events = await _eventRepository.getEventsbyTenant(
-  //       tenantId: currentUser?.tenantId ?? '',
-  //     );
-  //     state = state.copyWith(
-  //       events: List.generate(
-  //         50,
-  //         (index) {
-  //           return EventModel(
-  //             eventDate: DateTime.now(),
-  //             createdAt: DateTime.now(),
-  //             guestCount: index,
-  //             name: 'test ${index}',
-  //             status: EventStatus.inprogress,
-  //           );
-  //         },
-  //       ),
-  //       isLoading: false,
-  //       error: null,
-  //     );
-  //   } catch (e) {
-  //     state = state.copyWith(
-  //       isLoading: false,
-  //       error: e.toString(),
-  //     );
-  //   }
-  // }
+  Future<void> addEvent(EventModel eventModel) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final newEvent = await _eventRepository.addEvent(eventModel: eventModel);
+      if (newEvent != null) {
+        state = state.copyWith(
+          events: [...state.events, newEvent],
+          isLoading: false,
+          error: null,
+        );
+      } else {
+        throw Exception('Failed to create event');
+      }
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
+  Future<void> updateEvent(EventModel eventModel) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final updatedEvent = await _eventRepository.updateEvent(eventModel: eventModel);
+      if (updatedEvent != null) {
+        final updatedEvents = state.events.map((e) => e.id == updatedEvent.id ? updatedEvent : e).toList();
+        state = state.copyWith(events: updatedEvents, isLoading: false, error: null);
+      } else {
+        throw Exception('Failed to update event');
+      }
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
 }

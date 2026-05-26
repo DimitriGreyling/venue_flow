@@ -38,10 +38,8 @@ class EventModel {
           : null,
       guestCount: json['guestCount'],
       name: json['name'],
-      status: null,//TODO : FIX THIS 
-      //  json['status'] != null
-      //     ? EventStatus.values.byName(json['status'].toString().toLowerCase())
-      //     : null,
+      status:
+          json['status'] != null ? EventStatus.values[json['status']] : null,
       tenantId: json['tenantId'],
     );
 
@@ -56,7 +54,7 @@ class EventModel {
       'eventDate': eventDate?.toIso8601String(),
       'guestCount': guestCount,
       'name': name,
-      'status': status,
+      'status': status?.index ?? 0,
       'tenantId': tenantId,
     };
   }
