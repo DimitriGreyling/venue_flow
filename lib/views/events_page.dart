@@ -33,10 +33,9 @@ class _EventsPageState extends ConsumerState<EventsPage> {
 
     await ref.read(eventListViewModelProvider.notifier).addEvent(model);
 
-    ref.read(eventListViewModelProvider.notifier).loadEvents();
-
     final error = ref.read(eventListViewModelProvider).error;
     if (error == null) {
+      ref.read(eventListViewModelProvider.notifier).loadEvents();
       GlobalPopupService.showSuccess(
         title: 'Event created',
         message: 'Your event was added successfully.',
@@ -60,10 +59,10 @@ class _EventsPageState extends ConsumerState<EventsPage> {
     if (model == null) return;
 
     await ref.read(eventListViewModelProvider.notifier).updateEvent(model);
-    ref.read(eventListViewModelProvider.notifier).loadEvents();
 
     final error = ref.read(eventListViewModelProvider).error;
     if (error == null) {
+      ref.read(eventListViewModelProvider.notifier).loadEvents();
       GlobalPopupService.showSuccess(
         title: 'Event updated',
         message: 'Your event was updated successfully.',
