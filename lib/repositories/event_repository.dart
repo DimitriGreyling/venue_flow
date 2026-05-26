@@ -1,6 +1,5 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:venue_flow_app/constants/supabase_table_names.dart';
 import 'package:venue_flow_app/models/event_model.dart';
+import 'package:venue_flow_app/shared/helpers/api_client.dart';
 
 abstract class IEventRepository {
   Future<List<EventModel>> getEventsbyTenant({
@@ -15,41 +14,32 @@ abstract class IEventRepository {
 }
 
 class EventRepository extends IEventRepository {
-  final SupabaseClient _client;
+  EventRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  EventRepository({
-    required SupabaseClient client,
-  }) : _client = client;
-
-  final _tableName = SupabaseTableNames.eventTable;
+  final ApiClient _apiClient;
 
   @override
   Future<List<EventModel>> getEventsbyTenant({
     required String tenantId,
   }) async {
-    final response =
-        await _client.from(_tableName).select().eq('tenant_id', tenantId);
+    return [];
+    // final response =
+    //     await _apiClient.from(_tableName).select().eq('tenant_id', tenantId);
 
-    return response.map((x)=> EventModel.fromJson(x)).toList();
+    // return response.map((x) => EventModel.fromJson(x)).toList();
   }
 
   @override
   Future<EventModel?> addEvent({
     required EventModel eventModel,
   }) async {
-    final response =
-        await _client.from(_tableName).insert(eventModel.toJson()).select();
-
-    return response.map((x) => EventModel.fromJson(x)).first;
+    return null;
   }
 
   @override
   Future<EventModel?> updateEvent({
     required EventModel eventModel,
   }) async {
-    final response =
-        await _client.from(_tableName).update(eventModel.toJson()).select();
-
-    return response.map((x) => EventModel.fromJson(x)).first;
+    return null;
   }
 }
