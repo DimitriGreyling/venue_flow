@@ -426,6 +426,16 @@ class _FormListPageState extends ConsumerState<FormListPage> {
               ],
               rows: results ?? [],
               isLoading: snapshot.connectionState == ConnectionState.waiting,
+              onRowTap: (row) {
+                row as DynamicFormModel;
+                context.pushNamed(
+                  AppRouteNames.formBuilder,
+                  extra: {'formModel': row},
+                  queryParameters: {'id': row.id ?? ''},
+                );
+              },
+              emptyMessage:
+                  'No forms found. Click "Create Form" to get started.',
             );
           },
         ),
