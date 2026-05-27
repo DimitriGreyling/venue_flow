@@ -63,7 +63,7 @@ class FormRepository extends IFormRepository {
   Future<List<DynamicFormModel>?> getForms() async {
     try {
       final response = await _apiClient.dio.get(ApiEndpoints.forms);
-      return _extractFormList(response.data);
+      return _extractFormList(response.data['data']);
     } catch (error) {
       log('getForms error: $error');
       return null;

@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
+import 'package:venue_flow_app/models/event_model.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/routing/app_routes.dart';
 import 'package:venue_flow_app/views/side_nav_widget.dart';
+import 'package:venue_flow_app/views/widgets/generic_table_widget.dart';
 import '../theme/theme.dart';
 import '../theme/spacing.dart';
 import '../theme/elevation.dart';
@@ -47,9 +49,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                 // Top Navigation
                 _buildTopNavigation(colorScheme, editorial),
                 // Dashboard Content
-                Expanded(
-                  child: _buildDashboardContent(colorScheme, editorial),
-                ),
+                Expanded(child: _buildDashboardContent(colorScheme, editorial)),
               ],
             ),
           ),
@@ -59,11 +59,14 @@ class _FormListPageState extends ConsumerState<FormListPage> {
   }
 
   Widget _buildTopNavigation(
-      ColorScheme colorScheme, EditorialThemeData editorial) {
+    ColorScheme colorScheme,
+    EditorialThemeData editorial,
+  ) {
     return Container(
       height: 64,
-      padding:
-          const EdgeInsets.symmetric(horizontal: EditorialSpacing.spacing8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: EditorialSpacing.spacing8,
+      ),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
@@ -173,8 +176,8 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                   Text(
                     'Alex Rivera',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -212,11 +215,11 @@ class _FormListPageState extends ConsumerState<FormListPage> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            context.pushNamed(AppRouteNames.formBuilder, extra: {
-              'formModel': formModel,
-            }, queryParameters: {
-              'id': formModel.id,
-            });
+            context.pushNamed(
+              AppRouteNames.formBuilder,
+              extra: {'formModel': formModel},
+              queryParameters: {'id': formModel.id},
+            );
           },
           child: Padding(
             padding: const EdgeInsets.all(EditorialSpacing.spacing6),
@@ -242,10 +245,8 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                       const SizedBox(width: EditorialSpacing.spacing3),
                       Text(
                         formModel.name ?? '',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -263,12 +264,13 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                 Expanded(
                   child: Text(
                     formModel.createdAt != null
-                        ? DateFormat('yyyy-MM-dd')
-                            .format(formModel.modifiedDate!)
+                        ? DateFormat(
+                          'yyyy-MM-dd',
+                        ).format(formModel.modifiedDate!)
                         : '',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -279,15 +281,16 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                     ),
                     decoration: BoxDecoration(
                       color: (_getStatusColor(
-                              formModel.formStatus ?? FormStatus.draft))
-                          .withOpacity(0.1),
+                        formModel.formStatus ?? FormStatus.draft,
+                      )).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       formModel.formStatus?.name.toUpperCase() ?? '',
                       style: editorial.metadataStyle.copyWith(
                         color: _getStatusColor(
-                            formModel.formStatus ?? FormStatus.draft),
+                          formModel.formStatus ?? FormStatus.draft,
+                        ),
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
@@ -314,7 +317,9 @@ class _FormListPageState extends ConsumerState<FormListPage> {
   }
 
   Widget _buildDashboardContent(
-      ColorScheme colorScheme, EditorialThemeData editorial) {
+    ColorScheme colorScheme,
+    EditorialThemeData editorial,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(EditorialSpacing.spacing8),
       child: Column(
@@ -330,16 +335,16 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                   Text(
                     'Forms',
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: colorScheme.onSurface,
-                        ),
+                      fontWeight: FontWeight.w900,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Welcome back, Alex. You have 4 forms awaiting review.',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -354,386 +359,76 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: colorScheme.onSecondaryContainer,
                       side: BorderSide(
-                          color: colorScheme.outline.withOpacity(0.1)),
+                        color: colorScheme.outline.withOpacity(0.1),
+                      ),
                     ),
                   ),
                 ],
               ),
             ],
           ),
-
-          _buildActiveEventsSection(colorScheme, editorial)
+          _buildActiveEventsSection(colorScheme, editorial),
         ],
       ),
     );
   }
 
   Widget _buildActiveEventsSection(
-      ColorScheme colorScheme, EditorialThemeData editorial) {
+    ColorScheme colorScheme,
+    EditorialThemeData editorial,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Row(
-        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //   children: [
-        //     Text(
-        //       'Active Events',
-        //       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-        //             fontWeight: FontWeight.w900,
-        //           ),
-        //     ),
-        //     TextButton(
-        //       onPressed: () {},
-        //       child: Text(
-        //         'View all schedules',
-        //         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-        //               color: colorScheme.secondary,
-        //               fontWeight: FontWeight.bold,
-        //             ),
-        //       ),
-        //     ),
-        //   ],
-        // ),
         const SizedBox(height: EditorialSpacing.spacing6),
         FutureBuilder(
           future: ref.watch(formBuilderViewModelProvider.notifier).loadForms(),
           builder: (context, snapshot) {
-            // if (snapshot.connectionState == ConnectionState.waiting) {
-            //   return const Center(
-            //     child: CircularProgressIndicator(),
-            //   );
-            // }
-
-            // if (!snapshot.hasData) {
-            //   return const Center(
-            //     child: CircularProgressIndicator(),
-            //   );
-            // }
-
             final results = snapshot.data;
 
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  height: MediaQuery.of(context).size.height * 0.7,
-                  decoration: BoxDecoration(
-                    // color: Colors.red, //colorScheme.surfaceContainerLowest,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: colorScheme.outline.withOpacity(0.05),
-                    ),
-                    boxShadow: EditorialElevation.cardShadow(
-                      colorScheme.brightness == Brightness.dark,
-                    ),
-                  ),
-                  child: DataTable(
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerLow,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16),
-                      ),
-                    ),
-                    headingTextStyle:
-                        editorial.metadataStyle.copyWith(fontSize: 16),
-                    dataTextStyle:
-                        editorial.metadataStyle.copyWith(fontSize: 12),
-                    dataRowColor:
-                        WidgetStateProperty.resolveWith<Color?>((states) {
-                      // if (states.contains(WidgetState.selected))
-                      //   return Colors.blue.withOpacity(0.08);
-                      // return null; // Default color
+            return GenericDataTable(
+              columns: [
+                GenericTableColumn(
+                  header: 'Form Name',
+                  cellBuilder: (context, row) {
+                    row as DynamicFormModel;
+                    return Text(row.name ?? 'UNKNOWN');
+                  },
+                ),
+                GenericTableColumn(
+                  header: 'Version',
+                  cellBuilder: (context, row) {
+                    row as DynamicFormModel;
+                    return Text(row.version?.toString() ?? 'UNKNOWN');
+                  },
+                ),
+                GenericTableColumn(
+                  header: 'Last Modified',
+                  cellBuilder: (context, row) {
+                    row as DynamicFormModel;
+                    final formattedDate =
+                        row.modifiedDate != null
+                            ? DateFormat('yyyy-MM-dd').format(row.modifiedDate!)
+                            : 'UNKNOWN';
 
-                      return colorScheme.surface;
-                    }),
-                    columns: const [
-                      DataColumn(
-                        label: Expanded(
-                          flex: 3,
-                          child: Text(
-                            'Form Name',
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'Last Modified',
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Expanded(
-                          child: Text(
-                            'Status',
-                          ),
-                        ),
-                      ),
-                    ],
-                    rows: snapshot.connectionState == ConnectionState.waiting
-                        ? (results != null && results.isEmpty)
-                            ? const [
-                                DataRow(
-                                  cells: [
-                                    DataCell(
-                                      Text(''),
-                                    ),
-                                    DataCell(
-                                      Text(''),
-                                    ),
-                                    DataCell(
-                                      Text(''),
-                                    ),
-                                  ],
-                                )
-                              ]
-                            : const [
-                                DataRow(
-                                  cells: [
-                                    DataCell(
-                                      Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 1,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 1,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Center(
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 1,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ]
-                        : results!.map((event) {
-                            return DataRow(
-                              cells: [
-                                DataCell(
-                                  Text(
-                                    event.name ?? 'Unknown',
-                                  ),
-                                ),
-                                DataCell(
-                                  Text(
-                                    event.modifiedDate?.toIso8601String() ??
-                                        '-',
-                                  ),
-                                ),
-                                DataCell(
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: EditorialSpacing.spacing3,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: (_getStatusColor(
-                                              event.formStatus ??
-                                                  FormStatus.inactive))
-                                          .withOpacity(0.3),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      event.formStatus?.name.toUpperCase() ??
-                                          '',
-                                      style: editorial.metadataStyle.copyWith(
-                                        color: _getStatusColor(
-                                            event.formStatus ??
-                                                FormStatus.inactive),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                  ),
+                    return Text(formattedDate);
+                  },
+                ),
+                GenericTableColumn(
+                  header: 'Status',
+                  cellBuilder: (context, row) {
+                    row as DynamicFormModel;
+                    final status =
+                        row.formStatus?.name.toUpperCase() ?? 'UNKNOWN';
+                    return Text(status);
+                  },
                 ),
               ],
+              rows: results ?? [],
+              isLoading: snapshot.connectionState == ConnectionState.waiting,
             );
-
-            // return Container(
-            //   decoration: BoxDecoration(
-            //     color: colorScheme.surfaceContainerLowest,
-            //     borderRadius: BorderRadius.circular(16),
-            //     border: Border.all(
-            //       color: colorScheme.outline.withOpacity(0.05),
-            //     ),
-            //     boxShadow: EditorialElevation.cardShadow(
-            //       colorScheme.brightness == Brightness.dark,
-            //     ),
-            //   ),
-            //   child: Column(
-            //     children: [
-            //       // Table Header
-            //       Container(
-            //         padding: const EdgeInsets.all(EditorialSpacing.spacing6),
-            //         decoration: BoxDecoration(
-            //           color: colorScheme.surfaceContainerLow,
-            //           borderRadius: const BorderRadius.vertical(
-            //             top: Radius.circular(16),
-            //           ),
-            //         ),
-            //         child: Row(
-            //           children: [
-            //             Expanded(
-            //               flex: 3,
-            //               child: Text(
-            //                 'FORM NAME',
-            //                 style:
-            //                     editorial.metadataStyle.copyWith(fontSize: 10),
-            //               ),
-            //             ),
-            //             // Expanded(
-            //             //   flex: 2,
-            //             //   child: Text(
-            //             //     'CLIENT',
-            //             //     style:
-            //             //         editorial.metadataStyle.copyWith(fontSize: 10),
-            //             //   ),
-            //             // ),
-            //             Expanded(
-            //               child: Text(
-            //                 'LAST MODIFIED',
-            //                 style:
-            //                     editorial.metadataStyle.copyWith(fontSize: 10),
-            //               ),
-            //             ),
-            //             Expanded(
-            //               child: Text(
-            //                 'STATUS',
-            //                 style:
-            //                     editorial.metadataStyle.copyWith(fontSize: 10),
-            //               ),
-            //             ),
-            //             const SizedBox(width: 40),
-            //           ],
-            //         ),
-            //       ),
-            //       SizedBox(
-            //         height: MediaQuery.of(context).size.height * 0.5,
-            //         child: Column(
-            //           children: [
-            //             if (snapshot.connectionState == ConnectionState.waiting)
-            //               const Center(
-            //                 child: CircularProgressIndicator(),
-            //               ),
-            //             if (snapshot.connectionState != ConnectionState.waiting)
-            //               // Table Rows
-            //               ...List.generate(
-            //                 snapshot.data?.length ?? 0,
-            //                 (index) => _buildFormRow(
-            //                   formModel: snapshot.data![index],
-            //                   colorScheme: colorScheme,
-            //                   editorial: editorial,
-            //                 ),
-            //               ),
-            //           ],
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // );
           },
         ),
-        // FutureBuilder(
-        //   future: ref.watch(formBuilderViewModelProvider.notifier).loadForms(),
-        //   builder: (context, snapshot) {
-        //     return Container(
-        //       decoration: BoxDecoration(
-        //         color: colorScheme.surfaceContainerLowest,
-        //         borderRadius: BorderRadius.circular(16),
-        //         border: Border.all(
-        //           color: colorScheme.outline.withOpacity(0.05),
-        //         ),
-        //         boxShadow: EditorialElevation.cardShadow(
-        //           colorScheme.brightness == Brightness.dark,
-        //         ),
-        //       ),
-        //       child: Column(
-        //         children: [
-        //           // Table Header
-        //           Container(
-        //             padding: const EdgeInsets.all(EditorialSpacing.spacing6),
-        //             decoration: BoxDecoration(
-        //               color: colorScheme.surfaceContainerLow,
-        //               borderRadius: const BorderRadius.vertical(
-        //                 top: Radius.circular(16),
-        //               ),
-        //             ),
-        //             child: Row(
-        //               children: [
-        //                 Expanded(
-        //                   flex: 3,
-        //                   child: Text(
-        //                     'FORM NAME',
-        //                     style:
-        //                         editorial.metadataStyle.copyWith(fontSize: 10),
-        //                   ),
-        //                 ),
-        //                 // Expanded(
-        //                 //   flex: 2,
-        //                 //   child: Text(
-        //                 //     'CLIENT',
-        //                 //     style:
-        //                 //         editorial.metadataStyle.copyWith(fontSize: 10),
-        //                 //   ),
-        //                 // ),
-        //                 Expanded(
-        //                   child: Text(
-        //                     'LAST MODIFIED',
-        //                     style:
-        //                         editorial.metadataStyle.copyWith(fontSize: 10),
-        //                   ),
-        //                 ),
-        //                 Expanded(
-        //                   child: Text(
-        //                     'STATUS',
-        //                     style:
-        //                         editorial.metadataStyle.copyWith(fontSize: 10),
-        //                   ),
-        //                 ),
-        //                 const SizedBox(width: 40),
-        //               ],
-        //             ),
-        //           ),
-        //           SizedBox(
-        //             height: MediaQuery.of(context).size.height * 0.5,
-        //             child: Column(
-        //               children: [
-        //                 if (snapshot.connectionState == ConnectionState.waiting)
-        //                   const Center(
-        //                     child: CircularProgressIndicator(),
-        //                   ),
-        //                 if (snapshot.connectionState != ConnectionState.waiting)
-        //                   // Table Rows
-        //                   ...List.generate(
-        //                     snapshot.data?.length ?? 0,
-        //                     (index) => _buildFormRow(
-        //                       formModel: snapshot.data![index],
-        //                       colorScheme: colorScheme,
-        //                       editorial: editorial,
-        //                     ),
-        //                   ),
-        //               ],
-        //             ),
-        //           ),
-        //         ],
-        //       ),
-        //     );
-        //   },
-        // ),
       ],
     );
   }

@@ -37,57 +37,69 @@ class DynamicFormModel {
     if (json['schema'] != null) {
       if (json['schema'] is List) {
         // Direct array: "schema": [{"title": "Page 1", ...}]
-        pages = (json['schema'] as List)
-            .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
-            .toList();
+        pages =
+            (json['schema'] as List)
+                .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
+                .toList();
       } else if (json['schema'] is Map && json['schema']['pages'] != null) {
         // Nested structure: "schema": {"pages": [...]}
-        pages = (json['schema']['pages'] as List)
-            .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
-            .toList();
+        pages =
+            (json['schema']['pages'] as List)
+                .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
+                .toList();
       }
     } else if (json['pages'] != null) {
       // Direct pages field: "pages": [...]
-      pages = (json['pages'] as List)
-          .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      pages =
+          (json['pages'] as List)
+              .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
+              .toList();
     }
 
     if (json['draft_schema'] != null) {
       if (json['draft_schema'] is List) {
         // Direct array: "schema": [{"title": "Page 1", ...}]
-        draftPges = (json['draft_schema'] as List)
-            .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
-            .toList();
-      } else if (json['draft_schema'] is Map && json['draft_schema']['pages'] != null) {
+        draftPges =
+            (json['draft_schema'] as List)
+                .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
+                .toList();
+      } else if (json['draft_schema'] is Map &&
+          json['draft_schema']['pages'] != null) {
         // Nested structure: "schema": {"pages": [...]}
-        draftPges = (json['draft_schema']['pages'] as List)
-            .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
-            .toList();
+        draftPges =
+            (json['draft_schema']['pages'] as List)
+                .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
+                .toList();
       }
     } else if (json['pages'] != null) {
       // Direct pages field: "pages": [...]
-      draftPges = (json['pages'] as List)
-          .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
-          .toList();
+      draftPges =
+          (json['pages'] as List)
+              .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
+              .toList();
     }
 
     final resp = DynamicFormModel(
       id: json['id'],
       name: json['name'] ?? '',
-      version: json['version'] ?? 1,
+      version: json['formVersion'] ?? 1,
       schema: pages,
-      formStatus: json['status'] != null
-          ? FormStatus.values.byName(json['status'])
-          : null,
-      isActive: json['is_active'] as bool? ?? false,
-      createdAt: json['created_at'] == null
-          ? null
-          : DateTime.tryParse(json['created_at']),
-      modifiedDate: json['modified_date'] == null
-          ? null
-          : DateTime.tryParse(json['modified_date']),
-      tenantId: json['tenant_id'],
+      formStatus:
+          json['formStatusEnum'] != null
+              ? json['formStatusEnum'] is String
+                  ? FormStatus.values.byName(json['formStatusEnum'])
+                  : FormStatus.values[json['formStatusEnum']]
+              : null,
+      isActive: json['isActive'] as bool? ?? false,
+      createdAt:
+          json['createdDate'] == null
+              ? null
+              : DateTime.tryParse(json['createdDate']),
+      modifiedDate:
+          json['modifiedDate'] == null
+              ? null
+              : DateTime.tryParse(json['modifiedDate']),
+      tenantId: json['tenantId'],
       draftSchema: draftPges,
     );
 
@@ -138,7 +150,7 @@ class DynamicFormModel {
   @override
   String toString() => toJsonString();
 
-//toJsonString
+  //toJsonString
   String toJsonString() {
     try {
       return jsonEncode(toJson());
