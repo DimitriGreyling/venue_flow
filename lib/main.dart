@@ -32,10 +32,10 @@ class EditorialConciergeApp extends ConsumerWidget {
 
   double _responsiveFontScale(double width) {
     if (width < 480) {
-      return 0.84;
+      return 0.68;
     }
     if (width < 768) {
-      return 0.80;
+      return 0.78;
     }
     if (width < 1024) {
       return 0.88;
