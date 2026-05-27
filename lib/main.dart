@@ -35,10 +35,11 @@ class EditorialConciergeApp extends ConsumerWidget {
       return 0.84;
     }
     if (width < 768) {
-      return 0.92;
+      return 0.80;
     }
     if (width < 1024) {
-      return 0.97;
+      return 0.88;
+      
     }
     return 1.0;
   }
@@ -77,16 +78,62 @@ class EditorialConciergeApp extends ConsumerWidget {
         if (child == null) return const SizedBox.shrink();
 
         final mediaQuery = MediaQuery.of(context);
-        final responsiveScale =
-            mediaQuery.textScaler.textScaleFactor * _responsiveFontScale(mediaQuery.size.width);
+        final responsiveScale = _responsiveFontScale(mediaQuery.size.width);
 
         return MediaQuery(
           data: mediaQuery.copyWith(
-            textScaler: TextScaler.linear(responsiveScale),
+            textScaler: _ResponsiveTextScaler(
+              base: mediaQuery.textScaler,
+              factor: responsiveScale,
+            ),
           ),
           child: GlobalPopupOverlay(child: child),
         );
       },
     );
   }
+}
+
+class _ResponsiveTextScaler implements TextScaler {
+  const _ResponsiveTextScaler({
+    required this.base,
+    required this.factor,
+  });
+
+  final TextScaler base;
+  final double factor;
+
+  @override
+  double scale(double fontSize) => base.scale(fontSize) * factor;
+
+  @override
+  double get textScaleFactor => scale(1.0);
+
+  @override
+  TextScaler clamp({
+    double minScaleFactor = 0,
+    double maxScaleFactor = double.infinity,
+  }) {
+    return _ResponsiveTextScaler(
+      base: base.clamp(
+        minScaleFactor: minScaleFactor,
+        maxScaleFactor: maxScaleFactor,
+      ),
+      factor: factor,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+
+    return other is _ResponsiveTextScaler &&
+        other.base == base &&
+        other.factor == factor;
+  }
+
+  @override
+  int get hashCode => Object.hash(base, factor);
 }
