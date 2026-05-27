@@ -31,6 +31,19 @@ void main() async {
 class EditorialConciergeApp extends ConsumerWidget {
   const EditorialConciergeApp({super.key});
 
+  double _responsiveFontScale(double width) {
+    if (width < 480) {
+      return 0.84;
+    }
+    if (width < 768) {
+      return 0.92;
+    }
+    if (width < 1024) {
+      return 0.97;
+    }
+    return 1.0;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
@@ -64,7 +77,16 @@ class EditorialConciergeApp extends ConsumerWidget {
       builder: (context, child) {
         if (child == null) return const SizedBox.shrink();
 
-        return GlobalPopupOverlay(child: child);
+        final mediaQuery = MediaQuery.of(context);
+        final responsiveScale =
+            mediaQuery.textScaler.textScaleFactor * _responsiveFontScale(mediaQuery.size.width);
+
+        return MediaQuery(
+          data: mediaQuery.copyWith(
+            textScaler: TextScaler.linear(responsiveScale),
+          ),
+          child: GlobalPopupOverlay(child: child),
+        );
       },
     );
   }
