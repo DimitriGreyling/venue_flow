@@ -62,129 +62,137 @@ class _FormListPageState extends ConsumerState<FormListPage> {
     ColorScheme colorScheme,
     EditorialThemeData editorial,
   ) {
-    return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(
-        horizontal: EditorialSpacing.spacing8,
-      ),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.outline.withOpacity(0.1),
-            width: 1,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTabletOrSmaller =
+            constraints.maxWidth < EditorialSpacing.breakpointDesktop;
+        final isMobile =
+            constraints.maxWidth < EditorialSpacing.breakpointTablet;
+
+        return Container(
+          height: 64,
+          padding: const EdgeInsets.symmetric(
+            horizontal: EditorialSpacing.spacing6,
           ),
-        ),
-      ),
-      child: Row(
-        children: [
-          // Search Bar
-          Container(
-            width: 320,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search events, forms, or clients...',
-                hintStyle: editorial.captionStyle,
-                prefixIcon: Icon(
-                  Icons.search,
-                  size: 18,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: EditorialSpacing.spacing4,
-                  vertical: EditorialSpacing.spacing2,
-                ),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border(
+              bottom: BorderSide(
+                color: colorScheme.outline.withOpacity(0.1),
+                width: 1,
               ),
             ),
           ),
-
-          const SizedBox(width: EditorialSpacing.spacing8),
-
-          const Spacer(),
-
-          // Right Section
-          Row(
+          child: Row(
             children: [
-              // Notifications
-              Stack(
-                children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.notifications_outlined,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: colorScheme.error,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: colorScheme.surface,
-                          width: 2,
+              if (!isMobile)
+                Flexible(
+                  flex: 6,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 320),
+                      child: Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search events, forms, or clients...',
+                            hintStyle: editorial.captionStyle,
+                            prefixIcon: Icon(
+                              Icons.search,
+                              size: 18,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: EditorialSpacing.spacing4,
+                              vertical: EditorialSpacing.spacing2,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
-
-              const SizedBox(width: EditorialSpacing.spacing4),
-
-              // Divider
-              Container(
-                width: 1,
-                height: 32,
-                color: colorScheme.outline.withOpacity(0.2),
-              ),
-
-              const SizedBox(width: EditorialSpacing.spacing4),
-
-              // Profile Section
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: colorScheme.primary.withOpacity(0.1),
-                        width: 2,
+                ),
+              if (!isMobile) const SizedBox(width: EditorialSpacing.spacing4),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Stack(
+                      children: [
+                        IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.notifications_outlined,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: colorScheme.error,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: colorScheme.surface,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: EditorialSpacing.spacing2),
+                    if (!isTabletOrSmaller)
+                      Container(
+                        width: 1,
+                        height: 32,
+                        color: colorScheme.outline.withOpacity(0.2),
+                      ),
+                    if (!isTabletOrSmaller)
+                      const SizedBox(width: EditorialSpacing.spacing4),
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colorScheme.primary.withOpacity(0.1),
+                          width: 2,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.person,
+                        size: 16,
+                        color: colorScheme.primary,
                       ),
                     ),
-                    child: Icon(
-                      Icons.person,
-                      size: 16,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: EditorialSpacing.spacing2),
-                  Text(
-                    'Alex Rivera',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+                    if (!isTabletOrSmaller) ...[
+                      const SizedBox(width: EditorialSpacing.spacing2),
+                      Text(
+                        'Alex Rivera',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -320,16 +328,22 @@ class _FormListPageState extends ConsumerState<FormListPage> {
     ColorScheme colorScheme,
     EditorialThemeData editorial,
   ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(EditorialSpacing.spacing8),
+      padding: EdgeInsets.all(
+        EditorialResponsiveSpacing.edgeSpacing(screenWidth),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header Section
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow =
+                  constraints.maxWidth < EditorialSpacing.breakpointTablet;
+
+              final titleBlock = Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -347,25 +361,42 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                     ),
                   ),
                 ],
-              ),
-              Row(
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      context.pushNamed(AppRouteNames.formBuilder);
-                    },
-                    icon: const Icon(Icons.description_outlined, size: 18),
-                    label: const Text('Create Form'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: colorScheme.onSecondaryContainer,
-                      side: BorderSide(
-                        color: colorScheme.outline.withOpacity(0.1),
-                      ),
-                    ),
+              );
+
+              final createButton = OutlinedButton.icon(
+                onPressed: () {
+                  context.pushNamed(AppRouteNames.formBuilder);
+                },
+                icon: const Icon(Icons.description_outlined, size: 18),
+                label: const Text('Create Form'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: colorScheme.onSecondaryContainer,
+                  side: BorderSide(
+                    color: colorScheme.outline.withOpacity(0.1),
                   ),
+                ),
+              );
+
+              if (isNarrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    titleBlock,
+                    const SizedBox(height: EditorialSpacing.spacing4),
+                    createButton,
+                  ],
+                );
+              }
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(child: titleBlock),
+                  const SizedBox(width: EditorialSpacing.spacing4),
+                  createButton,
                 ],
-              ),
-            ],
+              );
+            },
           ),
           _buildActiveEventsSection(colorScheme, editorial),
         ],
