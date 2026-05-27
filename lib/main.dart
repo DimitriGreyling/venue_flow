@@ -7,7 +7,6 @@ import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
 import 'package:venue_flow_app/views/popup/global_popup_overlay.dart';
 import 'theme/theme.dart';
 import 'theme/theme_provider.dart';
-import 'views/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +22,7 @@ void main() async {
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: EditorialConciergeApp(),
+      child: const EditorialConciergeApp(),
     ),
   );
 }

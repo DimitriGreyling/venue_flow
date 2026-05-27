@@ -4,15 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
-import 'package:venue_flow_app/models/enums.dart';
-import 'package:venue_flow_app/models/event_model.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/routing/app_routes.dart';
 import 'package:venue_flow_app/views/side_nav_widget.dart';
 import 'package:venue_flow_app/views/widgets/generic_table_widget.dart';
 import '../theme/theme.dart';
 import '../theme/spacing.dart';
-import '../theme/elevation.dart';
 
 class FormListPage extends ConsumerStatefulWidget {
   const FormListPage({super.key});
@@ -22,13 +19,70 @@ class FormListPage extends ConsumerStatefulWidget {
 }
 
 class _FormListPageState extends ConsumerState<FormListPage> {
-  String _selectedNavItem = 'Dashboard';
   final TextEditingController _searchController = TextEditingController();
+  late Future<List<DynamicFormModel>?> _formsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _formsFuture = ref.read(formBuilderViewModelProvider.notifier).loadForms();
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _reloadForms() async {
+    setState(() {
+      _formsFuture = ref.read(formBuilderViewModelProvider.notifier).loadForms();
+    });
+
+    await _formsFuture;
+  }
+
+  void _openSearchSheet(
+    ColorScheme colorScheme,
+    EditorialThemeData editorial,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: colorScheme.surface,
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Search events, forms, or clients...',
+                  hintStyle: editorial.captionStyle,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: EditorialSpacing.spacing4,
+                    vertical: EditorialSpacing.spacing2,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -124,9 +178,19 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    if (isMobile)
+                      IconButton(
+                        tooltip: 'Search',
+                        onPressed: () => _openSearchSheet(colorScheme, editorial),
+                        icon: Icon(
+                          Icons.search,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     Stack(
                       children: [
                         IconButton(
+                          tooltip: 'Notifications',
                           onPressed: () {},
                           icon: Icon(
                             Icons.notifications_outlined,
@@ -196,134 +260,6 @@ class _FormListPageState extends ConsumerState<FormListPage> {
     );
   }
 
-  Color _getStatusColor(FormStatus formStatus) {
-    switch (formStatus) {
-      case FormStatus.draft:
-        return Theme.of(context).colorScheme.primary;
-      default:
-        return Theme.of(context).colorScheme.inversePrimary;
-    }
-  }
-
-  Widget _buildFormRow({
-    required DynamicFormModel formModel,
-    required ColorScheme colorScheme,
-    required EditorialThemeData editorial,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.outline.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            context.pushNamed(
-              AppRouteNames.formBuilder,
-              extra: {'formModel': formModel},
-              queryParameters: {'id': formModel.id},
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(EditorialSpacing.spacing6),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          Icons.format_align_center,
-                          size: 20,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: EditorialSpacing.spacing3),
-                      Text(
-                        formModel.name ?? '',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-                // Expanded(
-                //   flex: 2,
-                //   child: Text(
-                //     '',
-                //     // event['client'] as String,
-                //     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                //           color: colorScheme.onSurfaceVariant,
-                //         ),
-                //   ),
-                // ),
-                Expanded(
-                  child: Text(
-                    formModel.createdAt != null
-                        ? DateFormat(
-                          'yyyy-MM-dd',
-                        ).format(formModel.modifiedDate!)
-                        : '',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: EditorialSpacing.spacing3,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: (_getStatusColor(
-                        formModel.formStatus ?? FormStatus.draft,
-                      )).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      formModel.formStatus?.name.toUpperCase() ?? '',
-                      style: editorial.metadataStyle.copyWith(
-                        color: _getStatusColor(
-                          formModel.formStatus ?? FormStatus.draft,
-                        ),
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: 40,
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.more_vert,
-                      color: colorScheme.onSurfaceVariant,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildDashboardContent(
     ColorScheme colorScheme,
     EditorialThemeData editorial,
@@ -377,13 +313,25 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                 ),
               );
 
+              final refreshButton = IconButton(
+                tooltip: 'Refresh forms',
+                onPressed: _reloadForms,
+                icon: const Icon(Icons.refresh),
+              );
+
               if (isNarrow) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     titleBlock,
                     const SizedBox(height: EditorialSpacing.spacing4),
-                    createButton,
+                    Row(
+                      children: [
+                        Expanded(child: createButton),
+                        const SizedBox(width: EditorialSpacing.spacing2),
+                        refreshButton,
+                      ],
+                    ),
                   ],
                 );
               }
@@ -393,6 +341,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                 children: [
                   Expanded(child: titleBlock),
                   const SizedBox(width: EditorialSpacing.spacing4),
+                  refreshButton,
                   createButton,
                 ],
               );
@@ -413,7 +362,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
       children: [
         const SizedBox(height: EditorialSpacing.spacing6),
         FutureBuilder(
-          future: ref.watch(formBuilderViewModelProvider.notifier).loadForms(),
+          future: _formsFuture,
           builder: (context, snapshot) {
             final results = snapshot.data;
 

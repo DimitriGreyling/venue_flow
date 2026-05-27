@@ -86,8 +86,8 @@ class EventModel {
   String toJsonString() {
     try {
       return jsonEncode(toJson());
-    } catch (error, stackTrace) {
-      log('TOJSONSTRING ERROR:: ${error}');
+    } catch (error) {
+      log('TOJSONSTRING ERROR:: $error');
       return '';
     }
   }

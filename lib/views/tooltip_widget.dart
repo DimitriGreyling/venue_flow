@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class TooltipWidget extends StatelessWidget {
-  Widget? child;
-  String? message;
+  final Widget? child;
+  final String? message;
 
-  TooltipWidget({super.key, this.child, this.message});
+  const TooltipWidget({super.key, this.child, this.message});
 
   @override
   Widget build(BuildContext context) {

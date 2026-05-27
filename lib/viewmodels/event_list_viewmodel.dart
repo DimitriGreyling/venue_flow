@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/event_model.dart';
 import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/repositories/event_repository.dart';

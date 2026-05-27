@@ -382,8 +382,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
         return 'Check/uncheck option';
       case FieldType.date:
         return 'Date picker input';
-      default:
-        return 'Form input field';
     }
   }
 
@@ -528,8 +526,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
         return Icons.check_box_outlined;
       case FieldType.date:
         return Icons.calendar_month;
-      default:
-        return Icons.help;
     }
   }
 

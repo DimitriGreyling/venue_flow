@@ -20,11 +20,11 @@ class TenantModel {
 
   factory TenantModel.fromJson(Map<String, dynamic> json) {
     return TenantModel(
-      id: json['id'] == null ? null : json['id'],
-      name: json['name'] == null ? null : json['name'],
-      slug: json['slug'] == null ? null : json['slug'],
-      isActive:  json['is_active'] == null ? true : json['is_active'],
-      subscriptionStatus: json['subscription_status'] == null ? 'trial' : json['subscription_status'],
+      id: json['id'],
+      name: json['name'],
+      slug: json['slug'],
+      isActive:  json['is_active'] ?? true,
+      subscriptionStatus: json['subscription_status'] ?? 'trial',
       createdAt: json['created_at'] == null ? null : DateTime.parse(json['created_at']),
       updatedAt: json['updated_at'] != null 
           ? DateTime.parse(json['updated_at']) 

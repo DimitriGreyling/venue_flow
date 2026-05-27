@@ -1,13 +1,10 @@
 // lib/viewmodels/home_viewmodel.dart
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
-import 'package:venue_flow_app/models/form_field_model.dart';
 import 'package:venue_flow_app/models/form_page_model.dart';
 import 'package:venue_flow_app/models/form_submission_model.dart';
 import 'package:venue_flow_app/models/popup_position.dart';
@@ -15,7 +12,6 @@ import 'package:venue_flow_app/models/user_model.dart';
 import 'package:venue_flow_app/repositories/form_repository.dart';
 import 'package:venue_flow_app/repositories/form_submission_repository.dart';
 import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
-import 'package:venue_flow_app/shared/helpers/storage_helper.dart';
 
 class FormViewBuilderViewState {
   final List<DynamicFormModel> form;
@@ -51,7 +47,7 @@ class FormViewBuilderViewState {
     String? error,
   }) {
     return FormViewBuilderViewState(
-      form: forms ?? this.form,
+      form: forms ?? form,
       isLoading: isLoading ?? this.isLoading,
     );
   }
@@ -59,20 +55,17 @@ class FormViewBuilderViewState {
 
 class FormViewBuilderViewModel extends StateNotifier<FormViewBuilderViewState> {
   final IFormRepository _formRepository;
-  final IStorageHelper _storageHelper;
   final IFormSubmissionRepository _formSubmissionRepository;
   final UserModel? Function() _getCurrentUser;
 
   FormViewBuilderViewModel({
     required IFormRepository formRepo,
-    required IStorageHelper storageHelper,
     required IFormSubmissionRepository formSubmissionRepository,
     required UserModel? Function() getCurrentUser,
   })  : _formRepository = formRepo,
-        _storageHelper = storageHelper,
         _getCurrentUser = getCurrentUser,
         _formSubmissionRepository = formSubmissionRepository,
-        super(FormViewBuilderViewState(form: [], isLoading: false)) {}
+        super(const FormViewBuilderViewState(form: [], isLoading: false));
 
   Future<void> loadForm() async {
     try {
@@ -84,7 +77,7 @@ class FormViewBuilderViewModel extends StateNotifier<FormViewBuilderViewState> {
         forms: result,
         isLoading: false,
       );
-    } catch (error, stackTrace) {
+    } catch (error) {
       state = state.copyWith(isLoading: false);
     }
   }

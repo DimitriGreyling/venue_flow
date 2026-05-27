@@ -19,7 +19,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
   final bool? isClient;
 
   const ReorderableFormFieldTile({
-    Key? key,
+    super.key,
     required this.field,
     required this.pageIndex,
     required this.fieldIndex,
@@ -33,7 +33,7 @@ class ReorderableFormFieldTile extends StatelessWidget {
     this.onDelete,
     this.onDuplicate,
     this.isClient = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -205,65 +205,6 @@ class ReorderableFormFieldTile extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _getFieldTypeColor() {
-    switch (field.type) {
-      case FieldType.text:
-        return colorScheme.primary;
-      case FieldType.dropdown:
-        return Colors.purple;
-      case FieldType.checkbox:
-        return Colors.green;
-      case FieldType.date:
-        return colorScheme.tertiary;
-      case FieldType.textarea:
-        return colorScheme.secondary;
-      case FieldType.radio:
-        return Colors.orange;
-      default:
-        return colorScheme.primary;
-    }
-  }
-
-  IconData _getFieldTypeIcon() {
-    switch (field.type) {
-      case FieldType.text:
-        return Icons.short_text;
-      case FieldType.dropdown:
-        return Icons.arrow_drop_down_circle;
-      case FieldType.checkbox:
-        return Icons.check_box_outlined;
-      case FieldType.date:
-        return Icons.calendar_month;
-      case FieldType.textarea:
-        return Icons.text_fields;
-      case FieldType.radio:
-        return Icons.radio_button_checked;
-      default:
-        return Icons.short_text;
-    }
-  }
-
-  bool _hasTrailingIcon() {
-    switch (field.type) {
-      case FieldType.date:
-      case FieldType.dropdown:
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  IconData _getTrailingIcon() {
-    switch (field.type) {
-      case FieldType.date:
-        return Icons.calendar_today;
-      case FieldType.dropdown:
-        return Icons.arrow_drop_down;
-      default:
-        return Icons.help;
-    }
   }
 
   Widget _determinFieldToShow({
@@ -776,7 +717,6 @@ class ReorderableFormFieldTile extends StatelessWidget {
   Widget _buildRadioField(
     BuildContext context, {
     String? selectedValue,
-    List<String>? options,
     ValueChanged<String?>? onChanged,
     FormFieldSetter<String>? onSaved,
     String? Function(String?)? validator,

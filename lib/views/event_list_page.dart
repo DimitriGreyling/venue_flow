@@ -4,7 +4,6 @@ import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/event_model.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/shared/helpers/date_extensions.dart';
-import 'package:venue_flow_app/theme/elevation.dart';
 import 'package:venue_flow_app/theme/spacing.dart';
 import 'package:venue_flow_app/viewmodels/event_list_viewmodel.dart';
 import 'package:venue_flow_app/views/dynamic_table_widget.dart';
@@ -98,13 +97,8 @@ class _EventListPageState extends ConsumerState<EventListPage> {
     required double tableWidth,
     required double tableHeight,
   }) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     const actionWidth = 20.0;
-    final contentWidth = tableWidth - actionWidth;
-    final nameWidth = contentWidth * 0.45;
-    final dateWidth = contentWidth * 0.30;
-    final statusWidth = contentWidth * 0.25;
+    final statusWidth = (tableWidth - actionWidth) * 0.25;
 
     final editorial = context.editorial;
     final textStyle = editorial.metadataStyle.copyWith(fontSize: 12);

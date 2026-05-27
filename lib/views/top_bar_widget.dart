@@ -17,6 +17,49 @@ class TopBarWidget extends ConsumerStatefulWidget {
 class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
   final TextEditingController _searchController = TextEditingController();
 
+  void _openSearchSheet(
+    ColorScheme colorScheme,
+    EditorialThemeData editorial,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: colorScheme.surface,
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Search events, forms, or clients...',
+                  hintStyle: editorial.captionStyle,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: EditorialSpacing.spacing4,
+                    vertical: EditorialSpacing.spacing2,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -91,9 +134,19 @@ class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    if (isMobile)
+                      IconButton(
+                        tooltip: 'Search',
+                        onPressed: () => _openSearchSheet(colorScheme, editorial),
+                        icon: Icon(
+                          Icons.search,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     Stack(
                       children: [
                         IconButton(
+                          tooltip: 'Notifications',
                           onPressed: () {},
                           icon: Icon(
                             Icons.notifications_outlined,

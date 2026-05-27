@@ -115,12 +115,12 @@ class DynamicFormModel {
     return DynamicFormModel(
       id: id ?? this.id,
       name: name ?? this.name,
-      schema: pages ?? this.schema,
+      schema: pages ?? schema,
       version: version ?? this.version,
-      formStatus: formStatus ?? this.formStatus,
-      createdAt: createdAt ?? this.createdAt,
-      modifiedDate: modifiedDate ?? this.modifiedDate,
-      tenantId: tenantId ?? this.tenantId,
+      formStatus: formStatus ?? formStatus,
+      createdAt: createdAt ?? createdAt,
+      modifiedDate: modifiedDate ?? modifiedDate,
+      tenantId: tenantId ?? tenantId,
     );
   }
 
@@ -141,7 +141,7 @@ class DynamicFormModel {
 
       return myObjec;
     } catch (error) {
-      log('toJson ERROR:: ${error}');
+      log('toJson ERROR:: $error');
       return {};
     }
   }
@@ -154,8 +154,8 @@ class DynamicFormModel {
   String toJsonString() {
     try {
       return jsonEncode(toJson());
-    } catch (error, stackTrace) {
-      log('TOJSONSTRING ERROR:: ${error}');
+    } catch (error) {
+      log('TOJSONSTRING ERROR:: $error');
       return '';
     }
   }

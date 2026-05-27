@@ -362,13 +362,16 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
               vertical: EditorialSpacing.spacing3,
             ),
             child: isCompact
-                ? Center(
-                    child: Icon(
-                      icon,
-                      size: 20,
-                      color: isSelected
-                          ? colorScheme.primary
-                          : colorScheme.onSurfaceVariant,
+                ? Tooltip(
+                    message: label,
+                    child: Center(
+                      child: Icon(
+                        icon,
+                        size: 20,
+                        color: isSelected
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   )
                 : Row(

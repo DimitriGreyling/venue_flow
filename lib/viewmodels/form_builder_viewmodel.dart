@@ -1,9 +1,7 @@
 // lib/viewmodels/home_viewmodel.dart
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
@@ -48,7 +46,7 @@ class FormBuilderViewState {
     String? error,
   }) {
     return FormBuilderViewState(
-      form: forms ?? this.form,
+      form: forms ?? form,
       isLoading: isLoading ?? this.isLoading,
     );
   }
