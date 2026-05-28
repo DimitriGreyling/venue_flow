@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -39,7 +41,6 @@ class EditorialConciergeApp extends ConsumerWidget {
     }
     if (width < 1024) {
       return 0.88;
-      
     }
     return 1.0;
   }
@@ -57,16 +58,16 @@ class EditorialConciergeApp extends ConsumerWidget {
     return MaterialApp.router(
       restorationScopeId: 'app',
       scrollBehavior: const MaterialScrollBehavior().copyWith(
-          //TODO:: add ack for mobil devices
+        //TODO:: add ack for mobil devices
 
-          // dragDevices: {
-          //   PointerDeviceKind.mouse,
-          //   PointerDeviceKind.touch,
-          //   PointerDeviceKind.trackpad,
-          //   PointerDeviceKind.stylus,
-          //   PointerDeviceKind.unknown,
-          // },
-          ),
+        // dragDevices: {
+        //   PointerDeviceKind.mouse,
+        //   PointerDeviceKind.touch,
+        //   PointerDeviceKind.trackpad,
+        //   PointerDeviceKind.stylus,
+        //   PointerDeviceKind.unknown,
+        // },
+      ),
       debugShowCheckedModeBanner: false,
       routerConfig: router,
       title: 'Venue Flow',
@@ -95,10 +96,7 @@ class EditorialConciergeApp extends ConsumerWidget {
 }
 
 class _ResponsiveTextScaler implements TextScaler {
-  const _ResponsiveTextScaler({
-    required this.base,
-    required this.factor,
-  });
+  const _ResponsiveTextScaler({required this.base, required this.factor});
 
   final TextScaler base;
   final double factor;

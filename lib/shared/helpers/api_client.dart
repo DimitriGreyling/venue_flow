@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:venue_flow_app/constants/api_contract.dart';
+import 'package:venue_flow_app/shared/helpers/project_settings.dart';
 
 class ApiClient {
   late final Dio dio;
@@ -11,7 +12,7 @@ class ApiClient {
   ApiClient() {
     dio = Dio(BaseOptions(
       // baseUrl: ApiEndpoints.productionUrl,
-      baseUrl: ApiEndpoints.localUrl,
+      baseUrl: ProjectSettings.instance.isDebugMode ? ApiEndpoints.localUrl : ApiEndpoints.productionUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
 
