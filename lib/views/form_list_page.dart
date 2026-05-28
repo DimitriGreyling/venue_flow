@@ -4,8 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
+import 'package:venue_flow_app/models/popup_position.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/routing/app_routes.dart';
+import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
+import 'package:venue_flow_app/views/dialogs/confirm_delete_dialog.dart';
 import 'package:venue_flow_app/views/side_nav_widget.dart';
 import 'package:venue_flow_app/views/widgets/generic_table_widget.dart';
 import '../theme/theme.dart';
@@ -40,6 +43,48 @@ class _FormListPageState extends ConsumerState<FormListPage> {
     });
 
     await _formsFuture;
+  }
+
+  Future<void> _confirmDeleteForm(DynamicFormModel form) async {
+    final formId = form.id;
+    if (formId == null || formId.isEmpty) {
+      GlobalPopupService.showError(
+        title: 'Delete failed',
+        message: 'This form cannot be deleted because it has no id.',
+        position: PopupPosition.bottomRight,
+      );
+      return;
+    }
+
+    final confirmed = await showConfirmDeleteDialog(
+      context,
+      title: 'Delete Form',
+      message:
+          'Are you sure you want to delete "${form.name ?? 'this form'}"? This action cannot be undone.',
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await ref
+          .read(formBuilderViewModelProvider.notifier)
+          .deleteForm(formId: formId);
+      await _reloadForms();
+
+      GlobalPopupService.showSuccess(
+        title: 'Form deleted',
+        message: '"${form.name ?? 'Form'}" was removed.',
+        position: PopupPosition.bottomRight,
+      );
+    } catch (_) {
+      GlobalPopupService.showError(
+        title: 'Delete failed',
+        message: 'Unable to delete the selected form.',
+        position: PopupPosition.bottomRight,
+      );
+    }
   }
 
   void _openSearchSheet(
@@ -132,7 +177,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
             color: colorScheme.surface,
             border: Border(
               bottom: BorderSide(
-                color: colorScheme.outline.withOpacity(0.1),
+                color: colorScheme.outline.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -220,7 +265,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                       Container(
                         width: 1,
                         height: 32,
-                        color: colorScheme.outline.withOpacity(0.2),
+                        color: colorScheme.outline.withValues(alpha: 0.2),
                       ),
                     if (!isTabletOrSmaller)
                       const SizedBox(width: EditorialSpacing.spacing4),
@@ -231,7 +276,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                         color: colorScheme.primaryContainer,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: colorScheme.primary.withOpacity(0.1),
+                          color: colorScheme.primary.withValues(alpha: 0.1),
                           width: 2,
                         ),
                       ),
@@ -308,7 +353,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: colorScheme.onSecondaryContainer,
                   side: BorderSide(
-                    color: colorScheme.outline.withOpacity(0.1),
+                    color: colorScheme.outline.withValues(alpha: 0.1),
                   ),
                 ),
               );
@@ -401,6 +446,24 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                     final status =
                         row.formStatus?.name.toUpperCase() ?? 'UNKNOWN';
                     return Text(status);
+                  },
+                ),
+                GenericTableColumn(
+                  header: '',
+                  flex: 0,
+                  cellBuilder: (context, row) {
+                    row as DynamicFormModel;
+                    return Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        tooltip: 'Delete form',
+                        onPressed: () => _confirmDeleteForm(row),
+                        icon: Icon(
+                          Icons.delete_outline,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    );
                   },
                 ),
               ],

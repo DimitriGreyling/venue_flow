@@ -90,6 +90,12 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     }
   }
 
+  Future<void> deleteForm({
+    required String formId,
+  }) async {
+    await _formRepository.deleteForm(formId: formId);
+  }
+
   Future<void> loadForm({
     required String formId,
   }) async {
@@ -134,7 +140,9 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
           isLoading: false,
         );
       }
-    } catch (error) {}
+    } catch (error) {
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   // Load stored forms on initialization
