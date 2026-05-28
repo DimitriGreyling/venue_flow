@@ -73,10 +73,31 @@ class _FormListPageState extends ConsumerState<FormListPage> {
           .deleteForm(formId: formId);
       await _reloadForms();
 
-      GlobalPopupService.showSuccess(
+      GlobalPopupService.showAction(
         title: 'Form deleted',
         message: '"${form.name ?? 'Form'}" was removed.',
+        actionText: 'Undo',
+        type: PopupType.success,
         position: PopupPosition.bottomRight,
+        onAction: () async {
+          try {
+            final restored = await ref
+                .read(formBuilderViewModelProvider.notifier)
+                .restoreForm(formModel: form);
+
+            if (restored == null) {
+              throw Exception('Failed to restore form');
+            }
+
+            await _reloadForms();
+          } catch (_) {
+            GlobalPopupService.showError(
+              title: 'Undo failed',
+              message: 'Unable to restore the deleted form.',
+              position: PopupPosition.bottomRight,
+            );
+          }
+        },
       );
     } catch (_) {
       GlobalPopupService.showError(

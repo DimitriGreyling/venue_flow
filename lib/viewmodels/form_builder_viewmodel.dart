@@ -96,6 +96,24 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     await _formRepository.deleteForm(formId: formId);
   }
 
+  Future<DynamicFormModel?> restoreForm({
+    required DynamicFormModel formModel,
+  }) async {
+    return _formRepository.addForm(
+      formModel: DynamicFormModel(
+        name: formModel.name,
+        version: formModel.version,
+        schema: formModel.schema,
+        formStatus: formModel.formStatus,
+        isActive: formModel.isActive,
+        createdAt: formModel.createdAt,
+        modifiedDate: formModel.modifiedDate,
+        tenantId: formModel.tenantId,
+        draftSchema: formModel.draftSchema,
+      ),
+    );
+  }
+
   Future<void> loadForm({
     required String formId,
   }) async {
