@@ -494,7 +494,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                 row as DynamicFormModel;
                 context.pushNamed(
                   AppRouteNames.formBuilder,
-                  extra: {'formModel': row},
+                  // extra: {'formModel': row},
                   queryParameters: {'id': row.id ?? ''},
                 );
               },

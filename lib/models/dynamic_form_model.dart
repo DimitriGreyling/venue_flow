@@ -34,17 +34,17 @@ class DynamicFormModel {
     List<FormPageModel>? draftPges;
 
     // ✅ Handle different JSON structures
-    if (json['schema'] != null) {
-      if (json['schema'] is List) {
+    if (json['formConfig'] != null) {
+      if (json['formConfig'] is List) {
         // Direct array: "schema": [{"title": "Page 1", ...}]
         pages =
-            (json['schema'] as List)
+            (json['formConfig'] as List)
                 .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
                 .toList();
-      } else if (json['schema'] is Map && json['schema']['pages'] != null) {
+      } else if (json['formConfig'] is Map && json['formConfig']['pages'] != null) {
         // Nested structure: "schema": {"pages": [...]}
         pages =
-            (json['schema']['pages'] as List)
+            (json['formConfig']['pages'] as List)
                 .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
                 .toList();
       }
@@ -56,18 +56,18 @@ class DynamicFormModel {
               .toList();
     }
 
-    if (json['draft_schema'] != null) {
-      if (json['draft_schema'] is List) {
+    if (json['draftFormConfig'] != null) {
+      if (json['draftFormConfig'] is List) {
         // Direct array: "schema": [{"title": "Page 1", ...}]
         draftPges =
-            (json['draft_schema'] as List)
+            (json['draftFormConfig'] as List)
                 .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
                 .toList();
-      } else if (json['draft_schema'] is Map &&
-          json['draft_schema']['pages'] != null) {
+      } else if (json['draftFormConfig'] is Map &&
+          json['draftFormConfig']['pages'] != null) {
         // Nested structure: "schema": {"pages": [...]}
         draftPges =
-            (json['draft_schema']['pages'] as List)
+            (json['draftFormConfig']['pages'] as List)
                 .map((e) => FormPageModel.fromJson(e as Map<String, dynamic>))
                 .toList();
       }
@@ -126,18 +126,23 @@ class DynamicFormModel {
 
   Map<String, dynamic> toJson() {
     try {
+
+
       final Map<String, dynamic> myObjec = {
         if (id != null) 'id': id,
         'name': name,
         'version': version,
-        'schema': schema?.map((x) => x.toJson()).toList(),
+        'formConfig': schema?.map((x) => x.toJson()).toList(),
         'status': formStatus?.name,
         'is_active': isActive,
         'created_at':
             createdAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
         'modified_date': DateTime.now().toIso8601String(),
         'tenant_id': tenantId,
+        'draftFormConfig': draftSchema?.map((x) => x.toJson()).toList(),
       };
+
+      log('toJson output: $myObjec');
 
       return myObjec;
     } catch (error) {

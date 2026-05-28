@@ -31,8 +31,8 @@ class AuthViewModel extends StateNotifier<AuthStateModel> {
         );
         return;
       }
-
       final user = await _authRepository.getCurrentUser();
+
       if (user != null) {
         final tenant = await _authRepository.getTenantById(user.tenantId ?? '');
         state = state.copyWith(

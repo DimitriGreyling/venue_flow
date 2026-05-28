@@ -1,4 +1,6 @@
 // lib/views/side_nav_widget.dart
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -294,6 +296,13 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
 
   Future<List<DynamicFormModel>> _loadNavigationData() async {
     try {
+      final currentUser = ref.read(currentUserProvider);
+      log('Current user in navigation: ${currentUser?.email}, isClient: ${currentUser?.isClient}');
+      if(currentUser?.isClient != true) {
+        return [];
+
+      }
+
       final forms = await ref.read(formRepositoryProvider).getFormNames();
       return forms ?? [];
     } catch (e) {

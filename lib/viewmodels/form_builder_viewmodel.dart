@@ -137,14 +137,25 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
         isLoading: true,
       );
 
-      if (formModel != null) {
-        await _storageHelper.saveForm(formModel);
-        state = state.copyWith(
-          forms: [formModel],
-          isLoading: false,
-        );
-      } else if (formId != null) {
+      //TODO: add possibility to load form from parameter or load from storage if no parameter is provided
+      // if (formModel != null) {
+      //   await _storageHelper.saveForm(formModel);
+      //   state = state.copyWith(
+      //     forms: [formModel],
+      //     isLoading: false,
+      //   );
+      // } else 
+      if (formId != null) {
         final form = await _formRepository.getFormById(formId: formId);
+        
+        if(form != null && form.isNotEmpty && form.first.schema == null){
+          form.first.schema = [
+            FormPageModel(
+              title: 'Page 1',
+            ),
+          ];
+        }
+        
         await _storageHelper.saveForm(form!.first);
         state = state.copyWith(
           forms: form,
