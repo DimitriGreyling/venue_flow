@@ -133,7 +133,7 @@ class DynamicFormModel {
         'name': name,
         'version': version,
         'formConfig': schema?.map((x) => x.toJson()).toList(),
-        'status': formStatus?.name,
+        'status': formStatus?.index,
         'is_active': isActive,
         'created_at':
             createdAt?.toIso8601String() ?? DateTime.now().toIso8601String(),
