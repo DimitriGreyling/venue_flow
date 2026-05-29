@@ -113,7 +113,7 @@ Future<EventModel?> showEventDialog({
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<EventStatus>(
-                        value: selectedStatus,
+                        initialValue: selectedStatus,
                         decoration: const InputDecoration(labelText: 'Status'),
                         items: EventStatus.values.map((status) {
                           return DropdownMenuItem<EventStatus>(

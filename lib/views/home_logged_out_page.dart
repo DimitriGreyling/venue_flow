@@ -271,10 +271,10 @@ class _HeroSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: EditorialSpacing.spacing8),
-        Wrap(
+        const Wrap(
           spacing: EditorialSpacing.spacing6,
           runSpacing: EditorialSpacing.spacing4,
-          children: const [
+          children: [
             _InlineMetric(value: '24', label: 'ACTIVE EVENT FLOWS'),
             _InlineMetric(value: '08', label: 'LIVE FORM CAMPAIGNS'),
             _InlineMetric(value: '4.9', label: 'CLIENT EXPERIENCE'),
@@ -283,7 +283,7 @@ class _HeroSection extends StatelessWidget {
       ],
     );
 
-    final heroVisual = const _HeroVisual();
+    const heroVisual = _HeroVisual();
 
     if (!isDesktop) {
       return Column(
@@ -529,11 +529,11 @@ class _TrustMetrics extends StatelessWidget {
           ),
         ],
       ),
-      child: Wrap(
+      child: const Wrap(
         alignment: WrapAlignment.spaceBetween,
         runSpacing: EditorialSpacing.spacing6,
         spacing: EditorialSpacing.spacing8,
-        children: const [
+        children: [
           _LargeMetric(value: '250+', label: 'EVENTS ORCHESTRATED'),
           _LargeMetric(value: '98%', label: 'FORM COMPLETION RATE'),
           _LargeMetric(value: '< 3 min', label: 'AVERAGE CLIENT RESPONSE'),
@@ -731,11 +731,11 @@ class _ExperienceStrip extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             width: 320,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 _StripItem(
                   icon: Icons.layers_outlined,
                   label: 'Layered surfaces instead of noisy chrome',

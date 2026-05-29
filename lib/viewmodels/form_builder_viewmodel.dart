@@ -1,9 +1,7 @@
 // lib/viewmodels/home_viewmodel.dart
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/models/form_field_model.dart';
@@ -48,7 +46,7 @@ class FormBuilderViewState {
     String? error,
   }) {
     return FormBuilderViewState(
-      form: forms ?? this.form,
+      form: forms ?? form,
       isLoading: isLoading ?? this.isLoading,
     );
   }
@@ -92,6 +90,30 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
     }
   }
 
+  Future<void> deleteForm({
+    required String formId,
+  }) async {
+    await _formRepository.deleteForm(formId: formId);
+  }
+
+  Future<DynamicFormModel?> restoreForm({
+    required DynamicFormModel formModel,
+  }) async {
+    return _formRepository.addForm(
+      formModel: DynamicFormModel(
+        name: formModel.name,
+        version: formModel.version,
+        schema: formModel.schema,
+        formStatus: formModel.formStatus,
+        isActive: formModel.isActive,
+        createdAt: formModel.createdAt,
+        modifiedDate: formModel.modifiedDate,
+        tenantId: formModel.tenantId,
+        draftSchema: formModel.draftSchema,
+      ),
+    );
+  }
+
   Future<void> loadForm({
     required String formId,
   }) async {
@@ -115,14 +137,25 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
         isLoading: true,
       );
 
-      if (formModel != null) {
-        await _storageHelper.saveForm(formModel);
-        state = state.copyWith(
-          forms: [formModel],
-          isLoading: false,
-        );
-      } else if (formId != null) {
+      //TODO: add possibility to load form from parameter or load from storage if no parameter is provided
+      // if (formModel != null) {
+      //   await _storageHelper.saveForm(formModel);
+      //   state = state.copyWith(
+      //     forms: [formModel],
+      //     isLoading: false,
+      //   );
+      // } else 
+      if (formId != null) {
         final form = await _formRepository.getFormById(formId: formId);
+        
+        if(form != null && form.isNotEmpty && form.first.schema == null){
+          form.first.schema = [
+            FormPageModel(
+              title: 'Page 1',
+            ),
+          ];
+        }
+        
         await _storageHelper.saveForm(form!.first);
         state = state.copyWith(
           forms: form,
@@ -136,7 +169,9 @@ class FormBuilderViewModel extends StateNotifier<FormBuilderViewState> {
           isLoading: false,
         );
       }
-    } catch (error) {}
+    } catch (error) {
+      state = state.copyWith(isLoading: false);
+    }
   }
 
   // Load stored forms on initialization

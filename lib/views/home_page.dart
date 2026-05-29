@@ -1,21 +1,12 @@
 // lib/views/dashboard_page.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:venue_flow_app/models/enums.dart';
-import 'package:venue_flow_app/models/popup_position.dart';
-import 'package:venue_flow_app/models/user_model.dart';
-import 'package:venue_flow_app/providers/auth_provider.dart';
-import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/routing/app_routes.dart';
-import 'package:venue_flow_app/routing/app_router.dart';
-import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
 import 'package:venue_flow_app/views/side_nav_widget.dart';
 import 'package:venue_flow_app/views/top_bar_widget.dart';
 import '../theme/theme.dart';
 import '../theme/spacing.dart';
-import '../theme/components.dart';
 import '../theme/elevation.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
@@ -26,7 +17,6 @@ class DashboardPage extends ConsumerStatefulWidget {
 }
 
 class _DashboardPageState extends ConsumerState<DashboardPage> {
-  String _selectedNavItem = 'Dashboard';
   final TextEditingController _searchController = TextEditingController();
 
   @override

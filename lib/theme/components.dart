@@ -547,7 +547,7 @@ extension EditorialThemeExtensions on ThemeData {
           space: 0,
           color: Colors.transparent,
         ),
-        listTileTheme: listTileTheme?.copyWith(
+        listTileTheme: listTileTheme.copyWith(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
             side: BorderSide.none, // No borders

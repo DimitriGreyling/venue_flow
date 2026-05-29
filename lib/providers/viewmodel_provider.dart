@@ -29,12 +29,10 @@ final formViewBuilderViewModelProvider =
     StateNotifierProvider<FormViewBuilderViewModel, FormViewBuilderViewState>(
         (ref) {
   final formRepository = ref.watch(formRepositoryProvider);
-  final storageHelper = ref.watch(storageHelperProvider);
   final formSubmissionRepository = ref.watch(formSubmissionRepositoryProvider);
 
   return FormViewBuilderViewModel(
     formRepo: formRepository,
-    storageHelper: storageHelper,
     formSubmissionRepository: formSubmissionRepository,
     getCurrentUser: () => ref.read(currentUserProvider),
   );

@@ -4,15 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:venue_flow_app/models/dynamic_form_model.dart';
-import 'package:venue_flow_app/models/enums.dart';
-import 'package:venue_flow_app/models/event_model.dart';
+import 'package:venue_flow_app/models/popup_position.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/routing/app_routes.dart';
+import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
+import 'package:venue_flow_app/views/dialogs/confirm_delete_dialog.dart';
 import 'package:venue_flow_app/views/side_nav_widget.dart';
 import 'package:venue_flow_app/views/widgets/generic_table_widget.dart';
 import '../theme/theme.dart';
 import '../theme/spacing.dart';
-import '../theme/elevation.dart';
 
 class FormListPage extends ConsumerStatefulWidget {
   const FormListPage({super.key});
@@ -22,13 +22,133 @@ class FormListPage extends ConsumerStatefulWidget {
 }
 
 class _FormListPageState extends ConsumerState<FormListPage> {
-  String _selectedNavItem = 'Dashboard';
   final TextEditingController _searchController = TextEditingController();
+  late Future<List<DynamicFormModel>?> _formsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _formsFuture = ref.read(formBuilderViewModelProvider.notifier).loadForms();
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _reloadForms() async {
+    setState(() {
+      _formsFuture = ref.read(formBuilderViewModelProvider.notifier).loadForms();
+    });
+
+    await _formsFuture;
+  }
+
+  Future<void> _confirmDeleteForm(DynamicFormModel form) async {
+    final formId = form.id;
+    if (formId == null || formId.isEmpty) {
+      GlobalPopupService.showError(
+        title: 'Delete failed',
+        message: 'This form cannot be deleted because it has no id.',
+        position: PopupPosition.bottomRight,
+      );
+      return;
+    }
+
+    final confirmed = await showConfirmDeleteDialog(
+      context,
+      title: 'Delete Form',
+      message:
+          'Are you sure you want to delete "${form.name ?? 'this form'}"? This action cannot be undone.',
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await ref
+          .read(formBuilderViewModelProvider.notifier)
+          .deleteForm(formId: formId);
+      await _reloadForms();
+
+      GlobalPopupService.showAction(
+        title: 'Form deleted',
+        message: '"${form.name ?? 'Form'}" was removed.',
+        actionText: 'Undo',
+        type: PopupType.success,
+        position: PopupPosition.bottomRight,
+        onAction: () async {
+          try {
+            final restored = await ref
+                .read(formBuilderViewModelProvider.notifier)
+                .restoreForm(formModel: form);
+
+            if (restored == null) {
+              throw Exception('Failed to restore form');
+            }
+
+            await _reloadForms();
+          } catch (_) {
+            GlobalPopupService.showError(
+              title: 'Undo failed',
+              message: 'Unable to restore the deleted form.',
+              position: PopupPosition.bottomRight,
+            );
+          }
+        },
+      );
+    } catch (_) {
+      GlobalPopupService.showError(
+        title: 'Delete failed',
+        message: 'Unable to delete the selected form.',
+        position: PopupPosition.bottomRight,
+      );
+    }
+  }
+
+  void _openSearchSheet(
+    ColorScheme colorScheme,
+    EditorialThemeData editorial,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: colorScheme.surface,
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Search events, forms, or clients...',
+                  hintStyle: editorial.captionStyle,
+                  prefixIcon: Icon(
+                    Icons.search,
+                    size: 18,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: EditorialSpacing.spacing4,
+                    vertical: EditorialSpacing.spacing2,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -62,257 +182,147 @@ class _FormListPageState extends ConsumerState<FormListPage> {
     ColorScheme colorScheme,
     EditorialThemeData editorial,
   ) {
-    return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(
-        horizontal: EditorialSpacing.spacing8,
-      ),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.outline.withOpacity(0.1),
-            width: 1,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTabletOrSmaller =
+            constraints.maxWidth < EditorialSpacing.breakpointDesktop;
+        final isMobile =
+            constraints.maxWidth < EditorialSpacing.breakpointTablet;
+
+        return Container(
+          height: 64,
+          padding: const EdgeInsets.symmetric(
+            horizontal: EditorialSpacing.spacing6,
           ),
-        ),
-      ),
-      child: Row(
-        children: [
-          // Search Bar
-          Container(
-            width: 320,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search events, forms, or clients...',
-                hintStyle: editorial.captionStyle,
-                prefixIcon: Icon(
-                  Icons.search,
-                  size: 18,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: EditorialSpacing.spacing4,
-                  vertical: EditorialSpacing.spacing2,
-                ),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border(
+              bottom: BorderSide(
+                color: colorScheme.outline.withValues(alpha: 0.1),
+                width: 1,
               ),
             ),
           ),
-
-          const SizedBox(width: EditorialSpacing.spacing8),
-
-          const Spacer(),
-
-          // Right Section
-          Row(
+          child: Row(
             children: [
-              // Notifications
-              Stack(
-                children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.notifications_outlined,
-                      color: colorScheme.onSurfaceVariant,
+              if (!isMobile)
+                Flexible(
+                  flex: 6,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 320),
+                      child: Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search events, forms, or clients...',
+                            hintStyle: editorial.captionStyle,
+                            prefixIcon: Icon(
+                              Icons.search,
+                              size: 18,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: EditorialSpacing.spacing4,
+                              vertical: EditorialSpacing.spacing2,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      width: 8,
-                      height: 8,
+                ),
+              if (!isMobile) const SizedBox(width: EditorialSpacing.spacing4),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (isMobile)
+                      IconButton(
+                        tooltip: 'Search',
+                        onPressed: () => _openSearchSheet(colorScheme, editorial),
+                        icon: Icon(
+                          Icons.search,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    Stack(
+                      children: [
+                        IconButton(
+                          tooltip: 'Notifications',
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.notifications_outlined,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: colorScheme.error,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: colorScheme.surface,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: EditorialSpacing.spacing2),
+                    if (!isTabletOrSmaller)
+                      Container(
+                        width: 1,
+                        height: 32,
+                        color: colorScheme.outline.withValues(alpha: 0.2),
+                      ),
+                    if (!isTabletOrSmaller)
+                      const SizedBox(width: EditorialSpacing.spacing4),
+                    Container(
+                      width: 32,
+                      height: 32,
                       decoration: BoxDecoration(
-                        color: colorScheme.error,
+                        color: colorScheme.primaryContainer,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: colorScheme.surface,
+                          color: colorScheme.primary.withValues(alpha: 0.1),
                           width: 2,
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(width: EditorialSpacing.spacing4),
-
-              // Divider
-              Container(
-                width: 1,
-                height: 32,
-                color: colorScheme.outline.withOpacity(0.2),
-              ),
-
-              const SizedBox(width: EditorialSpacing.spacing4),
-
-              // Profile Section
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: colorScheme.primary.withOpacity(0.1),
-                        width: 2,
+                      child: Icon(
+                        Icons.person,
+                        size: 16,
+                        color: colorScheme.primary,
                       ),
                     ),
-                    child: Icon(
-                      Icons.person,
-                      size: 16,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: EditorialSpacing.spacing2),
-                  Text(
-                    'Alex Rivera',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+                    if (!isTabletOrSmaller) ...[
+                      const SizedBox(width: EditorialSpacing.spacing2),
+                      Text(
+                        'Alex Rivera',
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Color _getStatusColor(FormStatus formStatus) {
-    switch (formStatus) {
-      case FormStatus.draft:
-        return Theme.of(context).colorScheme.primary;
-      default:
-        return Theme.of(context).colorScheme.inversePrimary;
-    }
-  }
-
-  Widget _buildFormRow({
-    required DynamicFormModel formModel,
-    required ColorScheme colorScheme,
-    required EditorialThemeData editorial,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.outline.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            context.pushNamed(
-              AppRouteNames.formBuilder,
-              extra: {'formModel': formModel},
-              queryParameters: {'id': formModel.id},
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(EditorialSpacing.spacing6),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          Icons.format_align_center,
-                          size: 20,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: EditorialSpacing.spacing3),
-                      Text(
-                        formModel.name ?? '',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-                // Expanded(
-                //   flex: 2,
-                //   child: Text(
-                //     '',
-                //     // event['client'] as String,
-                //     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                //           color: colorScheme.onSurfaceVariant,
-                //         ),
-                //   ),
-                // ),
-                Expanded(
-                  child: Text(
-                    formModel.createdAt != null
-                        ? DateFormat(
-                          'yyyy-MM-dd',
-                        ).format(formModel.modifiedDate!)
-                        : '',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: EditorialSpacing.spacing3,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: (_getStatusColor(
-                        formModel.formStatus ?? FormStatus.draft,
-                      )).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      formModel.formStatus?.name.toUpperCase() ?? '',
-                      style: editorial.metadataStyle.copyWith(
-                        color: _getStatusColor(
-                          formModel.formStatus ?? FormStatus.draft,
-                        ),
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: 40,
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.more_vert,
-                      color: colorScheme.onSurfaceVariant,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -320,16 +330,22 @@ class _FormListPageState extends ConsumerState<FormListPage> {
     ColorScheme colorScheme,
     EditorialThemeData editorial,
   ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(EditorialSpacing.spacing8),
+      padding: EdgeInsets.all(
+        EditorialResponsiveSpacing.edgeSpacing(screenWidth),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header Section
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isNarrow =
+                  constraints.maxWidth < EditorialSpacing.breakpointTablet;
+
+              final titleBlock = Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -347,25 +363,55 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                     ),
                   ),
                 ],
-              ),
-              Row(
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      context.pushNamed(AppRouteNames.formBuilder);
-                    },
-                    icon: const Icon(Icons.description_outlined, size: 18),
-                    label: const Text('Create Form'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: colorScheme.onSecondaryContainer,
-                      side: BorderSide(
-                        color: colorScheme.outline.withOpacity(0.1),
-                      ),
-                    ),
+              );
+
+              final createButton = OutlinedButton.icon(
+                onPressed: () {
+                  context.pushNamed(AppRouteNames.formBuilder);
+                },
+                icon: const Icon(Icons.description_outlined, size: 18),
+                label: const Text('Create Form'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: colorScheme.onSecondaryContainer,
+                  side: BorderSide(
+                    color: colorScheme.outline.withValues(alpha: 0.1),
                   ),
+                ),
+              );
+
+              final refreshButton = IconButton(
+                tooltip: 'Refresh forms',
+                onPressed: _reloadForms,
+                icon: const Icon(Icons.refresh),
+              );
+
+              if (isNarrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    titleBlock,
+                    const SizedBox(height: EditorialSpacing.spacing4),
+                    Row(
+                      children: [
+                        Expanded(child: createButton),
+                        const SizedBox(width: EditorialSpacing.spacing2),
+                        refreshButton,
+                      ],
+                    ),
+                  ],
+                );
+              }
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(child: titleBlock),
+                  const SizedBox(width: EditorialSpacing.spacing4),
+                  refreshButton,
+                  createButton,
                 ],
-              ),
-            ],
+              );
+            },
           ),
           _buildActiveEventsSection(colorScheme, editorial),
         ],
@@ -382,7 +428,7 @@ class _FormListPageState extends ConsumerState<FormListPage> {
       children: [
         const SizedBox(height: EditorialSpacing.spacing6),
         FutureBuilder(
-          future: ref.watch(formBuilderViewModelProvider.notifier).loadForms(),
+          future: _formsFuture,
           builder: (context, snapshot) {
             final results = snapshot.data;
 
@@ -423,9 +469,37 @@ class _FormListPageState extends ConsumerState<FormListPage> {
                     return Text(status);
                   },
                 ),
+                GenericTableColumn(
+                  header: '',
+                  flex: 0,
+                  cellBuilder: (context, row) {
+                    row as DynamicFormModel;
+                    return Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        tooltip: 'Delete form',
+                        onPressed: () => _confirmDeleteForm(row),
+                        icon: Icon(
+                          Icons.delete_outline,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ],
               rows: results ?? [],
               isLoading: snapshot.connectionState == ConnectionState.waiting,
+              onRowTap: (row) {
+                row as DynamicFormModel;
+                context.pushNamed(
+                  AppRouteNames.formBuilder,
+                  // extra: {'formModel': row},
+                  queryParameters: {'id': row.id ?? ''},
+                );
+              },
+              emptyMessage:
+                  'No forms found. Click "Create Form" to get started.',
             );
           },
         ),

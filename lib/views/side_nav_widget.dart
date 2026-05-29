@@ -1,4 +1,6 @@
 // lib/views/side_nav_widget.dart
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -41,14 +43,19 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     final editorial = context.editorial;
     final navigationState = ref.watch(navigationStateProvider);
     final currentUser = ref.watch(currentUserProvider);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isCompact = screenWidth < EditorialSpacing.breakpointDesktop;
+    final navWidth = isCompact ? 76.0 : 256.0;
 
     // Listen to route changes to update navigation state
     ref.listen(currentRouteProvider, (previous, next) {
       ref.read(navigationStateProvider.notifier).updateFromRoute(next);
     });
 
-    return Container(
-      width: 256,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+      width: navWidth,
       height: double.infinity,
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerLow,
@@ -63,13 +70,14 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
       child: Column(
         children: [
           // Logo Section (same as before)
-          _buildLogoSection(colorScheme, editorial, context),
+          _buildLogoSection(colorScheme, editorial, context, isCompact),
 
           // Navigation Items
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: EditorialSpacing.spacing4),
+              padding: EdgeInsets.symmetric(
+                horizontal: isCompact ? EditorialSpacing.spacing2 : EditorialSpacing.spacing4,
+              ),
               child: FutureBuilder(
                 future: _navigationDataFuture,
                 builder: (context, snapshot) {
@@ -77,7 +85,8 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  return Column(
+                  return ListView(
+                    padding: EdgeInsets.zero,
                     children: [
                       // Static navigation items
                       ..._buildStaticNavItems(
@@ -85,6 +94,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
                         colorScheme,
                         editorial,
                         currentUser,
+                        isCompact,
                       ),
 
                       // Dynamic form navigation items
@@ -95,6 +105,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
                           colorScheme,
                           editorial,
                           currentUser,
+                          isCompact,
                         ),
                     ],
                   );
@@ -105,7 +116,11 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
 
           // Bottom Section (same as before)
           _buildBottomSection(
-              navigationState.selectedItem, colorScheme, editorial),
+            navigationState.selectedItem,
+            colorScheme,
+            editorial,
+            isCompact,
+          ),
         ],
       ),
     );
@@ -117,6 +132,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     ColorScheme colorScheme,
     EditorialThemeData editorial,
     UserModel? currentUser,
+    bool isCompact,
   ) {
     final items = <Widget>[];
 
@@ -127,6 +143,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
       isSelected: selectedItem == 'Dashboard',
       colorScheme: colorScheme,
       editorial: editorial,
+      isCompact: isCompact,
       onTap: () {
         final dashboardRouteName =
             currentUser?.isCoordinator == true
@@ -153,6 +170,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           isSelected: selectedItem == 'Form Builder',
           colorScheme: colorScheme,
           editorial: editorial,
+          isCompact: isCompact,
           onTap: () => _navigateToItem(
             itemName: 'Form Builder',
             routeName: AppRouteNames.formList,
@@ -165,6 +183,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           isSelected: selectedItem == 'Events',
           colorScheme: colorScheme,
           editorial: editorial,
+          isCompact: isCompact,
           onTap: () => _navigateToItem(
             itemName: 'Events',
             routeName: AppRouteNames.coordinatorEvents,
@@ -177,6 +196,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           isSelected: selectedItem == 'Analytics',
           colorScheme: colorScheme,
           editorial: editorial,
+          isCompact: isCompact,
           onTap: () => _navigateToItem(
             itemName: 'Analytics',
             routeName: AppRouteNames.coordinatorAnalytics,
@@ -203,6 +223,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
       isSelected: selectedItem == 'Settings',
       colorScheme: colorScheme,
       editorial: editorial,
+      isCompact: isCompact,
       onTap: () => _navigateToItem(
         itemName: 'Settings',
         routeName: AppRouteNames.settings,
@@ -220,6 +241,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     ColorScheme colorScheme,
     EditorialThemeData editorial,
     UserModel? currentUser,
+    bool isCompact,
   ) {
     if (currentUser?.isClient != true || formData.isEmpty) {
       return [];
@@ -234,19 +256,20 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
       ),
 
       // Section header
-      Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: EditorialSpacing.spacing4,
-          vertical: EditorialSpacing.spacing2,
-        ),
-        child: Text(
-          'AVAILABLE FORMS',
-          style: editorial.labelUppercase.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            fontSize: 10,
+      if (!isCompact)
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: EditorialSpacing.spacing4,
+            vertical: EditorialSpacing.spacing2,
+          ),
+          child: Text(
+            'AVAILABLE FORMS',
+            style: editorial.labelUppercase.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontSize: 10,
+            ),
           ),
         ),
-      ),
 
       // Form items
       ...formData.take(5).map((form) {
@@ -260,6 +283,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           isSelected: selectedItem == formName,
           colorScheme: colorScheme,
           editorial: editorial,
+          isCompact: isCompact,
           onTap: () => _navigateToForm(
             formName: formName,
             formId: formId,
@@ -272,6 +296,13 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
 
   Future<List<DynamicFormModel>> _loadNavigationData() async {
     try {
+      final currentUser = ref.read(currentUserProvider);
+      log('Current user in navigation: ${currentUser?.email}, isClient: ${currentUser?.isClient}');
+      if(currentUser?.isClient != true) {
+        return [];
+
+      }
+
       final forms = await ref.read(formRepositoryProvider).getFormNames();
       return forms ?? [];
     } catch (e) {
@@ -321,6 +352,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     required bool isSelected,
     required ColorScheme colorScheme,
     required EditorialThemeData editorial,
+    required bool isCompact,
     required VoidCallback onTap,
   }) {
     return Container(
@@ -338,39 +370,58 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
               horizontal: EditorialSpacing.spacing4,
               vertical: EditorialSpacing.spacing3,
             ),
-            child: Row(
-              children: [
-                Icon(
-                  icon,
-                  size: 20,
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: EditorialSpacing.spacing3),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: isSelected
-                              ? colorScheme.primary
-                              : colorScheme.onSurfaceVariant,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
+            child: isCompact
+                ? Tooltip(
+                    message: label,
+                    child: Center(
+                      child: Icon(
+                        icon,
+                        size: 20,
+                        color: isSelected
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  )
+                : Row(
+                    children: [
+                      Icon(
+                        icon,
+                        size: 20,
+                        color: isSelected
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: EditorialSpacing.spacing3),
+                      Expanded(
+                        child: Text(
+                          label,
+                          style:
+                              Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    color: isSelected
+                                        ? colorScheme.primary
+                                        : colorScheme.onSurfaceVariant,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.w500,
+                                  ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                    overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLogoSection(ColorScheme colorScheme,
-      EditorialThemeData editorial, BuildContext context) {
+  Widget _buildLogoSection(
+    ColorScheme colorScheme,
+    EditorialThemeData editorial,
+    BuildContext context,
+    bool isCompact,
+  ) {
     return Container(
       padding: const EdgeInsets.all(EditorialSpacing.spacing6),
       child: Row(
@@ -395,35 +446,41 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
               size: 20,
             ),
           ),
-          const SizedBox(width: EditorialSpacing.spacing3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Venue Flow',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        color: colorScheme.onSurface,
-                      ),
-                ),
-                Text(
-                  'MANAGEMENT PORTAL',
-                  style: editorial.metadataStyle.copyWith(
-                    fontSize: 8,
-                    letterSpacing: 1.5,
+          if (!isCompact) ...[
+            const SizedBox(width: EditorialSpacing.spacing3),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Venue Flow',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: colorScheme.onSurface,
+                        ),
                   ),
-                ),
-              ],
+                  Text(
+                    'MANAGEMENT PORTAL',
+                    style: editorial.metadataStyle.copyWith(
+                      fontSize: 8,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildBottomSection(String selectedItem, ColorScheme colorScheme,
-      EditorialThemeData editorial) {
+  Widget _buildBottomSection(
+    String selectedItem,
+    ColorScheme colorScheme,
+    EditorialThemeData editorial,
+    bool isCompact,
+  ) {
     return Container(
       padding: const EdgeInsets.all(EditorialSpacing.spacing6),
       decoration: BoxDecoration(
@@ -442,6 +499,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
             isSelected: selectedItem == 'Help Center',
             colorScheme: colorScheme,
             editorial: editorial,
+            isCompact: isCompact,
             onTap: () => _selectItemOnly(
               itemName: 'Help Center',
               routePath: '/help',
@@ -453,6 +511,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
             isSelected: selectedItem == 'Account',
             colorScheme: colorScheme,
             editorial: editorial,
+            isCompact: isCompact,
             onTap: () => _selectItemOnly(
               itemName: 'Account',
               routePath: '/account',

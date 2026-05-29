@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'colors.dart';
 import 'typography.dart';
 import 'spacing.dart';
-import 'elevation.dart';
 
 /// Custom theme extension for Editorial Concierge specific styles
 /// Provides access to specialized editorial typography and design elements

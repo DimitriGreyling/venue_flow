@@ -1,6 +1,6 @@
 class ValidationRule {
   String? type;
-  dynamic? value;
+  dynamic value;
   String? message;
 
   ValidationRule({

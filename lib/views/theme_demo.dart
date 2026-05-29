@@ -220,7 +220,7 @@ class EditorialThemeDemo extends ConsumerWidget {
           const SizedBox(height: EditorialSpacing.spacing6),
           
           // Input Field
-          TextField(
+          const TextField(
             decoration: InputDecoration(
               labelText: 'Event Details',
               hintText: 'Enter venue information...',

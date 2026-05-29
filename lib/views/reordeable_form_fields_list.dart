@@ -19,7 +19,7 @@ class ReorderableFormFieldsList extends StatefulWidget {
   final bool? isClient;
 
   const ReorderableFormFieldsList({
-    Key? key,
+    super.key,
     required this.fields,
     required this.pageIndex,
     required this.colorScheme,
@@ -33,7 +33,7 @@ class ReorderableFormFieldsList extends StatefulWidget {
     this.onFieldChanged,
     this.onFieldSaved,
     this.isClient = false,
-  }) : super(key: key);
+  });
 
   @override
   State<ReorderableFormFieldsList> createState() =>

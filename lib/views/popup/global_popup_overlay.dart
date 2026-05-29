@@ -41,7 +41,7 @@ class GlobalPopupOverlay extends ConsumerWidget {
                   ),
                   ...activePopups.map((popup) {
                     return _buildPositionedPopup(popup, popupNotifier);
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

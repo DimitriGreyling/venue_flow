@@ -36,7 +36,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
 
   // Floating Action Button variables
   TabController? _tabController;
-  final ScrollController _scrollController = ScrollController();
   bool _showFAB = false;
   int _currentTabIndex = 0;
 
@@ -91,25 +90,30 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
       });
     });
 
-    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
     _tabController?.dispose();
     super.dispose();
   }
 
-  void _onScroll() {
+  void _onScroll(double offset) {
     // Show FAB when user scrolls down
-    final bool shouldShow = _scrollController.offset > 100;
+    final bool shouldShow = offset > 100;
     if (shouldShow != _showFAB) {
       setState(() {
         _showFAB = shouldShow;
       });
     }
+  }
+
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification.depth == 0) {
+      _onScroll(notification.metrics.pixels);
+    }
+
+    return false;
   }
 
   @override
@@ -189,7 +193,7 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
       return const SizedBox.shrink();
     }
 
-    return FloatingActionButton.extended(
+    return OutlinedButton.icon(
       onPressed: formBuilderState.isLoading
           ? null
           : () {
@@ -199,13 +203,13 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                 editorial: editorial,
               );
             },
-      icon: const Icon(Icons.add),
+      icon: const Icon(Icons.add, size: 18),
       label: const Text('Add Field'),
-      backgroundColor: colorScheme.secondary,
-      foregroundColor: colorScheme.onSecondary,
-      tooltip: 'Add a new field to the current page',
-      elevation: 0,
-      heroTag: "addField", // Unique hero tag to avoid conflicts
+      style: OutlinedButton.styleFrom(
+        foregroundColor: colorScheme.secondary,
+        side: BorderSide(color: colorScheme.secondary.withValues(alpha: 0.3)),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      ),
     );
   }
 
@@ -299,7 +303,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                       leading: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer.withOpacity(0.2),
+                            color:
+                              colorScheme.primaryContainer.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Icon(
@@ -382,8 +387,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
         return 'Check/uncheck option';
       case FieldType.date:
         return 'Date picker input';
-      default:
-        return 'Form input field';
     }
   }
 
@@ -528,8 +531,6 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
         return Icons.check_box_outlined;
       case FieldType.date:
         return Icons.calendar_month;
-      default:
-        return Icons.help;
     }
   }
 
@@ -607,14 +608,14 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide(
-                color: scheme.primaryContainer.withOpacity(0.50),
+                color: scheme.primaryContainer.withValues(alpha: 0.50),
                 width: 2,
               ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
               borderSide: BorderSide(
-                color: scheme.error.withOpacity(0.80),
+                color: scheme.error.withValues(alpha: 0.80),
                 width: 1.5,
               ),
             ),
@@ -912,7 +913,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: colorScheme.outlineVariant.withOpacity(0.5),
+                            color:
+                              colorScheme.outlineVariant.withValues(alpha: 0.5),
                         ),
                       ),
                       child: Row(
@@ -934,8 +936,8 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                               child: Container(
                                 padding: const EdgeInsets.all(2),
                                 decoration: BoxDecoration(
-                                  color: colorScheme.errorContainer
-                                      .withOpacity(0.8),
+                                    color: colorScheme.errorContainer
+                                      .withValues(alpha: 0.8),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
@@ -965,10 +967,11 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
               final index = entry.key;
               final page = entry.value;
 
-              return CustomScrollView(
-                controller: _scrollController, // Add scroll controller here
-                slivers: [
-                  SliverPadding(
+              return NotificationListener<ScrollNotification>(
+                onNotification: _handleScrollNotification,
+                child: CustomScrollView(
+                  slivers: [
+                    SliverPadding(
                     padding: const EdgeInsets.all(16),
                     sliver: SliverToBoxAdapter(
                       child: Column(
@@ -1101,10 +1104,10 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                         ],
                       ),
                     ),
-                  ),
+                    ),
 
-                  // Form Fields List as Sliver
-                  SliverPadding(
+                    // Form Fields List as Sliver
+                    SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     sliver: SliverToBoxAdapter(
                       child: Center(
@@ -1155,13 +1158,14 @@ class _FormBuilderPageState extends ConsumerState<FormBuilderPage>
                         ),
                       ),
                     ),
-                  ),
+                    ),
 
-                  // Add some bottom padding for better scrolling
-                  const SliverPadding(
+                    // Add some bottom padding for better scrolling
+                    const SliverPadding(
                     padding: EdgeInsets.only(bottom: 100),
                   ),
-                ],
+                  ],
+                ),
               );
             }).toList(),
           ),

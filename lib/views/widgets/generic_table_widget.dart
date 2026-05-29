@@ -22,6 +22,7 @@ class GenericDataTable<T> extends StatelessWidget {
   final int skeletonRowCount;
   final double rowHeight;
   final double maxBodyHeight;
+  final double minTableWidth;
   final void Function(T row)? onRowTap;
   final String emptyMessage;
 
@@ -33,6 +34,7 @@ class GenericDataTable<T> extends StatelessWidget {
     this.skeletonRowCount = 6,
     this.rowHeight = 64,
     this.maxBodyHeight = 420,
+    this.minTableWidth = 640,
     this.onRowTap,
     this.emptyMessage = 'No data available',
   });
@@ -41,75 +43,75 @@ class GenericDataTable<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.05),
-        ),
-      ),
-      child: Column(
-        children: [
-          _buildHeader(context),
-          SizedBox(
-            height: maxBodyHeight,
-            child: isLoading
-                ? Skeletonizer(
-                    enabled: true,
-                    child: ListView.builder(
-                      itemCount: skeletonRowCount,
-                      itemBuilder: (context, index) =>
-                          _buildSkeletonRow(context),
-                    ),
-                  )
-                : rows.isEmpty
-                    ? Center(
-                        child: Text(
-                          emptyMessage,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: rows.length,
-                        itemBuilder: (context, index) {
-                          final row = rows[index];
-                          // return Material(
-                          //   color: Colors.transparent,
-                          //   child: InkWell(
-                          //     hoverColor: Theme.of(context).colorScheme.primary,
-                          //     // .withValues(alpha: 0.06),
-                          //     splashColor: Theme.of(context)
-                          //         .colorScheme
-                          //         .primary
-                          //         .withValues(alpha: 0.10),
-                          //     highlightColor: Theme.of(context)
-                          //         .colorScheme
-                          //         .primary
-                          //         .withValues(alpha: 0.04),
-                          //     borderRadius: BorderRadius.circular(8),
-                          //     onTap: onRowTap == null
-                          //         ? null
-                          //         : () => onRowTap!(row),
-                          //     child: _buildDataRow(context, row),
-                          //   ),
-                          // );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : minTableWidth;
+        final tableWidth = availableWidth < minTableWidth
+            ? minTableWidth
+            : availableWidth;
 
-                          return _HoverableTableRow<T>(
-                            row: row,
-                            rowHeight: rowHeight,
-                            onTap:
-                                onRowTap == null ? null : () => onRowTap!(row),
-                            child: _buildDataRow(context, row),
-                          );
-                        },
-                      ),
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: tableWidth,
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerLowest,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: colorScheme.outline.withValues(alpha: 0.05),
+                ),
+              ),
+              child: Column(
+                children: [
+                  _buildHeader(context),
+                  SizedBox(
+                    height: maxBodyHeight,
+                    child: isLoading
+                        ? Skeletonizer(
+                            enabled: true,
+                            child: ListView.builder(
+                              itemCount: skeletonRowCount,
+                              itemBuilder: (context, index) =>
+                                  _buildSkeletonRow(context),
+                            ),
+                          )
+                        : rows.isEmpty
+                            ? Center(
+                                child: Text(
+                                  emptyMessage,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: rows.length,
+                                itemBuilder: (context, index) {
+                                  final row = rows[index];
+
+                                  return _HoverableTableRow<T>(
+                                    row: row,
+                                    rowHeight: rowHeight,
+                                    onTap: onRowTap == null
+                                        ? null
+                                        : () => onRowTap!(row),
+                                    child: _buildDataRow(context, row),
+                                  );
+                                },
+                              ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

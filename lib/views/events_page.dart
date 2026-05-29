@@ -5,7 +5,6 @@ import 'package:venue_flow_app/models/popup_position.dart';
 import 'package:venue_flow_app/providers/viewmodel_provider.dart';
 import 'package:venue_flow_app/shared/helpers/global_popup_service.dart';
 import 'package:venue_flow_app/theme/spacing.dart';
-import 'package:venue_flow_app/theme/theme.dart';
 import 'package:venue_flow_app/views/dialogs/event_delete_dialog.dart';
 import 'package:venue_flow_app/views/dialogs/event_dialogs.dart';
 import 'package:venue_flow_app/views/side_nav_widget.dart';

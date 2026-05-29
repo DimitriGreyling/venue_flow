@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:venue_flow_app/models/form_field_model.dart';
 
 class FormPageModel {
@@ -5,27 +8,38 @@ class FormPageModel {
   String? title;
   List<FormFieldModel>? fields;
 
-  FormPageModel({
-    this.id,
-    this.title,
-    this.fields,
-  });
+  FormPageModel({this.id, this.title, this.fields});
 
   factory FormPageModel.fromJson(Map<String, dynamic> json) {
     return FormPageModel(
       id: json['id'],
       title: json['title'] ?? '',
-      fields: (json['fields'] as List?)
-          ?.map((e) => FormFieldModel.fromJson(e))
-          .toList(),
+      fields:
+          (json['fields'] as List?)
+              ?.map((e) => FormFieldModel.fromJson(e))
+              .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'title':title,
-      'fields': fields?.map((x)=>x.toJson()).toList(),
+      'title': title,
+      'fields': fields?.map((x) => x.toJson()).toList(),
     };
+  }
+
+  //toString
+  @override
+  String toString() => toJsonString();
+
+  //toJsonString
+  String toJsonString() {
+    try {
+      return jsonEncode(toJson());
+    } catch (error) {
+      log('TOJSONSTRING ERROR:: $error');
+      return '';
+    }
   }
 }

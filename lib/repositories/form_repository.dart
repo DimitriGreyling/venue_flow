@@ -13,6 +13,9 @@ abstract class IFormRepository {
   Future<DynamicFormModel?> updateForm({
     required DynamicFormModel formModel,
   });
+  Future<void> deleteForm({
+    required String formId,
+  });
   Future<List<DynamicFormModel>?> getFormById({
     String? formId,
   });
@@ -46,7 +49,7 @@ class FormRepository extends IFormRepository {
   @override
   Future<List<DynamicFormModel>?> getFormNames() async {
     try {
-      final response = await _apiClient.dio.get(ApiEndpoints.forms+"/MenuItems",
+      final response = await _apiClient.dio.get("${ApiEndpoints.forms}/MenuItems",
       //  queryParameters: {
       //   ApiQueryKeys.fields: 'id,name',
       // }
@@ -96,6 +99,22 @@ class FormRepository extends IFormRepository {
       final response = await _apiClient.dio.put(ApiEndpoints.formById(formId), data: formModel.toJson());
       return _extractForm(response.data);
     } catch (error) {
+      throw Exception(error);
+    }
+  }
+
+  @override
+  Future<void> deleteForm({
+    required String formId,
+  }) async {
+    try {
+      final response = await _apiClient.dio.delete(ApiEndpoints.formById(formId));
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Failed to delete form');
+      }
+    } catch (error) {
+      log('deleteForm error: $error');
       throw Exception(error);
     }
   }

@@ -1,7 +1,7 @@
 class VisibilityRule {
   String? fieldId;
   String? operator;
-  dynamic? value;
+  dynamic value;
 
   VisibilityRule({
     this.fieldId,
