@@ -21,14 +21,8 @@ class AuthRepository {
   Future<ApiLoginResult> login(String email, String password) async {
     final response = await _apiClient.dio.post(
       ApiEndpoints.authLogin,
-      data: {
-        "email": email,
-        "password": password,
-      },
-      options: Options(extra: {
-        'requiresAuth': false,
-        'skipAuthRefresh': true,
-      }),
+      data: {"email": email, "password": password},
+      options: Options(extra: {'requiresAuth': false, 'skipAuthRefresh': true}),
     );
 
     final responseData = response.data;
@@ -83,7 +77,9 @@ class AuthRepository {
         tenant: _extractTenant(responseData),
       );
     } on DioException catch (error) {
-      log('Fetch current profile error: ${error.response?.statusCode} ${error.error}');
+      log(
+        'Fetch current profile error: ${error.response?.statusCode} ${error.error}',
+      );
       return null;
     } catch (error) {
       log('Fetch current profile error: $error');
@@ -100,13 +96,10 @@ class AuthRepository {
     try {
       final response = await _apiClient.dio.post(
         ApiEndpoints.authRefresh,
-        data: {
-          ApiPayloadKeys.refreshToken: refreshToken,
-        },
-        options: Options(extra: {
-          'requiresAuth': false,
-          'skipAuthRefresh': true,
-        }),
+        data: {ApiPayloadKeys.refreshToken: refreshToken},
+        options: Options(
+          extra: {'requiresAuth': false, 'skipAuthRefresh': true},
+        ),
       );
 
       final responseData = response.data;
@@ -118,13 +111,16 @@ class AuthRepository {
       }
 
       await _saveToken(newAccessToken);
-      await _saveRefreshToken(newRefreshToken.isNotEmpty ? newRefreshToken : refreshToken);
+      await _saveRefreshToken(
+        newRefreshToken.isNotEmpty ? newRefreshToken : refreshToken,
+      );
       _apiClient.setAuthToken(newAccessToken);
 
       return newAccessToken;
     } on DioException catch (error) {
       log('Refresh token error: ${error.response?.statusCode} ${error.error}');
-      if (error.response?.statusCode == 401 || error.response?.statusCode == 403) {
+      if (error.response?.statusCode == 401 ||
+          error.response?.statusCode == 403) {
         await clearStoredSession();
       }
       return null;
@@ -278,10 +274,9 @@ class AuthRepository {
           'role': role.name,
           'tenantSlug': tenantSlug,
         },
-        options: Options(extra: {
-          'requiresAuth': false,
-          'skipAuthRefresh': true,
-        }),
+        options: Options(
+          extra: {'requiresAuth': false, 'skipAuthRefresh': true},
+        ),
       );
 
       return _extractUser(response.data);
@@ -306,10 +301,14 @@ class AuthRepository {
 
   Future<TenantModel?> getTenantBySlug(String slug) async {
     try {
-      final response = await _apiClient.dio.get(ApiEndpoints.tenantBySlug(slug));
+      final response = await _apiClient.dio.get(
+        ApiEndpoints.tenantBySlug(slug),
+      );
       return _extractTenant(response.data);
     } on DioException catch (error) {
-      log('Get tenant by slug error: ${error.response?.statusCode} ${error.error}');
+      log(
+        'Get tenant by slug error: ${error.response?.statusCode} ${error.error}',
+      );
       return null;
     } catch (error) {
       log('Get tenant by slug error: $error');
@@ -323,10 +322,14 @@ class AuthRepository {
     }
 
     try {
-      final response = await _apiClient.dio.get(ApiEndpoints.tenantById(tenantId));
+      final response = await _apiClient.dio.get(
+        ApiEndpoints.tenantById(tenantId),
+      );
       return _extractTenant(response.data);
     } on DioException catch (error) {
-      log('Get tenant by id error: ${error.response?.statusCode} ${error.error}');
+      log(
+        'Get tenant by id error: ${error.response?.statusCode} ${error.error}',
+      );
       return null;
     } catch (error) {
       log('Get tenant by id error: $error');
@@ -336,13 +339,17 @@ class AuthRepository {
 
   Future<void> signOut() async {
     try {
-      await clearStoredSession();
-      await _apiClient.dio.post(
+      var response = await _apiClient.dio.post(
         ApiEndpoints.authLogout,
-        options: Options(extra: {
-          'skipAuthRefresh': true,
-        }),
+        // options: Options(extra: {
+        //   'skipAuthRefresh': true,
+        // }),
       );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        log('Sign out successful');
+        await clearStoredSession();
+      }
     } on DioException {
       // Logout should still complete locally even if API call fails.
     } catch (error) {
@@ -357,19 +364,12 @@ class ApiLoginResult {
   final UserModel? user;
   final TenantModel? tenant;
 
-  const ApiLoginResult({
-    required this.token,
-    this.user,
-    this.tenant,
-  });
+  const ApiLoginResult({required this.token, this.user, this.tenant});
 }
 
 class ApiAuthProfile {
   final UserModel? user;
   final TenantModel? tenant;
 
-  const ApiAuthProfile({
-    this.user,
-    this.tenant,
-  });
+  const ApiAuthProfile({this.user, this.tenant});
 }
