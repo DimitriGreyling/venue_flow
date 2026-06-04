@@ -26,10 +26,10 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
   @override
   void initState() {
     super.initState();
+    _navigationDataFuture = _loadNavigationData();
 
     // Update navigation state based on current route when widget initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _navigationDataFuture = _loadNavigationData();
       final currentRoute = GoRouterState.of(context).uri.path;
       ref.read(navigationStateProvider.notifier).updateFromRoute(currentRoute);
       ref.read(currentRouteProvider.notifier).state = currentRoute;
@@ -80,7 +80,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
                         ? EditorialSpacing.spacing2
                         : EditorialSpacing.spacing4,
               ),
-              child: FutureBuilder(
+              child: FutureBuilder<List<DynamicFormModel>>(
                 future: _navigationDataFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -307,7 +307,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
 
   Future<List<DynamicFormModel>> _loadNavigationData() async {
     try {
-      final currentUser = await ref.read(currentUserProvider);
+      final currentUser = await ref.read(storedUserProfileProvider.future);
       log(
         'Current user in navigation: ${currentUser?.email}, isClient: ${currentUser?.isClient}',
       );
@@ -315,14 +315,11 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
         return [];
       }
 
-      log(
-        'Current user in navigation: ${currentUser?.email}, isClient: ${currentUser?.isClient}',
-      );
       final forms = await ref.read(formRepositoryProvider).getFormNames();
       log('Loaded forms for navigation: ${forms?.map((f) => f.name).join(', ')}');
       return forms ?? [];
-    } catch (e) {
-      log('Error loading forms for navigation: $e');
+    } catch (e, stackTrace) {
+      log('Error loading forms for navigation: $e', stackTrace: stackTrace);
       return [];
     }
   }
