@@ -30,3 +30,12 @@ final currentTenantProvider = Provider<TenantModel?>((ref) {
 final isAuthenticatedProvider = Provider<bool>((ref) {
   return ref.watch(authViewModelProvider).isAuthenticated;
 });
+
+final storedAuthProfileProvider = FutureProvider<ApiAuthProfile?>((ref) {
+  return ref.watch(authRepositoryProvider).getStoredAuthProfile();
+});
+
+final storedUserProfileProvider = FutureProvider<UserModel?>((ref) async {
+  final profile = await ref.watch(authRepositoryProvider).getStoredAuthProfile();
+  return profile?.user;
+});

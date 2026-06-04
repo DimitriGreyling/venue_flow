@@ -1,6 +1,7 @@
 // lib/repositories/auth_repository.dart
+import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:venue_flow_app/constants/api_contract.dart';
 import 'package:venue_flow_app/models/enums.dart';
 import 'package:venue_flow_app/shared/helpers/api_client.dart';
@@ -10,8 +11,11 @@ import '../models/tenant_model.dart';
 
 class AuthRepository {
   final ApiClient _apiClient;
+  final FlutterSecureStorage _secureStorage;
 
-  AuthRepository({required ApiClient apiClient}) : _apiClient = apiClient {
+  AuthRepository({required ApiClient apiClient})
+      : _apiClient = apiClient,
+        _secureStorage = const FlutterSecureStorage() {
     _apiClient.configureAuthHandlers(
       onRefreshToken: refreshAccessToken,
       onUnauthorized: clearStoredSession,
@@ -39,6 +43,9 @@ class AuthRepository {
     _apiClient.setAuthToken(token);
 
     final hydratedProfile = await fetchCurrentProfileFromApi();
+    if (hydratedProfile?.user != null) {
+      await _saveAuthProfile(hydratedProfile!);
+    }
 
     return ApiLoginResult(
       token: token,
@@ -57,8 +64,20 @@ class AuthRepository {
     final profile = await fetchCurrentProfileFromApi();
 
     if (profile?.user == null) {
+      final cachedProfile = await _loadCachedAuthProfile();
+      if (cachedProfile?.user != null) {
+        return ApiLoginResult(
+          token: token,
+          user: cachedProfile?.user,
+          tenant: cachedProfile?.tenant,
+        );
+      }
+
+      await clearStoredSession();
       return null;
     }
+
+    await _saveAuthProfile(profile!);
 
     return ApiLoginResult(
       token: token,
@@ -85,6 +104,10 @@ class AuthRepository {
       log('Fetch current profile error: $error');
       return null;
     }
+  }
+
+  Future<ApiAuthProfile?> getStoredAuthProfile() async {
+    return _loadCachedAuthProfile();
   }
 
   Future<String?> refreshAccessToken() async {
@@ -134,21 +157,19 @@ class AuthRepository {
     _apiClient.clearAuthToken();
     await _clearToken();
     await _clearRefreshToken();
+    await _clearAuthProfile();
   }
 
   Future<void> _saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(AuthStorageKeys.accessToken, token);
+    await _secureStorage.write(key: AuthStorageKeys.accessToken, value: token);
   }
 
   Future<String?> _loadToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(AuthStorageKeys.accessToken);
+    return _secureStorage.read(key: AuthStorageKeys.accessToken);
   }
 
   Future<void> _clearToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(AuthStorageKeys.accessToken);
+    await _secureStorage.delete(key: AuthStorageKeys.accessToken);
   }
 
   Future<void> _saveRefreshToken(String refreshToken) async {
@@ -156,18 +177,63 @@ class AuthRepository {
       return;
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(AuthStorageKeys.refreshToken, refreshToken);
+    await _secureStorage.write(
+      key: AuthStorageKeys.refreshToken,
+      value: refreshToken,
+    );
   }
 
   Future<String?> _loadRefreshToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(AuthStorageKeys.refreshToken);
+    return _secureStorage.read(key: AuthStorageKeys.refreshToken);
   }
 
   Future<void> _clearRefreshToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(AuthStorageKeys.refreshToken);
+    await _secureStorage.delete(key: AuthStorageKeys.refreshToken);
+  }
+
+  Future<void> _saveAuthProfile(ApiAuthProfile profile) async {
+    final encoded = jsonEncode({
+      'user': profile.user?.toJson(),
+      'tenant': profile.tenant?.toJson(),
+    });
+
+    await _secureStorage.write(
+      key: AuthStorageKeys.authProfile,
+      value: encoded,
+    );
+  }
+
+  Future<ApiAuthProfile?> _loadCachedAuthProfile() async {
+    final encoded = await _secureStorage.read(key: AuthStorageKeys.authProfile);
+    if (encoded == null || encoded.isEmpty) {
+      return null;
+    }
+
+    try {
+      final decoded = jsonDecode(encoded);
+      if (decoded is! Map<String, dynamic>) {
+        return null;
+      }
+
+      final userJson = decoded['user'];
+      final tenantJson = decoded['tenant'];
+
+      return ApiAuthProfile(
+        user: userJson is Map<String, dynamic>
+            ? UserModel.fromJson(userJson)
+            : null,
+        tenant: tenantJson is Map<String, dynamic>
+            ? TenantModel.fromJson(tenantJson)
+            : null,
+      );
+    } catch (error) {
+      log('Load cached auth profile error: $error');
+      return null;
+    }
+  }
+
+  Future<void> _clearAuthProfile() async {
+    await _secureStorage.delete(key: AuthStorageKeys.authProfile);
   }
 
   String _extractToken(dynamic body) {
@@ -339,22 +405,20 @@ class AuthRepository {
 
   Future<void> signOut() async {
     try {
-      var response = await _apiClient.dio.post(
+      final response = await _apiClient.dio.post(
         ApiEndpoints.authLogout,
-        // options: Options(extra: {
-        //   'skipAuthRefresh': true,
-        // }),
       );
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         log('Sign out successful');
-        await clearStoredSession();
       }
     } on DioException {
       // Logout should still complete locally even if API call fails.
     } catch (error) {
       log('Sign out error: $error');
       rethrow;
+    } finally {
+      await clearStoredSession();
     }
   }
 }

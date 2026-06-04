@@ -28,6 +28,7 @@ class ApiQueryKeys {
 class AuthStorageKeys {
   static const String accessToken = 'AUTH_TOKEN';
   static const String refreshToken = 'REFRESH_TOKEN';
+  static const String authProfile = 'AUTH_PROFILE';
 }
 
 class ApiPayloadKeys {
