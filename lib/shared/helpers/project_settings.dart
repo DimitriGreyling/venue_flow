@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class ProjectSettings {
   static ProjectSettings? _instance;
 
@@ -8,5 +10,5 @@ class ProjectSettings {
     return _instance!;
   }
 
-  bool isDebugMode = false;
+  bool isDebugMode = kDebugMode;
 }
