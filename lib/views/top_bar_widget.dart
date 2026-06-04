@@ -7,6 +7,8 @@ import 'package:venue_flow_app/routing/app_routes.dart';
 import 'package:venue_flow_app/theme/editorial_theme_data.dart';
 import 'package:venue_flow_app/theme/spacing.dart';
 
+enum _TopBarMenuAction { logout }
+
 class TopBarWidget extends ConsumerStatefulWidget {
   const TopBarWidget({super.key});
 
@@ -16,6 +18,29 @@ class TopBarWidget extends ConsumerStatefulWidget {
 
 class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
   final TextEditingController _searchController = TextEditingController();
+
+  Future<void> _handleMenuSelection(_TopBarMenuAction action) async {
+    if (action != _TopBarMenuAction.logout) {
+      return;
+    }
+
+    try {
+      await ref.read(authViewModelProvider.notifier).signOut();
+      if (!mounted) {
+        return;
+      }
+      context.goNamed(AppRouteNames.login);
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to log out right now. Please try again.'),
+        ),
+      );
+    }
+  }
 
   void _openSearchSheet(
     ColorScheme colorScheme,
@@ -201,16 +226,14 @@ class _TopBarWidgetState extends ConsumerState<TopBarWidget> {
                             ),
                           ),
                           const SizedBox(width: EditorialSpacing.spacing2),
-                          PopupMenuButton(
+                          PopupMenuButton<_TopBarMenuAction>(
                             offset: const Offset(0, 50),
+                            onSelected: _handleMenuSelection,
                             itemBuilder: (context) {
-                              return [
-                                PopupMenuItem(
-                                  child: const Text('Logout'),
-                                  onTap: () {
-                                    ref.read(authRepositoryProvider).signOut();
-                                    context.goNamed(AppRouteNames.login);
-                                  },
+                              return const [
+                                PopupMenuItem<_TopBarMenuAction>(
+                                  value: _TopBarMenuAction.logout,
+                                  child: Text('Logout'),
                                 ),
                               ];
                             },

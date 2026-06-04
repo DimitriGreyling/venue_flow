@@ -85,10 +85,10 @@ class DynamicFormModel {
       version: json['formVersion'] ?? 1,
       schema: pages,
       formStatus:
-          json['formStatusEnum'] != null
-              ? json['formStatusEnum'] is String
-                  ? FormStatus.values.byName(json['formStatusEnum'])
-                  : FormStatus.values[json['formStatusEnum']]
+          json['status'] != null
+              ? json['status'] is String
+                  ? FormStatus.values.byName(json['status'])
+                  : FormStatus.values[json['status']]
               : null,
       isActive: json['isActive'] as bool? ?? false,
       createdAt:

@@ -167,4 +167,6 @@ class AuthViewModel extends StateNotifier<AuthStateModel> {
   void clearError() {
     state = state.copyWith(error: null);
   }
+
+  get getUser => _authRepository.getCurrentUser();
 }

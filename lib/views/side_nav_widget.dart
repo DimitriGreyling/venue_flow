@@ -26,7 +26,6 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
   @override
   void initState() {
     super.initState();
-
     _navigationDataFuture = _loadNavigationData();
 
     // Update navigation state based on current route when widget initializes
@@ -76,9 +75,12 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           Expanded(
             child: Container(
               padding: EdgeInsets.symmetric(
-                horizontal: isCompact ? EditorialSpacing.spacing2 : EditorialSpacing.spacing4,
+                horizontal:
+                    isCompact
+                        ? EditorialSpacing.spacing2
+                        : EditorialSpacing.spacing4,
               ),
-              child: FutureBuilder(
+              child: FutureBuilder<List<DynamicFormModel>>(
                 future: _navigationDataFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -137,29 +139,31 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     final items = <Widget>[];
 
     // Dashboard - available to all
-    items.add(_buildNavItem(
-      icon: Icons.dashboard_outlined,
-      label: 'Dashboard',
-      isSelected: selectedItem == 'Dashboard',
-      colorScheme: colorScheme,
-      editorial: editorial,
-      isCompact: isCompact,
-      onTap: () {
-        final dashboardRouteName =
-            currentUser?.isCoordinator == true
-                ? AppRouteNames.coordinatorDashboard
-                : AppRouteNames.clientDashboard;
-        final dashboardRoutePath =
-            currentUser?.isCoordinator == true
-                ? AppRoutePaths.coordinatorDashboard
-                : AppRoutePaths.clientDashboard;
-        _navigateToItem(
-          itemName: 'Dashboard',
-          routeName: dashboardRouteName,
-          routePath: dashboardRoutePath,
-        );
-      },
-    ));
+    items.add(
+      _buildNavItem(
+        icon: Icons.dashboard_outlined,
+        label: 'Dashboard',
+        isSelected: selectedItem == 'Dashboard',
+        colorScheme: colorScheme,
+        editorial: editorial,
+        isCompact: isCompact,
+        onTap: () {
+          final dashboardRouteName =
+              currentUser?.isCoordinator == true
+                  ? AppRouteNames.coordinatorDashboard
+                  : AppRouteNames.clientDashboard;
+          final dashboardRoutePath =
+              currentUser?.isCoordinator == true
+                  ? AppRoutePaths.coordinatorDashboard
+                  : AppRoutePaths.clientDashboard;
+          _navigateToItem(
+            itemName: 'Dashboard',
+            routeName: dashboardRouteName,
+            routePath: dashboardRoutePath,
+          );
+        },
+      ),
+    );
 
     // Role-specific items
     if (currentUser?.isCoordinator == true) {
@@ -171,11 +175,12 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           colorScheme: colorScheme,
           editorial: editorial,
           isCompact: isCompact,
-          onTap: () => _navigateToItem(
-            itemName: 'Form Builder',
-            routeName: AppRouteNames.formList,
-            routePath: AppRoutePaths.coordinatorFormList,
-          ),
+          onTap:
+              () => _navigateToItem(
+                itemName: 'Form Builder',
+                routeName: AppRouteNames.formList,
+                routePath: AppRoutePaths.coordinatorFormList,
+              ),
         ),
         _buildNavItem(
           icon: Icons.calendar_today_outlined,
@@ -184,11 +189,12 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           colorScheme: colorScheme,
           editorial: editorial,
           isCompact: isCompact,
-          onTap: () => _navigateToItem(
-            itemName: 'Events',
-            routeName: AppRouteNames.coordinatorEvents,
-            routePath: AppRoutePaths.coordinatorEvents,
-          ),
+          onTap:
+              () => _navigateToItem(
+                itemName: 'Events',
+                routeName: AppRouteNames.coordinatorEvents,
+                routePath: AppRoutePaths.coordinatorEvents,
+              ),
         ),
         _buildNavItem(
           icon: Icons.analytics_outlined,
@@ -197,11 +203,12 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           colorScheme: colorScheme,
           editorial: editorial,
           isCompact: isCompact,
-          onTap: () => _navigateToItem(
-            itemName: 'Analytics',
-            routeName: AppRouteNames.coordinatorAnalytics,
-            routePath: AppRoutePaths.coordinatorAnalytics,
-          ),
+          onTap:
+              () => _navigateToItem(
+                itemName: 'Analytics',
+                routeName: AppRouteNames.coordinatorAnalytics,
+                routePath: AppRoutePaths.coordinatorAnalytics,
+              ),
         ),
       ]);
     }
@@ -217,19 +224,22 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     //   ));
     // }
 
-    items.add(_buildNavItem(
-      icon: Icons.settings_outlined,
-      label: 'Settings',
-      isSelected: selectedItem == 'Settings',
-      colorScheme: colorScheme,
-      editorial: editorial,
-      isCompact: isCompact,
-      onTap: () => _navigateToItem(
-        itemName: 'Settings',
-        routeName: AppRouteNames.settings,
-        routePath: AppRoutePaths.settings,
+    items.add(
+      _buildNavItem(
+        icon: Icons.settings_outlined,
+        label: 'Settings',
+        isSelected: selectedItem == 'Settings',
+        colorScheme: colorScheme,
+        editorial: editorial,
+        isCompact: isCompact,
+        onTap:
+            () => _navigateToItem(
+              itemName: 'Settings',
+              routeName: AppRouteNames.settings,
+              routePath: AppRoutePaths.settings,
+            ),
       ),
-    ));
+    );
 
     return items;
   }
@@ -284,11 +294,12 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
           colorScheme: colorScheme,
           editorial: editorial,
           isCompact: isCompact,
-          onTap: () => _navigateToForm(
-            formName: formName,
-            formId: formId,
-            formModel: form,
-          ),
+          onTap:
+              () => _navigateToForm(
+                formName: formName,
+                formId: formId,
+                formModel: form,
+              ),
         );
       }),
     ];
@@ -296,16 +307,19 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
 
   Future<List<DynamicFormModel>> _loadNavigationData() async {
     try {
-      final currentUser = ref.read(currentUserProvider);
-      log('Current user in navigation: ${currentUser?.email}, isClient: ${currentUser?.isClient}');
-      if(currentUser?.isClient != true) {
+      final currentUser = await ref.read(storedUserProfileProvider.future);
+      log(
+        'Current user in navigation: ${currentUser?.email}, isClient: ${currentUser?.isClient}',
+      );
+      if (currentUser?.isClient != true) {
         return [];
-
       }
 
       final forms = await ref.read(formRepositoryProvider).getFormNames();
+      log('Loaded forms for navigation: ${forms?.map((f) => f.name).join(', ')}');
       return forms ?? [];
-    } catch (e) {
+    } catch (e, stackTrace) {
+      log('Error loading forms for navigation: $e', stackTrace: stackTrace);
       return [];
     }
   }
@@ -322,10 +336,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     context.goNamed(routeName);
   }
 
-  void _selectItemOnly({
-    required String itemName,
-    required String routePath,
-  }) {
+  void _selectItemOnly({required String itemName, required String routePath}) {
     ref
         .read(navigationStateProvider.notifier)
         .selectNavItem(itemName, routePath);
@@ -340,10 +351,13 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     final route = '${AppRoutePaths.clientViewForm}?id=$formId';
     ref.read(navigationStateProvider.notifier).selectNavItem(formName, route);
     ref.read(currentRouteProvider.notifier).state = route;
-    context.goNamed(AppRouteNames.viewForm, queryParameters: {
-      // 'formModel': formModel,
-      'id': formId,
-    });
+    context.goNamed(
+      AppRouteNames.viewForm,
+      queryParameters: {
+        // 'formModel': formModel,
+        'id': formId,
+      },
+    );
   }
 
   Widget _buildNavItem({
@@ -358,9 +372,10 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2),
       child: Material(
-        color: isSelected
-            ? colorScheme.surfaceContainerHighest
-            : Colors.transparent,
+        color:
+            isSelected
+                ? colorScheme.surfaceContainerHighest
+                : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
@@ -370,46 +385,52 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
               horizontal: EditorialSpacing.spacing4,
               vertical: EditorialSpacing.spacing3,
             ),
-            child: isCompact
-                ? Tooltip(
-                    message: label,
-                    child: Center(
-                      child: Icon(
-                        icon,
-                        size: 20,
-                        color: isSelected
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  )
-                : Row(
-                    children: [
-                      Icon(
-                        icon,
-                        size: 20,
-                        color: isSelected
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: EditorialSpacing.spacing3),
-                      Expanded(
-                        child: Text(
-                          label,
-                          style:
-                              Theme.of(context).textTheme.labelMedium?.copyWith(
-                                    color: isSelected
-                                        ? colorScheme.primary
-                                        : colorScheme.onSurfaceVariant,
-                                    fontWeight: isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.w500,
-                                  ),
-                          overflow: TextOverflow.ellipsis,
+            child:
+                isCompact
+                    ? Tooltip(
+                      message: label,
+                      child: Center(
+                        child: Icon(
+                          icon,
+                          size: 20,
+                          color:
+                              isSelected
+                                  ? colorScheme.primary
+                                  : colorScheme.onSurfaceVariant,
                         ),
                       ),
-                    ],
-                  ),
+                    )
+                    : Row(
+                      children: [
+                        Icon(
+                          icon,
+                          size: 20,
+                          color:
+                              isSelected
+                                  ? colorScheme.primary
+                                  : colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: EditorialSpacing.spacing3),
+                        Expanded(
+                          child: Text(
+                            label,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelMedium?.copyWith(
+                              color:
+                                  isSelected
+                                      ? colorScheme.primary
+                                      : colorScheme.onSurfaceVariant,
+                              fontWeight:
+                                  isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
           ),
         ),
       ),
@@ -433,10 +454,7 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  colorScheme.primaryContainer,
-                  colorScheme.primary,
-                ],
+                colors: [colorScheme.primaryContainer, colorScheme.primary],
               ),
               borderRadius: BorderRadius.circular(12),
             ),
@@ -455,9 +473,9 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
                   Text(
                     'Venue Flow',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: colorScheme.onSurface,
-                        ),
+                      fontWeight: FontWeight.w900,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
                   Text(
                     'MANAGEMENT PORTAL',
@@ -500,10 +518,11 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
             colorScheme: colorScheme,
             editorial: editorial,
             isCompact: isCompact,
-            onTap: () => _selectItemOnly(
-              itemName: 'Help Center',
-              routePath: '/help',
-            ),
+            onTap:
+                () => _selectItemOnly(
+                  itemName: 'Help Center',
+                  routePath: '/help',
+                ),
           ),
           _buildNavItem(
             icon: Icons.person_outline,
@@ -512,10 +531,9 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
             colorScheme: colorScheme,
             editorial: editorial,
             isCompact: isCompact,
-            onTap: () => _selectItemOnly(
-              itemName: 'Account',
-              routePath: '/account',
-            ),
+            onTap:
+                () =>
+                    _selectItemOnly(itemName: 'Account', routePath: '/account'),
           ),
         ],
       ),
