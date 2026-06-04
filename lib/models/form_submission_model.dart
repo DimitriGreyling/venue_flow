@@ -8,7 +8,7 @@ class FormSubmission {
   String? formId;
   String? userId;
   int? formVersion;
-  Map<String, dynamic>? data;
+  Map<String, dynamic>? formData;
   DateTime? createdAt;
   String? tenantId;
 
@@ -16,7 +16,7 @@ class FormSubmission {
     this.formId,
     this.userId,
     this.formVersion,
-    this.data,
+    this.formData,
     this.createdAt,
     this.tenantId,
   });
@@ -31,7 +31,7 @@ class FormSubmission {
       userId: user.id,
       tenantId: user.tenantId,
       formVersion: form.version ?? 1,
-      data: {
+      formData: {
         'responses': _normalizeValues(values),
         'fields': _buildFieldSnapshots(form, values),
       },
@@ -109,13 +109,14 @@ class FormSubmission {
 
   Map<String, dynamic> toJson() {
     return {
-      'form_id': formId,
-      'tenant_id': tenantId,
-      'user_id': userId,
+      "id": null, // ID will be assigned by the backend
+      'formid': formId,
+      'tenantid': tenantId,
+      'userid': userId,
       // 'form_version': formVersion,
-      'data': data,
-      'created_at': createdAt?.toIso8601String() ?? DateTime.now(),
-      'modified_date': DateTime.now().toIso8601String(),
+      'formData': formData,
+      // 'created_at': createdAt?.toIso8601String() ?? DateTime.now(),
+      // 'modified_date': DateTime.now().toIso8601String(),
     };
   }
 
@@ -162,7 +163,7 @@ factory FormSubmission.fromJson(Map<String, dynamic> json) {
     formVersion: json['form_version'] is num
         ? (json['form_version'] as num).toInt()
         : int.tryParse(json['form_version']?.toString() ?? ''),
-    data: parsedData,
+    formData: parsedData,
     createdAt: parseDate(json['created_at']),
   );
 }

@@ -7,7 +7,7 @@ class ApiEndpoints {
 
   static const String events = '/event';
   static const String forms = '/form';
-  static const String formSubmissions = '/form-submissions';
+  static const String formSubmissions = '/FormSubmission';
 
   static String formById(String id) => '$forms/$id';
   static String tenantById(String id) => '/tenants/$id';

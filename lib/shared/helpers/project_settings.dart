@@ -8,5 +8,5 @@ class ProjectSettings {
     return _instance!;
   }
 
-  bool isDebugMode = true;
+  bool isDebugMode = false;
 }
