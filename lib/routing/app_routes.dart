@@ -14,6 +14,8 @@ class AppRoutePaths {
   static const String clientViewForm = '/client/view-form';
 
   static const String settings = '/settings';
+
+  static const String calendarPage = '/calendar';
 }
 
 class AppRouteNames {
@@ -32,4 +34,5 @@ class AppRouteNames {
   static const String viewForm = 'view-form';
 
   static const String settings = 'settings';
+  static const String calendarPage = 'calendar';
 }

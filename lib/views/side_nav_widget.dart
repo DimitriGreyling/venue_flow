@@ -197,6 +197,20 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
               ),
         ),
         _buildNavItem(
+          icon: Icons.calendar_month,
+          label: 'Calendar',
+          isSelected: selectedItem == 'Calendar',
+          colorScheme: colorScheme,
+          editorial: editorial,
+          isCompact: isCompact,
+          onTap:
+              () => _navigateToItem(
+                itemName: 'Calendar',
+                routeName: AppRouteNames.calendarPage,
+                routePath: AppRoutePaths.calendarPage,
+              ),
+        ),
+        _buildNavItem(
           icon: Icons.analytics_outlined,
           label: 'Analytics',
           isSelected: selectedItem == 'Analytics',
@@ -316,7 +330,9 @@ class _SideNavWidgetState extends ConsumerState<SideNavWidget> {
       }
 
       final forms = await ref.read(formRepositoryProvider).getFormNames();
-      log('Loaded forms for navigation: ${forms?.map((f) => f.name).join(', ')}');
+      log(
+        'Loaded forms for navigation: ${forms?.map((f) => f.name).join(', ')}',
+      );
       return forms ?? [];
     } catch (e, stackTrace) {
       log('Error loading forms for navigation: $e', stackTrace: stackTrace);

@@ -28,15 +28,20 @@ class SettingsPage extends StatelessWidget {
                       children: [
                         Text(
                           'Settings',
-                          style: Theme.of(context)
-                              .textTheme
-                              .displaySmall
+                          style: Theme.of(context).textTheme.displaySmall
                               ?.copyWith(fontWeight: FontWeight.w900),
                         ),
                         const SizedBox(height: EditorialSpacing.spacing2),
                         Text(
                           'Manage application preferences and account defaults.',
                           style: context.editorial.metadataStyle,
+                        ),
+                        const SizedBox(height: EditorialSpacing.spacing8),
+                        _buildToggleRow(
+                          context,
+                          title: 'Enable Dark Theme',
+                          subtitle: 'Switch between light and dark mode',
+                          value: false,
                         ),
                         const SizedBox(height: EditorialSpacing.spacing8),
                         _buildToggleRow(
@@ -92,10 +97,7 @@ class SettingsPage extends StatelessWidget {
               ],
             ),
           ),
-          Switch(
-            value: value,
-            onChanged: (_) {},
-          ),
+          Switch(value: value, onChanged: (_) {}),
         ],
       ),
     );

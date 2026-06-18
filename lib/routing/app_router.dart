@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/routing/app_routes.dart';
 import 'package:venue_flow_app/views/analytics_page.dart';
+import 'package:venue_flow_app/views/calendar_page.dart';
 import 'package:venue_flow_app/views/events_page.dart';
 import 'package:venue_flow_app/views/home_logged_out_page.dart';
 import 'package:venue_flow_app/views/settings_page.dart';
@@ -21,11 +22,7 @@ class _AuthLoadingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
 }
 
@@ -43,7 +40,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isLoading = authState.isLoading;
       final isProfileHydrated = authState.user != null;
 
-      final isAuthPage = state.matchedLocation == AppRoutePaths.home ||
+      final isAuthPage =
+          state.matchedLocation == AppRoutePaths.home ||
           state.matchedLocation == AppRoutePaths.signup ||
           state.matchedLocation == AppRoutePaths.login;
 
@@ -75,8 +73,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         }
 
         return authState.user?.isCoordinator == true
-          ? AppRoutePaths.coordinatorDashboard
-          : AppRoutePaths.clientDashboard;
+            ? AppRoutePaths.coordinatorDashboard
+            : AppRoutePaths.clientDashboard;
       }
 
       return null;
@@ -86,6 +84,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutePaths.login,
         name: AppRouteNames.login,
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: AppRoutePaths.calendarPage,
+        name: AppRouteNames.calendarPage,
+        builder: (context, state) => const CalendarPage(),
       ),
       GoRoute(
         path: AppRoutePaths.home,
@@ -112,13 +115,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             name: AppRouteNames.formBuilder,
             builder: (context, state) {
               final id = state.uri.queryParameters['id'];
-              final formModel = state.extra != null
-                  ? (state.extra as Map)['formModel']
-                  : null;
-              return FormBuilderPage(
-                formId: id,
-                formModel: formModel,
-              );
+              final formModel =
+                  state.extra != null
+                      ? (state.extra as Map)['formModel']
+                      : null;
+              return FormBuilderPage(formId: id, formModel: formModel);
             },
           ),
           GoRoute(
