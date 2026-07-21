@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/env.dart';
 import '../storage/token_storage.dart';
+import 'api_client.dart';
 
 final tokenStorageProvider = Provider<TokenStorage>((ref) => TokenStorage());
 
@@ -41,4 +42,9 @@ final dioProvider = Provider<Dio>((ref) {
   );
 
   return dio;
+});
+
+final apiClientProvider = Provider<ApiClient>((ref) {
+  final dio = ref.read(dioProvider);
+  return ApiClient(dio);
 });
