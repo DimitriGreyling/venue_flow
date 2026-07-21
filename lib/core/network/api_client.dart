@@ -1,10 +1,15 @@
 import 'package:dio/dio.dart';
+import '../error/app_exception.dart';
 import '../error/failures.dart';
 import '../result/result.dart';
+import 'dio_error_mapper.dart';
 
 class ApiClient {
   final Dio _dio;
   ApiClient(this._dio);
+
+  Failure _failureFromException(AppException e) =>
+      Failure(e.message, statusCode: e.statusCode);
 
   Future<Result<T>> get<T>(
     String path,
@@ -14,9 +19,10 @@ class ApiClient {
       final res = await _dio.get(path);
       return Success(parser(res.data));
     } on DioException catch (e) {
-      return FailureResult(_mapDioError(e));
-    } catch (e) {
-      return FailureResult(Failure('Unexpected error: $e'));
+      final ex = DioErrorMapper.map(e);
+      return FailureResult(_failureFromException(ex));
+    } catch (_) {
+      return const FailureResult(Failure('Something went wrong. Please try again.'));
     }
   }
 
