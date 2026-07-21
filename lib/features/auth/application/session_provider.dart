@@ -4,7 +4,8 @@ import '../../../core/network/dio_provider.dart';
 
 class SessionState {
   final bool isAuthenticated;
-  const SessionState({required this.isAuthenticated});
+  final String? accessToken;
+  const SessionState({required this.isAuthenticated,this.accessToken});
 }
 
 final sessionProvider = AsyncNotifierProvider<SessionNotifier, SessionState>(
@@ -20,7 +21,12 @@ class SessionNotifier extends AsyncNotifier<SessionState> {
 
   Future<void> setAuthenticated(String token) async {
     await ref.read(tokenStorageProvider).save(token);
-    state = const AsyncData(SessionState(isAuthenticated: true));
+    state = AsyncData(
+      SessionState(
+        isAuthenticated: true,
+        accessToken: token,
+      ),
+    );
   }
 
   Future<void> clear() async {

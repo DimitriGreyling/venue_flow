@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/features/auth/application/session_provider.dart';
 import '../../../core/network/dio_provider.dart';
 import '../../../core/storage/token_storage.dart';
 import '../data/auth_api.dart';
@@ -18,6 +19,7 @@ class AuthController extends AsyncNotifier<void> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final token = await ref.read(authApiProvider).login(email, password);
+      await ref.read(sessionProvider.notifier).setAuthenticated(token);
       await ref.read(tokenStorageProvider).save(token);
     });
   }
