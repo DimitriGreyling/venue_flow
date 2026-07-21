@@ -21,29 +21,53 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.listen(authControllerProvider, (_, next) {
       if (next.hasValue) context.go('/customers');
       if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error.toString())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.error.toString())));
       }
     });
 
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: null, //AppBar(title: const Text('Login')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(controller: email, decoration: const InputDecoration(labelText: 'Email')),
-            TextField(controller: password, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: authState.isLoading
-                  ? null
-                  : () => ref.read(authControllerProvider.notifier).login(email.text, password.text),
-              child: authState.isLoading
-                  ? const CircularProgressIndicator()
-                  : const Text('Login'),
-            )
+            // TextField(controller: email, decoration: const InputDecoration(labelText: 'Email')),
+            // TextField(controller: password, decoration: const InputDecoration(labelText: 'Password'), obscureText: true),
+            // const SizedBox(height: 16),
+            // ElevatedButton(
+            //   onPressed: authState.isLoading
+            //       ? null
+            //       : () => ref.read(authControllerProvider.notifier).login(email.text, password.text),
+            //   child: authState.isLoading
+            //       ? const CircularProgressIndicator()
+            //       : const Text('Login'),
+            // )
+            Center(
+              child: Card(
+                elevation: 4,
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Text(
+                        "Venue Flow",
+                        style: theme.textTheme.displaySmall?.copyWith(
+                          color: theme.primaryColor,
+                        ),
+                      ),
+                      Text("Sign In",style: theme.textTheme.headlineMedium,),
+                      Text('Access your venue management dashboard'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

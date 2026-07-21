@@ -11,6 +11,6 @@ class AuthApi {
     });
 
     // adjust to your backend response shape
-    return res.data['token'] as String;
+    return res.data['accessToken'] as String;
   }
 }
