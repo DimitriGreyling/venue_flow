@@ -49,7 +49,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/customers',
-            builder: (_, __) => const CustomersScreen(),
+            builder: (_, __) => const DashboardScreen(),
           ),
         ],
       ),

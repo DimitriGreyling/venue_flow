@@ -12,7 +12,7 @@ class AppScaffold extends ConsumerWidget {
     return Scaffold(
       body: Row(
         children: [
-          const SizedBox(width: 240, child: AppSidebar()),
+          const SizedBox(width: 240, child: SideNav()),
           Expanded(
             child: SafeArea(
               child: Padding(
