@@ -1,0 +1,65 @@
+import 'package:flutter/material.dart';
+
+class AppColors {
+  static const Color surface = Color(0xFFFAF8FF);
+  static const Color surfaceDim = Color(0xFFD2D9F4);
+  static const Color surfaceBright = Color(0xFFFAF8FF);
+  static const Color surfaceContainerLowest = Color(0xFFFFFFFF);
+  static const Color surfaceContainerLow = Color(0xFFF2F3FF);
+  static const Color surfaceContainer = Color(0xFFEAEDFF);
+  static const Color surfaceContainerHigh = Color(0xFFE2E7FF);
+  static const Color surfaceContainerHighest = Color(0xFFDAE2FD);
+  static const Color onSurface = Color(0xFF131B2E);
+  static const Color onSurfaceVariant = Color(0xFF464555);
+  static const Color inverseSurface = Color(0xFF283044);
+  static const Color inverseOnSurface = Color(0xFFEEF0FF);
+  static const Color outline = Color(0xFF777587);
+  static const Color outlineVariant = Color(0xFFC7C4D8);
+  static const Color surfaceTint = Color(0xFF4D44E3);
+  static const Color primary = Color(0xFF3525CD);
+  static const Color onPrimary = Color(0xFFFFFFFF);
+  static const Color primaryContainer = Color(0xFF4F46E5);
+  static const Color onPrimaryContainer = Color(0xFFdad7ff);
+  static const Color inversePrimary = Color(0xFFC3C0FF);
+  static const Color secondary = Color(0xFF4648D4);
+  static const Color onSecondary = Color(0xFFFFFFFF);
+  static const Color secondaryContainer = Color(0xFF6063EE);
+  static const Color onSecondaryContainer = Color(0xFFFFFBFF);
+  static const Color tertiary = Color(0xFF004D70);
+  static const Color onTertiary = Color(0xFFFFFFFF);
+  static const Color tertiaryContainer = Color(0xFF006693);
+  static const Color onTertiaryContainer = Color(0xFFB8E0FF);
+  static const Color error = Color(0xFFBA1A1A);
+  static const Color onError = Color(0xFFFFFFFF);
+  static const Color errorContainer = Color(0xFFFFDAD6);
+  static const Color onErrorContainer = Color(0xFF93000A);
+  static const Color primaryFixed = Color(0xFFE2DFFF);
+  static const Color primaryFixedDim = Color(0xFFC3C0FF);
+  static const Color onPrimaryFixed = Color(0xFF0F0069);
+  static const Color onPrimaryFixedVariant = Color(0xFF3323CC);
+  static const Color secondaryFixed = Color(0xFFE1E0FF);
+  static const Color secondaryFixedDim = Color(0xFFC0C1FF);
+  static const Color onSecondaryFixed = Color(0xFF07006C);
+  static const Color onSecondaryFixedVariant = Color(0xFF2F2EBE);
+  static const Color tertiaryFixed = Color(0xFFC9E6FF);
+  static const Color tertiaryFixedDim = Color(0xFF89CEFF);
+  static const Color onTertiaryFixed = Color(0xFF001E2F);
+  static const Color onTertiaryFixedVariant = Color(0xFF004C6E);
+  static const Color background = Color(0xFFFAF8FF);
+  static const Color onBackground = Color(0xFF131B2E);
+  static const Color surfaceVariant = Color(0xFFDAE2FD);
+
+  static const Color success = Color(0xFF10B981);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color danger = Color(0xFFF43F5E);
+  static const Color info = Color(0xFF0EA5E9);
+
+  static const Color neutral900 = Color(0xFF0F172A);
+  static const Color neutral800 = Color(0xFF1E293B);
+  static const Color neutral700 = Color(0xFF334155);
+  static const Color neutral500 = Color(0xFF64748B);
+  static const Color neutral200 = Color(0xFFE2E8F0);
+  static const Color neutral100 = Color(0xFFF1F5F9);
+  static const Color neutral50 = Color(0xFFF8FAFC);
+  static const Color white = Color(0xFFFFFFFF);
+}
