@@ -1,0 +1,30 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(0 8)">
+    <text
+            x="460"
+            y="420"
+            text-anchor="middle"
+            font-size="430"
+            font-weight="500"
+            letter-spacing="-18"
+            font-family="Georgia, 'Times New Roman', serif"
+            fill="#111111">V</text>
+
+    <rect
+            x="596"
+            y="98"
+            width="8"
+            height="360"
+            fill="#111111"/>
+
+    <text
+            x="740"
+            y="420"
+            text-anchor="middle"
+            font-size="430"
+            font-weight="500"
+            letter-spacing="-18"
+            font-family="Georgia, 'Times New Roman', serif"
+            fill="#111111">F</text>
+  </g>
+</svg>
