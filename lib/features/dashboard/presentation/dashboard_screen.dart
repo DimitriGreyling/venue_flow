@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/app/theme/app_colors.dart';
+import 'package:venue_flow_app/core/error/failure.dart';
+import 'package:venue_flow_app/core/widgets/failure_view.dart';
 import 'package:venue_flow_app/features/dashboard/application/dashboard_controller.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -158,26 +160,12 @@ class DashboardScreen extends ConsumerWidget {
           );
         },
         error: (error, stackTrace) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.error_outline_rounded, size: 40, color: AppColors.error),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Unable to load dashboard',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    error.toString(),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
+          final failure = error is Failure
+              ? error
+              : Failure(error.toString());
+          return FailureView(
+            failure: failure,
+            onRetry: () => ref.read(dashboardControllerProvider.notifier).refresh(),
           );
         },
         loading: () {

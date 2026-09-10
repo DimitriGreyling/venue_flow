@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/app/theme/app_colors.dart';
+import 'package:venue_flow_app/core/error/failure.dart';
 import 'package:venue_flow_app/features/login/application/auth_controller.dart';
 import 'package:venue_flow_app/features/login/domain/auth_session.dart';
 
@@ -41,10 +42,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
 
       if (next.hasError) {
-        // final message = next.error.toString().replaceFirst('Exception: ', '');
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text(message)),
-        // );
+        final error = next.error;
+        final message = error is Failure ? error.message : error.toString();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
       }
     });
 
