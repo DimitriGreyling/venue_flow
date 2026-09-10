@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/features/dashboard/presentation/dashboard_screen.dart';
-import 'package:venue_flow_app/features/home/presentation/home_screen.dart';
 import 'package:venue_flow_app/features/login/application/auth_controller.dart';
 import 'package:venue_flow_app/features/login/presentation/login_screen.dart';
 
@@ -14,7 +13,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/home',
+    initialLocation: '/sign-in',
     redirect: (_, state) {
       final location = state.matchedLocation;
       final isProtectedRoute = location == '/dashboard';
@@ -33,11 +32,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/',
-        redirect: (_, __) => '/home',
-      ),
-      GoRoute(
-        path: '/home',
-        builder: (_, __) => const HomeScreen(),
+        redirect: (_, __) => '/sign-in',
       ),
       GoRoute(
         path: '/dashboard',

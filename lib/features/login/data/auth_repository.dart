@@ -9,6 +9,7 @@ import 'package:venue_flow_app/core/storage/secure_storage.dart';
 import 'package:venue_flow_app/features/login/data/models/login_request.dart';
 import 'package:venue_flow_app/features/login/data/models/login_response.dart';
 import 'package:venue_flow_app/features/login/domain/auth_session.dart';
+import 'package:venue_flow_app/core/error/failure.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final dio = ref.read(dioProvider);
@@ -49,10 +50,26 @@ class AuthRepository {
       }
 
       return session;
+    } on Failure {
+      rethrow;
     } on FormatException {
       await storage.delete(_sessionKey);
       return null;
     }
+  }
+
+  Future<AuthSession?> restoreSession() async {
+    final session = await currentSession();
+    if (session == null) {
+      return null;
+    }
+
+    if (session.isExpired) {
+      await logout();
+      return null;
+    }
+
+    return session;
   }
 
   Future<AuthSession> login({
@@ -81,7 +98,7 @@ class AuthRepository {
 
       final data = response.data;
       if (data == null) {
-        throw const ApiException('The server returned an empty response.');
+        throw const Failure('The server returned an empty response.');
       }
 
       final loginResponse = LoginResponse.fromJson(data);
@@ -92,8 +109,8 @@ class AuthRepository {
       return session;
     } on DioException catch (error) {
       final apiError = switch (error.response?.statusCode) {
-        401 => const ApiException('Invalid email or password.'),
-        403 => const ApiException('Your account is not allowed to sign in.'),
+        401 => const Failure('Invalid email or password.'),
+        403 => const Failure('Your account is not allowed to sign in.'),
         _ => ApiClient.mapDioException(error),
       };
 

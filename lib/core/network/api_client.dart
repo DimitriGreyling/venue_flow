@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:venue_flow_app/core/error/failure.dart';
 import 'package:venue_flow_app/app/global_popup.dart';
 
 class ApiClient {
@@ -18,15 +19,15 @@ class ApiClient {
         return Map<String, dynamic>.from(response.data as Map);
       }
 
-      throw const ApiException('Unexpected API response format.');
+      throw const Failure('Unexpected API response format.');
     } on DioException catch (error) {
-      final apiError = ApiClient.mapDioException(error);
-      GlobalPopup.show(message: apiError.message, mode: PopupMode.error);
-      throw apiError;
+      final failure = ApiClient.mapDioException(error);
+      GlobalPopup.show(message: failure.message, mode: PopupMode.error);
+      throw failure;
     }
   }
 
-  static ApiException mapDioException(DioException error) {
+  static Failure mapDioException(DioException error) {
     final message = switch (error.type) {
       DioExceptionType.connectionTimeout => 'Connection timed out.',
       DioExceptionType.sendTimeout => 'Request timed out.',
@@ -37,15 +38,6 @@ class ApiClient {
       _ => 'Unable to reach the server right now.',
     };
 
-    return ApiException(message);
+    return Failure(message);
   }
-}
-
-class ApiException implements Exception {
-  const ApiException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => 'ApiException: $message';
 }

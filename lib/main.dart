@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
+import 'core/error/failure.dart';
 import 'error/isolate_setup_stub.dart';
 
 void main() {
@@ -43,14 +44,7 @@ class GlobalErrorHandler {
   }
 
   static String userMessage(Object error) {
-    if (error is ApiException) return error.message;
+    if (error is Failure) return error.message;
     return 'Something went wrong. Please try again.';
   }
-}
-
-class ApiException implements Exception {
-  final String message;
-  final int? statusCode;
-
-  ApiException(this.message, {this.statusCode});
 }

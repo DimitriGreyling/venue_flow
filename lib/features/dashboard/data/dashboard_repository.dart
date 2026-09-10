@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/core/error/failure.dart';
 import 'package:venue_flow_app/core/network/api_client.dart';
 import 'package:venue_flow_app/core/network/dio_provider.dart';
 import 'package:venue_flow_app/features/dashboard/domain/dashboard_summary.dart';
@@ -18,7 +19,7 @@ class DashboardRepository {
     try {
       final data = await _apiClient.getJson('/dashboard/summary');
       return DashboardSummary.fromJson(data);
-    } on ApiException catch (_) {
+    } on Failure catch (_) {
       return const DashboardSummary(
         venueName: 'North Tower',
         occupancyRate: 86.4,
