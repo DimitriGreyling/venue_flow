@@ -78,23 +78,28 @@ class AuthRepository {
       return null;
     }
 
-    final response = await dio.get<Map<String, dynamic>>('/auth/me');
-    final data = response.data;
-    if (data == null) {
+    try {
+      final response = await dio.get<Map<String, dynamic>>('/auth/me');
+      final data = response.data;
+      if (data == null) {
+        await logout();
+        return null;
+      }
+
+      final resolved = AuthSession.fromJson({
+        'userId': data['userId'] ?? session.userId,
+        'email': data['email'] ?? session.email,
+        'token': session.token,
+        'refreshToken': data['refreshToken'] ?? session.refreshToken,
+        'expiresAt': data['expiresAt'] ?? session.expiresAt.toIso8601String(),
+      });
+
+      await storage.write(_sessionKey, jsonEncode(resolved.toJson()));
+      return resolved;
+    } on DioException {
       await logout();
       return null;
     }
-
-    final resolved = AuthSession.fromJson({
-      'userId': data['userId'] ?? session.userId,
-      'email': data['email'] ?? session.email,
-      'token': session.token,
-      'refreshToken': data['refreshToken'] ?? session.refreshToken,
-      'expiresAt': data['expiresAt'] ?? session.expiresAt.toIso8601String(),
-    });
-
-    await storage.write(_sessionKey, jsonEncode(resolved.toJson()));
-    return resolved;
   }
 
   Future<AuthSession> login({
