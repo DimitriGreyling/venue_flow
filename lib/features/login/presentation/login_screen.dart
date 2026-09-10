@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/app/theme/app_colors.dart';
+import 'package:venue_flow_app/features/login/application/auth_controller.dart';
+import 'package:venue_flow_app/features/login/domain/auth_session.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -26,7 +29,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    ref.listen<AsyncValue<AuthSession?>>(authControllerProvider, (_, next) {
+      if (!mounted || next.isLoading) {
+        return;
+      }
+
+      final session = next.valueOrNull;
+      if (session != null) {
+        context.go('/dashboard');
+        return;
+      }
+
+      if (next.hasError) {
+        final message = next.error.toString().replaceFirst('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
+    });
+
+    final authState = ref.watch(authControllerProvider);
+    final isSubmitting = authState.isLoading;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -76,8 +99,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                 _rememberMe = value ?? false;
                               });
                             },
-                            onSubmit: () {
-                              context.go('/dashboard');
+                            isSubmitting: isSubmitting,
+                            onSubmit: () async {
+                              await ref
+                                  .read(authControllerProvider.notifier)
+                                  .signIn(
+                                    email: _emailController.text,
+                                    password: _passwordController.text,
+                                  );
                             },
                           ),
                         ),
@@ -103,8 +132,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             _rememberMe = value ?? false;
                           });
                         },
-                        onSubmit: () {
-                          context.go('/dashboard');
+                        isSubmitting: isSubmitting,
+                        onSubmit: () async {
+                          await ref.read(authControllerProvider.notifier).signIn(
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                              );
                         },
                       ),
                     ],
@@ -269,6 +302,7 @@ class _LoginForm extends StatelessWidget {
     required this.passwordController,
     required this.obscurePassword,
     required this.rememberMe,
+    required this.isSubmitting,
     required this.onTogglePassword,
     required this.onRememberChanged,
     required this.onSubmit,
@@ -278,9 +312,10 @@ class _LoginForm extends StatelessWidget {
   final TextEditingController passwordController;
   final bool obscurePassword;
   final bool rememberMe;
+  final bool isSubmitting;
   final VoidCallback onTogglePassword;
   final ValueChanged<bool?> onRememberChanged;
-  final VoidCallback onSubmit;
+  final Future<void> Function() onSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -366,7 +401,7 @@ class _LoginForm extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: onSubmit,
+              onPressed: isSubmitting ? null : onSubmit,
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
@@ -375,10 +410,21 @@ class _LoginForm extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: const Text(
-                'Sign in',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
+              child: isSubmitting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.onPrimary,
+                        ),
+                      ),
+                    )
+                  : const Text(
+                      'Sign in',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
             ),
           ),
           const SizedBox(height: 20),

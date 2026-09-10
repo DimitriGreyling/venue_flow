@@ -1,14 +1,31 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:venue_flow_app/features/home/presentation/home_screen.dart';
+import 'package:venue_flow_app/features/login/application/auth_controller.dart';
+import 'package:venue_flow_app/features/login/presentation/login_screen.dart';
 
-import '../features/login/presentation/login_screen.dart';
+final appRouterProvider = Provider<GoRouter>((ref) {
+  final authState = ref.watch(authControllerProvider);
+  final isAuthenticated = authState.valueOrNull != null;
 
-class AppRouter {
-  AppRouter();
-
-  final GoRouter router = GoRouter(
+  return GoRouter(
     initialLocation: '/home',
+    redirect: (_, state) {
+      final location = state.matchedLocation;
+      final isProtectedRoute = location == '/dashboard';
+      final isAuthRoute = location == '/sign-in';
+
+      if (!isAuthenticated && isProtectedRoute) {
+        return '/sign-in';
+      }
+
+      if (isAuthenticated && isAuthRoute) {
+        return '/dashboard';
+      }
+
+      return null;
+    },
     routes: [
       GoRoute(
         path: '/',
@@ -22,7 +39,10 @@ class AppRouter {
         path: '/dashboard',
         builder: (_, __) => const DashboardScreen(),
       ),
-      GoRoute(path: '/sign-in', builder: (_, __) => const LoginScreen()),
+      GoRoute(
+        path: '/sign-in',
+        builder: (_, __) => const LoginScreen(),
+      ),
     ],
   );
-}
+});
