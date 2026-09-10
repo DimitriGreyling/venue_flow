@@ -1,10 +1,13 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/app/shell/app_shell.dart';
+import 'package:venue_flow_app/features/bookings/presentation/bookings_screen.dart';
+import 'package:venue_flow_app/features/customers/presentation/customers_screen.dart';
 import 'package:venue_flow_app/features/dashboard/presentation/dashboard_screen.dart';
+import 'package:venue_flow_app/features/home/presentation/home_screen.dart';
 import 'package:venue_flow_app/features/login/application/auth_controller.dart';
 import 'package:venue_flow_app/features/login/presentation/login_screen.dart';
+import 'package:venue_flow_app/features/venues/presentation/venues_screen.dart';
 
 import 'global_popup.dart';
 
@@ -14,14 +17,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/sign-in',
+    initialLocation: '/',
     redirect: (_, state) {
       final location = state.matchedLocation;
-      final isProtectedRoute = location == '/dashboard';
+      final protectedRoutes = <String>{
+        '/dashboard',
+        '/venues',
+        '/customers',
+        '/bookings',
+      };
+      final isProtectedRoute = protectedRoutes.contains(location);
       final isAuthRoute = location == '/sign-in';
 
       if (!isAuthenticated && isProtectedRoute) {
-        return '/sign-in';
+        return '/';
       }
 
       if (isAuthenticated && isAuthRoute) {
@@ -33,7 +42,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/',
-        redirect: (_, __) => '/sign-in',
+        builder: (_, __) => const HomeScreen(),
       ),
       ShellRoute(
         builder: (_, __, child) => AppShell(child: child),
@@ -41,6 +50,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/dashboard',
             builder: (_, __) => const DashboardScreen(),
+          ),
+          GoRoute(
+            path: '/venues',
+            builder: (_, __) => const VenuesScreen(),
+          ),
+          GoRoute(
+            path: '/customers',
+            builder: (_, __) => const CustomersScreen(),
+          ),
+          GoRoute(
+            path: '/bookings',
+            builder: (_, __) => const BookingsScreen(),
           ),
         ],
       ),

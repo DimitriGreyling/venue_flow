@@ -120,7 +120,7 @@ class DashboardScreen extends ConsumerWidget {
                     children: stats,
                   ),
                   const SizedBox(height: 24),
-                  Row(
+                  const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
@@ -137,7 +137,7 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       Expanded(
                         flex: 1,
                         child: _Panel(

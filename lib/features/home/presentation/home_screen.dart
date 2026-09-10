@@ -3,8 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/app/theme/app_colors.dart';
 
-import '../../../app/global_popup.dart';
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -15,13 +13,57 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Column(
-            children: [
-              _TopBar(),
-              const SizedBox(height: 40),
-            ],
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerLowest,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: AppColors.neutral200),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(17, 24, 39, 0.04),
+                      blurRadius: 20,
+                      offset: Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isWide = constraints.maxWidth >= 900;
+
+                    if (isWide) {
+                      return Row(
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: _HeroPanel(theme: theme),
+                          ),
+                          const SizedBox(width: 32),
+                          const Expanded(
+                            flex: 4,
+                            child: _ActionPanel(),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _HeroPanel(theme: theme),
+                        const SizedBox(height: 24),
+                        const _ActionPanel(),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -29,91 +71,81 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _TopBar extends StatelessWidget {
-  const _TopBar();
+class _HeroPanel extends StatelessWidget {
+  const _HeroPanel({required this.theme});
+
+  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        border: Border.all(color: AppColors.neutral200),
-        borderRadius: BorderRadius.circular(18),
+      padding: const EdgeInsets.all(36),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary,
+            AppColors.secondary,
+          ],
+        ),
+        borderRadius: BorderRadius.all(Radius.circular(24)),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const _BrandMark(),
-          const SizedBox(width: 18),
-          const Text('VenueFlow'),
-          const Spacer(),
-          const Wrap(
-            spacing: 20,
+          Row(
             children: [
-              Text('Platform'),
-              Text('Operations'),
-              Text('Pricing'),
-              Text('Resources'),
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    'assets/venue_flow_mark_transparent.svg',
+                    width: 28,
+                    height: 28,
+                    colorFilter: const ColorFilter.mode(
+                      AppColors.onPrimary,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'VenueFlow',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: AppColors.onPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ],
           ),
-          const Spacer(),
-          OutlinedButton(
-            onPressed: () {
-              context.go('/sign-in');
-            },
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.onSurface,
-              side: const BorderSide(color: AppColors.neutral200),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          const SizedBox(height: 40),
+          Text(
+            'Venue operations in one place.',
+            style: theme.textTheme.displaySmall?.copyWith(
+              color: AppColors.onPrimary,
+              height: 1.1,
             ),
-            child: const Text('Sign in'),
           ),
-          const SizedBox(width: 12),
-          FilledButton(
-            onPressed: () {
-              print("Request demo button pressed");
-              GlobalPopup.show(message: 'Saved successfully', mode: PopupMode.error);
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: AppColors.onPrimary,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          const SizedBox(height: 16),
+          Text(
+            'Track bookings, customers, venues, and live operational health from a single workspace built for event teams.',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: AppColors.onPrimary.withValues(alpha: 0.9),
+              height: 1.6,
             ),
-            child: const Text('Request demo'),
           ),
+          const SizedBox(height: 32),
+          const _MetricRow(),
         ],
       ),
-    );
-  }
-}
-
-class _BrandMark extends StatelessWidget {
-  const _BrandMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final size = switch (constraints.maxWidth) {
-          < 360 => 34.0,
-          < 768 => 48.0,
-          < 1200 => 64.0,
-          _ => 80.0,
-        };
-
-        return Align(
-          alignment: Alignment.center,
-          child: SvgPicture.asset(
-            'assets/venue_flow_mark_transparent.svg',
-            width: size,
-            height: size,
-            fit: BoxFit.contain,
-            alignment: Alignment.center,
-          ),
-        );
-      },
     );
   }
 }
@@ -123,142 +155,54 @@ class _MetricRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final metrics = [
-      _MetricItem(label: 'Bookings tracked', value: '3,240'),
-      _MetricItem(label: 'Occupancy uplift', value: '+12.4%'),
-      _MetricItem(label: 'Avg. response time', value: '4.2 min'),
-    ];
-
-    return Row(
-      children:
-          metrics
-              .map(
-                (metric) => Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceContainerLowest,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.neutral200),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            metric.label,
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(color: AppColors.neutral500),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            metric.value,
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
+    return const Row(
+      children: [
+        Expanded(child: _MetricTile(label: 'Live venues', value: '24')),
+        SizedBox(width: 16),
+        Expanded(child: _MetricTile(label: 'Bookings today', value: '134')),
+        SizedBox(width: 16),
+        Expanded(child: _MetricTile(label: 'Occupancy', value: '86.4%')),
+      ],
     );
   }
 }
 
-class _MetricItem {
-  const _MetricItem({required this.label, required this.value});
+class _MetricTile extends StatelessWidget {
+  const _MetricTile({
+    required this.label,
+    required this.value,
+  });
 
   final String label;
   final String value;
-}
-
-class _MiniPanel extends StatelessWidget {
-  const _MiniPanel({
-    required this.title,
-    required this.value,
-    required this.accent,
-  });
-
-  final String title;
-  final String value;
-  final Color accent;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.neutral200),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.12),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.labelMedium?.copyWith(color: AppColors.neutral500),
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: AppColors.onPrimary.withValues(alpha: 0.8),
+            ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             value,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineLarge?.copyWith(color: accent),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActivityCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final events = [
-      'Main Hall: setup complete',
-      'Catering final check at 14:30',
-      'Finance approved deposit',
-    ];
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.neutral200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Live activity', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 14),
-          ...events.map(
-            (event) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppColors.success,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      event,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                ],
-              ),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: AppColors.onPrimary,
             ),
           ),
         ],
@@ -267,50 +211,38 @@ class _ActivityCard extends StatelessWidget {
   }
 }
 
-class _FeatureCard extends StatelessWidget {
-  const _FeatureCard({
-    required this.icon,
-    required this.title,
-    required this.text,
-  });
-
-  final IconData icon;
-  final String title;
-  final String text;
+class _ActionPanel extends StatelessWidget {
+  const _ActionPanel();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.neutral200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: AppColors.primary),
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Welcome to VenueFlow',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            color: AppColors.onSurface,
+            fontWeight: FontWeight.w700,
           ),
-          const SizedBox(height: 18),
-          Text(title, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 10),
-          Text(
-            text,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.onSurfaceVariant,
-              height: 1.5,
-            ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Start on the public home page, then sign in when you are ready to access the workspace.',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: AppColors.onSurfaceVariant,
+            height: 1.6,
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 28),
+        FilledButton(
+          onPressed: () => context.go('/sign-in'),
+          child: const Text('Sign in'),
+        ),
+      ],
     );
   }
 }

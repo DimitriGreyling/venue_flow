@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/app/theme/app_colors.dart';
+import 'package:venue_flow_app/app/global_popup.dart';
 import 'package:venue_flow_app/core/error/failure.dart';
 import 'package:venue_flow_app/features/login/application/auth_controller.dart';
 import 'package:venue_flow_app/features/login/domain/auth_session.dart';
@@ -44,9 +45,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (next.hasError) {
         final error = next.error;
         final message = error is Failure ? error.message : error.toString();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        GlobalPopup.show(message: message, mode: PopupMode.error);
       }
     });
 
@@ -352,9 +351,9 @@ class _LoginForm extends StatelessWidget {
           TextFormField(
             controller: emailController,
             keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'you@venueflow.com',
-              prefixIcon: const Icon(Icons.email_outlined),
+              prefixIcon: Icon(Icons.email_outlined),
             ),
           ),
           const SizedBox(height: 20),
