@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/app/theme/app_colors.dart';
 
+import '../../../app/global_popup.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -70,7 +72,10 @@ class _TopBar extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           FilledButton(
-            onPressed: () {},
+            onPressed: () {
+              print("Request demo button pressed");
+              GlobalPopup.show(message: 'Saved successfully', mode: PopupMode.success);
+            },
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.onPrimary,
