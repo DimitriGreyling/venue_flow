@@ -72,6 +72,31 @@ class AuthRepository {
     return session;
   }
 
+  Future<AuthSession?> fetchSessionFromServer() async {
+    final session = await restoreSession();
+    if (session == null) {
+      return null;
+    }
+
+    final response = await dio.get<Map<String, dynamic>>('/auth/me');
+    final data = response.data;
+    if (data == null) {
+      await logout();
+      return null;
+    }
+
+    final resolved = AuthSession.fromJson({
+      'userId': data['userId'] ?? session.userId,
+      'email': data['email'] ?? session.email,
+      'token': session.token,
+      'refreshToken': data['refreshToken'] ?? session.refreshToken,
+      'expiresAt': data['expiresAt'] ?? session.expiresAt.toIso8601String(),
+    });
+
+    await storage.write(_sessionKey, jsonEncode(resolved.toJson()));
+    return resolved;
+  }
+
   Future<AuthSession> login({
     required String email,
     required String password,
@@ -105,6 +130,7 @@ class AuthRepository {
       final session = loginResponse.toSession();
 
       await storage.write(_sessionKey, jsonEncode(session.toJson()));
+      await storage.writeToken(session.token);
 
       return session;
     } on DioException catch (error) {
@@ -120,6 +146,6 @@ class AuthRepository {
   }
 
   Future<void> logout() {
-    return storage.delete(_sessionKey);
+    return storage.delete(_sessionKey).then((_) => storage.deleteToken());
   }
 }

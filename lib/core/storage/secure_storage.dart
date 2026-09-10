@@ -29,4 +29,16 @@ class AppSecureStorage {
   Future<void> clear() {
     return _storage.deleteAll();
   }
+
+  Future<void> writeToken(String token) {
+    return write('venue_flow_token', token);
+  }
+
+  Future<String?> readToken() {
+    return read('venue_flow_token');
+  }
+
+  Future<void> deleteToken() {
+    return delete('venue_flow_token');
+  }
 }

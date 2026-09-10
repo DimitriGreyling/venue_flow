@@ -16,27 +16,7 @@ class DashboardRepository {
   final ApiClient _apiClient;
 
   Future<DashboardSummary> fetchSummary() async {
-    try {
-      final data = await _apiClient.getJson('/dashboard/summary');
-      return DashboardSummary.fromJson(data);
-    } on Failure catch (_) {
-      return const DashboardSummary(
-        venueName: 'North Tower',
-        occupancyRate: 86.4,
-        revenue: 48250,
-        activeBookings: 134,
-        pendingAlerts: 9,
-        lastUpdated: 'Fallback snapshot',
-      );
-    } on DioException catch (_) {
-      return const DashboardSummary(
-        venueName: 'North Tower',
-        occupancyRate: 86.4,
-        revenue: 48250,
-        activeBookings: 134,
-        pendingAlerts: 9,
-        lastUpdated: 'Fallback snapshot',
-      );
-    }
+    final data = await _apiClient.getJson('/dashboard/summary');
+    return DashboardSummary.fromJson(data);
   }
 }

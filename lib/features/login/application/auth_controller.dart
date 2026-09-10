@@ -9,7 +9,7 @@ class AuthController extends AsyncNotifier<AuthSession?> {
   @override
   Future<AuthSession?> build() async {
     final repository = ref.read(authRepositoryProvider);
-    return repository.restoreSession();
+    return repository.fetchSessionFromServer();
   }
 
   Future<void> signIn({
