@@ -74,7 +74,7 @@ class _TopBar extends StatelessWidget {
           FilledButton(
             onPressed: () {
               print("Request demo button pressed");
-              GlobalPopup.show(message: 'Saved successfully', mode: PopupMode.success);
+              GlobalPopup.show(message: 'Saved successfully', mode: PopupMode.error);
             },
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,

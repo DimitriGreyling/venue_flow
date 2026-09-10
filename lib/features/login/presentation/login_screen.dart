@@ -41,10 +41,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
 
       if (next.hasError) {
-        final message = next.error.toString().replaceFirst('Exception: ', '');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        // final message = next.error.toString().replaceFirst('Exception: ', '');
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text(message)),
+        // );
       }
     });
 

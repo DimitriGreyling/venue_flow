@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/app/global_popup.dart';
 import 'package:venue_flow_app/core/network/api_client.dart';
 import 'package:venue_flow_app/core/network/dio_provider.dart';
 import 'package:venue_flow_app/core/storage/secure_storage.dart';
@@ -90,17 +91,14 @@ class AuthRepository {
 
       return session;
     } on DioException catch (error) {
-      final statusCode = error.response?.statusCode;
+      final apiError = switch (error.response?.statusCode) {
+        401 => const ApiException('Invalid email or password.'),
+        403 => const ApiException('Your account is not allowed to sign in.'),
+        _ => ApiClient.mapDioException(error),
+      };
 
-      if (statusCode == 401) {
-        throw const ApiException('Invalid email or password.');
-      }
-
-      if (statusCode == 403) {
-        throw const ApiException('Your account is not allowed to sign in.');
-      }
-
-      throw ApiException.fromDio(error);
+      GlobalPopup.show(message: apiError.message, mode: PopupMode.error);
+      throw apiError;
     }
   }
 
