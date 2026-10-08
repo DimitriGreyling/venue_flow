@@ -6,6 +6,8 @@ if [ "${DEBUG:-}" = "1" ]; then
   set -x
 fi
 
+# Prefer Cloudflare env overrides; fallback defaults below.
+# IMPORTANT: set FLUTTER_VERSION in Cloudflare Pages to match your local working version.
 FLUTTER_VERSION="${FLUTTER_VERSION:-3.41.9}"
 FLUTTER_CHANNEL="${FLUTTER_CHANNEL:-stable}"
 
@@ -116,7 +118,6 @@ SUPABASE_URL=${supabase_url}
 SUPABASE_ANON_KEY=${supabase_anon}
 EOF
 else
-  # If you choose to commit .env (public values for web), this will allow builds to proceed.
   if [ -f "${ROOT_DIR}/.env" ]; then
     echo "Using existing .env from repo."
   else
@@ -138,11 +139,6 @@ else
   echo "Building web with default renderer (current Flutter CLI does not support --web-renderer)..."
   "${FLUTTER_BIN}" build web --release
 fi
-
-# if you do not need offline/PWA behavior, disable the Flutter service worker.
-# This is the simplest way to guarantee users see the latest deployment.
-# Change the build command in cf_build.sh from:
-# "${FLUTTER_BIN}" build web --release --web-renderer canvaskit --pwa-strategy=none
 
 echo "Build complete. Output:"
 ls -la "${ROOT_DIR}/build/web" | head -n 60
