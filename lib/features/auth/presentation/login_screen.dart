@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/error/error_service.dart';
 import 'auth_session.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -19,10 +20,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref
           .read(authSessionProvider.notifier)
           .login(_email.text.trim(), _password.text);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Login failed')));
+    } catch (e, st) {
+      ref.read(errorServiceProvider).show(e, stack: st);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

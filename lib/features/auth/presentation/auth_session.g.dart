@@ -8,15 +8,12 @@ part of 'auth_session.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// true = logged in, false = logged out
 
 @ProviderFor(AuthSession)
 final authSessionProvider = AuthSessionProvider._();
 
-/// true = logged in, false = logged out
 final class AuthSessionProvider
     extends $AsyncNotifierProvider<AuthSession, bool> {
-  /// true = logged in, false = logged out
   AuthSessionProvider._()
     : super(
         from: null,
@@ -36,9 +33,7 @@ final class AuthSessionProvider
   AuthSession create() => AuthSession();
 }
 
-String _$authSessionHash() => r'467aff243d89cd0c25b397305671e141129d093a';
-
-/// true = logged in, false = logged out
+String _$authSessionHash() => r'0975e054b17bb18bfa71323e6be0d5791d816148';
 
 abstract class _$AuthSession extends $AsyncNotifier<bool> {
   FutureOr<bool> build();
