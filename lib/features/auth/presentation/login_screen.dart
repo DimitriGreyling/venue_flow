@@ -5,6 +5,7 @@ import 'auth_session.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
+
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
@@ -17,10 +18,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _submit() async {
     setState(() => _loading = true);
     try {
-      await ref.read(authSessionProvider.notifier).login(
-        _email.text.trim(),
-        _password.text,
-      );
+      await ref
+          .read(authSessionProvider.notifier)
+          .login(_email.text.trim(), _password.text);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -38,7 +38,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Sign in', style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Sign in',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: AppSpacing.lg),
                   TextField(
                     controller: _email,
