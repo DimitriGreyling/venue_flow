@@ -46,15 +46,21 @@ class AuthSession extends _$AuthSession {
   }
 
   Future<void> login(String email, String password) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final response = await ref.read(authRepositoryProvider).login(
-        LoginRequest(email: email, password: password),
-      );
+    // state = const AsyncLoading();
+    // state = await AsyncValue.guard(() async {
+    //   final response = await ref.read(authRepositoryProvider).login(
+    //     LoginRequest(email: email, password: password),
+    //   );
+    //
+    //   await ref.read(tokenStorageProvider).saveToken(response.token);
+    //   return true;
+    // });
 
-      await ref.read(tokenStorageProvider).saveToken(response.token);
-      return true;
-    });
+    final response = await ref
+        .read(authRepositoryProvider)
+        .login(LoginRequest(email: email, password: password));
+    await ref.read(tokenStorageProvider).saveToken(response.token);
+    state = const AsyncData(true);
   }
 
   Future<void> logout() async {

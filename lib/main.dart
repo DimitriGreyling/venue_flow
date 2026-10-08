@@ -4,8 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/error/error_observer.dart';
 import 'core/error/error_service.dart';
+import 'features/auth/presentation/auth_session.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final errors = ErrorService();
@@ -14,6 +15,9 @@ void main() {
     observers: [ErrorObserver(errors)],
     overrides: [errorServiceProvider.overrideWithValue(errors)],
   );
+
+  // Read the stored token first, so the router never sees "loading"
+  await container.read(authSessionProvider.future);
 
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
@@ -25,8 +29,5 @@ void main() {
     return true;
   };
 
-  runApp(UncontrolledProviderScope(
-    container: container,
-    child: const App(),
-  ));
+  runApp(UncontrolledProviderScope(container: container, child: const App()));
 }

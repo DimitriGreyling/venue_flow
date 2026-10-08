@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/presentation/auth_session.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/home/presentation/home_screen.dart';
 import '../../features/venues/presentation/venue_list_screen.dart';
 import '../error/error_service.dart';
 
@@ -18,34 +18,70 @@ GoRouter router(Ref ref) {
 
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: '/login',
+    initialLocation: '/home',
     refreshListenable: refresh,
     routes: [
-      GoRoute(
-        path: '/splash',
-        builder: (_, __) =>
-        const Scaffold(body: Center(child: CircularProgressIndicator())),
-      ),
+      GoRoute(path: '/', redirect: (_, __) => '/home'),
+      GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/venues', builder: (_, __) => const VenueListScreen()),
     ],
+    // redirect: (_, state) {
+    //   final auth = ref.read(authSessionProvider);
+    //
+    //   // Mid-login: stay where you are
+    //   if (auth.isLoading) return null;
+    //
+    //   final isAuthed = auth.value ?? false;
+    //   final loc = state.matchedLocation;
+    //   final goingToLogin = loc == '/login';
+    //
+    //   if (!isAuthed) {
+    //     if (goingToLogin) return null;
+    //     // Remember where the user was trying to go
+    //     final from = Uri.encodeComponent(state.uri.toString());
+    //     return '/login?from=$from';
+    //   }
+    //
+    //   if (goingToLogin) {
+    //     // Return to the original URL, or home
+    //     final from = state.uri.queryParameters['from'];
+    //     if (from != null && from.isNotEmpty && !from.startsWith('/login')) {
+    //       return from;
+    //     }
+    //     return '/home';
+    //   }
+    //
+    //   return null; // logged in: stay on the current URL
+    // },
+
     redirect: (_, state) {
       final auth = ref.read(authSessionProvider);
-      final loc = state.matchedLocation;
 
-      // Wait while reading token
-      if (auth.isLoading) return loc == '/splash' ? null : '/splash';
+      // Mid-login: stay where you are
+      if (auth.isLoading) return null;
 
       final isAuthed = auth.value ?? false;
+      final loc = state.matchedLocation;
+      final goingToLogin = loc == '/login';
+
+      // Routes a logged-out user may visit
+      const publicRoutes = {'/home'};
 
       if (!isAuthed) {
-        // Logged-out users can only access login/splash
-        if (loc == '/login' || loc == '/splash') return null;
-        return '/login';
+        if (goingToLogin || publicRoutes.contains(loc)) return null;
+        final from = Uri.encodeComponent(state.uri.toString());
+        return '/login?from=$from';
       }
 
-      // Logged-in users should not be on login/splash
-      if (loc == '/login' || loc == '/splash') return '/venues';
+      if (goingToLogin) {
+        final from = state.uri.queryParameters['from'];
+        if (from != null && from.isNotEmpty && !from.startsWith('/login')) {
+          return from;
+        }
+        return '/home';
+      }
+
       return null;
     },
   );
