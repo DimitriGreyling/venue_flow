@@ -1070,8 +1070,8 @@ class _CtaCard extends StatelessWidget {
     );
 
     final visual = Container(
-      height: wide ? null : 192,
-      constraints: const BoxConstraints(minHeight: 192),
+      // height: wide ? null : 192,
+      // constraints: const BoxConstraints(minHeight: 192),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
@@ -1080,8 +1080,9 @@ class _CtaCard extends StatelessWidget {
           colors: [cs.primaryContainer, cs.secondaryContainer, cs.primary],
         ),
       ),
-      child: const Center(
-        child: Icon(Icons.hub, size: 72, color: Colors.white70),
+      child: Center(
+        child: Image.asset('ready_to_scale_your_venue.webp',),
+        //Icon(Icons.hub, size: 72, color: Colors.white70),
       ),
     );
 
