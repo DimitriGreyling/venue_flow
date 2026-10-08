@@ -246,12 +246,7 @@ class _Hero extends StatelessWidget {
     final titleSize = mobile ? 40.0 : 64.0;
 
     return Container(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          radius: 1.1,
-          colors: [cs.primary.withValues(alpha: 0.14), cs.surface],
-        ),
-      ),
+      decoration: BoxDecoration(color: Color(0xFFE9E7FD)),
       child: _Section(
         padding: const EdgeInsets.only(top: 64, bottom: 80),
         child: Column(
@@ -477,8 +472,10 @@ class _DashboardPreview extends StatelessWidget {
               children: [
                 // Browser bar
                 Container(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   color: cs.surfaceContainerLow,
                   child: Row(
                     children: [
@@ -488,8 +485,9 @@ class _DashboardPreview extends StatelessWidget {
                           height: 12,
                           margin: const EdgeInsets.only(right: 6),
                           decoration: BoxDecoration(
-                              color: c.withValues(alpha: 0.3),
-                              shape: BoxShape.circle),
+                            color: c.withValues(alpha: 0.3),
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       const SizedBox(width: 10),
                       Container(
@@ -504,9 +502,13 @@ class _DashboardPreview extends StatelessWidget {
                           children: [
                             Icon(Icons.lock, size: 12, color: sem.textMuted),
                             const SizedBox(width: 4),
-                            Text('admin.venuemanager.io/dashboard',
-                                style: TextStyle(
-                                    fontSize: 10, color: sem.textMuted)),
+                            Text(
+                              'admin.venuemanager.io/dashboard',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: sem.textMuted,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -1081,7 +1083,7 @@ class _CtaCard extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: Image.asset('ready_to_scale_your_venue.webp',),
+        child: Image.asset('ready_to_scale_your_venue.webp'),
         //Icon(Icons.hub, size: 72, color: Colors.white70),
       ),
     );
