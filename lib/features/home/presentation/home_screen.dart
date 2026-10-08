@@ -1076,11 +1076,11 @@ class _CtaCard extends StatelessWidget {
       // constraints: const BoxConstraints(minHeight: 192),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [cs.primaryContainer, cs.secondaryContainer, cs.primary],
-        ),
+        // gradient: LinearGradient(
+        //   begin: Alignment.topLeft,
+        //   end: Alignment.bottomRight,
+        //   colors: [cs.primaryContainer, cs.secondaryContainer, cs.primary],
+        // ),
       ),
       child: Center(
         child: Image.asset('ready_to_scale_your_venue.webp'),
