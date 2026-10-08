@@ -1,9 +1,16 @@
-class Venue {
-  const Venue({
-    required this.id,
-    required this.name,
-  });
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  final String id;
-  final String name;
+part 'venue.freezed.dart';
+part 'venue.g.dart';
+
+@freezed
+abstract class Venue with _$Venue {
+  const factory Venue({
+    required String id,
+    required String name,
+    String? address,
+    int? capacity,
+  }) = _Venue;
+
+  factory Venue.fromJson(Map<String, dynamic> json) => _$VenueFromJson(json);
 }
