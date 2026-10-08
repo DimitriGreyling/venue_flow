@@ -7,15 +7,11 @@ part 'dio_client.g.dart';
 
 @Riverpod(keepAlive: true)
 Dio dio(Ref ref) {
-  final dio = Dio(
-    BaseOptions(
-      baseUrl: Env.apiBaseUrl,
-      connectTimeout: const Duration(seconds: 20),
-      receiveTimeout: const Duration(seconds: 20),
-      sendTimeout: const Duration(seconds: 20),
-      headers: {'Content-Type': 'application/json'},
-    ),
-  );
+  final dio = Dio(BaseOptions(
+    baseUrl: Env.apiBaseUrl,
+    connectTimeout: const Duration(seconds: 20),
+    receiveTimeout: const Duration(seconds: 20),
+  ));
 
   dio.interceptors.add(
     InterceptorsWrapper(
@@ -25,10 +21,6 @@ Dio dio(Ref ref) {
           options.headers['Authorization'] = 'Bearer $token';
         }
         handler.next(options);
-      },
-      onError: (error, handler) {
-        // Optional: map / log errors globally later
-        handler.next(error);
       },
     ),
   );

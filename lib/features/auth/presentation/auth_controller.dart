@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/storage/token_storage.dart';
 import '../data/auth_repository.dart';
+import '../domain/login_request.dart';
 
 part 'auth_controller.g.dart';
 
@@ -9,14 +10,16 @@ class AuthController extends _$AuthController {
   @override
   FutureOr<void> build() {}
 
-  Future<void> login(String email, String password) async {
+  Future<void> login({
+    required String email,
+    required String password,
+  }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final token = await ref.read(authRepositoryProvider).login(
-        email: email,
-        password: password,
+      final response = await ref.read(authRepositoryProvider).login(
+        LoginRequest(email: email, password: password),
       );
-      await ref.read(tokenStorageProvider).saveToken(token);
+      await ref.read(tokenStorageProvider).saveToken(response.token);
     });
   }
 
