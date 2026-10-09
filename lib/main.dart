@@ -8,7 +8,7 @@ import 'features/auth/presentation/auth_session.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+//Testing
   final errors = ErrorService();
 
   final container = ProviderContainer(
