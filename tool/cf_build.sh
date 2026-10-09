@@ -148,10 +148,10 @@ else
 fi
 
 # Optional: improve SPA routing on static hosts like Cloudflare Pages
-mkdir -p "${ROOT_DIR}/build/web"
-cat > "${ROOT_DIR}/build/web/_redirects" <<'EOF'
-/*    /index.html   200
-EOF
+# mkdir -p "${ROOT_DIR}/build/web"
+# cat > "${ROOT_DIR}/build/web/_redirects" <<'EOF'
+# /*    /index.html   200
+# EOF
 
 echo "Build complete. Output:"
 ls -la "${ROOT_DIR}/build/web" | head -n 60
