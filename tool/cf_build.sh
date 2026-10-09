@@ -8,7 +8,7 @@ fi
 
 # Prefer Cloudflare env overrides; fallback defaults below.
 # IMPORTANT: set FLUTTER_VERSION in Cloudflare Pages to match your local working version.
-FLUTTER_VERSION="${FLUTTER_VERSION:-3.35.2}"
+FLUTTER_VERSION="${FLUTTER_VERSION:-3.47.3}"
 FLUTTER_CHANNEL="${FLUTTER_CHANNEL:-stable}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
