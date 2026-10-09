@@ -8,7 +8,7 @@ fi
 
 # Prefer Cloudflare env overrides; fallback defaults below.
 # IMPORTANT: set FLUTTER_VERSION in Cloudflare Pages to match your local working version.
-FLUTTER_VERSION="${FLUTTER_VERSION:-3.46.0}"
+FLUTTER_VERSION="${FLUTTER_VERSION:-3.35.2}"
 FLUTTER_CHANNEL="${FLUTTER_CHANNEL:-stable}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -61,18 +61,25 @@ if [ "${needs_download}" = "1" ]; then
 
   rm -rf "${FLUTTER_DIR}" "${ROOT_DIR}/flutter"
 
-  ARCHIVE="flutter_linux_${FLUTTER_VERSION}-${FLUTTER_CHANNEL}.tar.xz"
-  URL="https://storage.googleapis.com/flutter_infra_release/releases/${FLUTTER_CHANNEL}/linux/${ARCHIVE}"
+  # Git tags are more reliable than guessing archive URLs
+  if command -v git >/dev/null 2>&1; then
+    echo "Cloning Flutter ${FLUTTER_VERSION} from GitHub..."
+    git clone --depth 1 --branch "${FLUTTER_VERSION}" https://github.com/flutter/flutter.git "${FLUTTER_DIR}"
+  else
+    echo "Git is not available; falling back to archive download..."
+    ARCHIVE="flutter_linux_${FLUTTER_VERSION}-${FLUTTER_CHANNEL}.tar.xz"
+    URL="https://storage.googleapis.com/flutter_infra_release/releases/${FLUTTER_CHANNEL}/linux/${ARCHIVE}"
 
-  curl -fsSL "${URL}" -o "${ARCHIVE}"
-  tar xf "${ARCHIVE}" -C "${ROOT_DIR}"
-  rm -f "${ARCHIVE}"
+    curl -fsSL "${URL}" -o "${ARCHIVE}"
+    tar xf "${ARCHIVE}" -C "${ROOT_DIR}"
+    rm -f "${ARCHIVE}"
 
-  if ! mv "${ROOT_DIR}/flutter" "${FLUTTER_DIR}"; then
-    echo "Direct move failed (likely Windows/Git Bash permissions). Falling back to copy..."
-    mkdir -p "${FLUTTER_DIR}"
-    cp -a "${ROOT_DIR}/flutter/." "${FLUTTER_DIR}/"
-    rm -rf "${ROOT_DIR}/flutter"
+    if ! mv "${ROOT_DIR}/flutter" "${FLUTTER_DIR}"; then
+      echo "Direct move failed (likely Windows/Git Bash permissions). Falling back to copy..."
+      mkdir -p "${FLUTTER_DIR}"
+      cp -a "${ROOT_DIR}/flutter/." "${FLUTTER_DIR}/"
+      rm -rf "${ROOT_DIR}/flutter"
+    fi
   fi
 fi
 
@@ -139,6 +146,12 @@ else
   echo "Building web with default renderer (current Flutter CLI does not support --web-renderer)..."
   "${FLUTTER_BIN}" build web --release
 fi
+
+# Optional: improve SPA routing on static hosts like Cloudflare Pages
+mkdir -p "${ROOT_DIR}/build/web"
+cat > "${ROOT_DIR}/build/web/_redirects" <<'EOF'
+/*    /index.html   200
+EOF
 
 echo "Build complete. Output:"
 ls -la "${ROOT_DIR}/build/web" | head -n 60
