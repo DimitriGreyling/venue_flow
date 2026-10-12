@@ -1,22 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!-- <script>
-    const host = window.location.hostname;
-    const isLocal = host === 'localhost' || host === '127.0.0.1';
+<!--  <script>-->
+<!--    const host = window.location.hostname;-->
+<!--    const isLocal = host === 'localhost' || host === '127.0.0.1';-->
 
-    if (!isLocal) {
-      var s = document.createElement('script');
-      s.async = true;
-      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-TFQ21RR1FP';
-      document.head.appendChild(s);
+<!--    if (!isLocal) {-->
+<!--      var s = document.createElement('script');-->
+<!--      s.async = true;-->
+<!--      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-TFQ21RR1FP';-->
+<!--      document.head.appendChild(s);-->
+
+<!--      window.dataLayer = window.dataLayer || [];-->
+<!--      function gtag(){ dataLayer.push(arguments); }-->
+
+<!--      gtag('consent', 'default', { analytics_storage: 'denied' });-->
+<!--      gtag('js', new Date());-->
+<!--      gtag('config', 'G-TFQ21RR1FP', { send_page_view: false });-->
+
+<!--      window.vfTrack = function (name, json) {-->
+<!--        try { gtag('event', name, json ? JSON.parse(json) : {}); } catch (e) {}-->
+<!--      };-->
+<!--      window.vfSetConsent = function (granted) {-->
+<!--        gtag('consent', 'update', { analytics_storage: granted ? 'granted' : 'denied' });-->
+<!--      };-->
+<!--    } else {-->
+<!--      window.vfTrack = function () {};-->
+<!--      window.vfSetConsent = function () {};-->
+<!--    }-->
+<!--  </script>-->
+
+  <script>
+    (function () {
+      var MEASUREMENT_ID = 'G-TFQ21RR1FP';
+      var host = window.location.hostname;
+      var isLocal = host === 'localhost' || host === '127.0.0.1';
+      // Test locally with http://localhost:PORT/?ga_debug=1
+      var forceOn = window.location.search.indexOf('ga_debug=1') !== -1;
+      var enabled = !isLocal || forceOn;
 
       window.dataLayer = window.dataLayer || [];
-      function gtag(){ dataLayer.push(arguments); }
+      window.gtag = function () { window.dataLayer.push(arguments); };
+
+      if (!enabled) {
+        window.vfTrack = function () {};
+        window.vfSetConsent = function () {};
+        return;
+      }
+
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + MEASUREMENT_ID;
+      document.head.appendChild(s);
 
       gtag('consent', 'default', { analytics_storage: 'denied' });
       gtag('js', new Date());
-      gtag('config', 'G-TFQ21RR1FP', { send_page_view: false });
+      gtag('config', MEASUREMENT_ID, {
+        send_page_view: false,
+        debug_mode: forceOn
+      });
 
       window.vfTrack = function (name, json) {
         try { gtag('event', name, json ? JSON.parse(json) : {}); } catch (e) {}
@@ -24,21 +66,18 @@
       window.vfSetConsent = function (granted) {
         gtag('consent', 'update', { analytics_storage: granted ? 'granted' : 'denied' });
       };
-    } else {
-      window.vfTrack = function () {};
-      window.vfSetConsent = function () {};
-    }
-  </script> -->
+    })();
+  </script>
 
   <!-- Google tag (gtag.js) -->
- <script async src="https://www.googletagmanager.com/gtag/js?id=G-TFQ21RR1FP"></script>
- <script>
-    window.dataLayer = window.dataLayer || [];
-   function gtag(){dataLayer.push(arguments);}
-   gtag('js', new Date());
+<!--  <script async src="https://www.googletagmanager.com/gtag/js?id=G-TFQ21RR1FP"></script>-->
+<!--  <script>-->
+<!--    window.dataLayer = window.dataLayer || [];-->
+<!--    function gtag(){dataLayer.push(arguments);}-->
+<!--    gtag('js', new Date());-->
 
-    gtag('config', 'G-TFQ21RR1FP');
- </script>
+<!--    gtag('config', 'G-TFQ21RR1FP');-->
+<!--  </script>-->
   <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
