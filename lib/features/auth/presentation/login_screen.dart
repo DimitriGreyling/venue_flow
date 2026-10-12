@@ -242,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen>
                                             ),
                                             const SizedBox(width: 16),
                                             const Text(
-                                              'Venue Manager',
+                                              'Venue Flow',
                                               style: TextStyle(
                                                 // color: Colors.white,
                                                 fontSize: 24,
