@@ -466,6 +466,7 @@ class _LoginScreenState extends State<LoginScreen>
                                           children: [
                                             Expanded(
                                               child: _buildSocialButton(
+                                                cs: cs,
                                                 label: 'Google',
                                                 iconPath:
                                                     'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
@@ -475,6 +476,7 @@ class _LoginScreenState extends State<LoginScreen>
                                             const SizedBox(width: 16),
                                             Expanded(
                                               child: _buildSocialButton(
+                                                cs: cs,
                                                 label: 'Microsoft',
                                                 iconPath:
                                                     'https://authjs.dev/img/providers/microsoft.svg',
@@ -493,10 +495,7 @@ class _LoginScreenState extends State<LoginScreen>
                                             children: [
                                               const Text(
                                                 "Don't have an account? ",
-                                                style: TextStyle(
-                                                  color: Colors.white70,
-                                                  fontSize: 13,
-                                                ),
+                                                style: TextStyle(fontSize: 13),
                                               ),
                                               InkWell(
                                                 onTap: () {},
@@ -543,8 +542,15 @@ class _LoginScreenState extends State<LoginScreen>
   }) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: TextStyle(color: cs.onSurface.withValues(alpha: 0.6), fontSize: 14),
-      prefixIcon: Icon(prefixIcon, color: cs.onSurface.withValues(alpha: 0.6), size: 20),
+      hintStyle: TextStyle(
+        color: cs.onSurface.withValues(alpha: 0.6),
+        fontSize: 14,
+      ),
+      prefixIcon: Icon(
+        prefixIcon,
+        color: cs.onSurface.withValues(alpha: 0.6),
+        size: 20,
+      ),
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: cs.inversePrimary.withValues(alpha: 0.05),
@@ -573,13 +579,14 @@ class _LoginScreenState extends State<LoginScreen>
     required String label,
     required String iconPath,
     required VoidCallback onPressed,
+    required ColorScheme cs,
   }) {
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.white.withOpacity(0.05),
-        side: BorderSide(color: Colors.white.withOpacity(0.1)),
+        foregroundColor: cs.onSurface,
+        backgroundColor: cs.onSurface.withOpacity(0.05),
+        side: BorderSide(color: cs.onSurface.withOpacity(0.1)),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -591,15 +598,15 @@ class _LoginScreenState extends State<LoginScreen>
             height: 18,
             width: 18,
             errorBuilder: (context, error, stackTrace) =>
-                const Icon(Icons.security, size: 18, color: Colors.white70),
+                Icon(Icons.security, size: 18, color: cs.onSurface),
           ),
           const SizedBox(width: 10),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: cs.onSurface,
             ),
           ),
         ],
