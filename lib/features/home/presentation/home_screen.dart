@@ -1083,7 +1083,7 @@ class _CtaCard extends StatelessWidget {
         // ),
       ),
       child: Center(
-        child: Image.asset('ready_to_scale_your_venue.webp'),
+        child: Image.asset('assets/ready_to_scale_your_venue.webp'),
         //Icon(Icons.hub, size: 72, color: Colors.white70),
       ),
     );
