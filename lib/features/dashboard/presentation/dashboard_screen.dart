@@ -357,9 +357,9 @@ class _DashboardBody extends StatelessWidget {
         _KpiGrid(),
         SizedBox(height: 32),
         _ChartsSection(),
-        SizedBox(height: 32),
-        _BottomSection(),
-        SizedBox(height: 32),
+        // SizedBox(height: 32),
+        // _BottomSection(),
+        // SizedBox(height: 32),
       ],
     );
   }
