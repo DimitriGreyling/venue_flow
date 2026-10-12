@@ -103,7 +103,7 @@ class _NavBar extends StatelessWidget {
                 Icon(Icons.dashboard_customize, color: cs.primary, size: 28),
                 const SizedBox(width: 8),
                 Text(
-                  'Venue Manager',
+                  'Venue Flow',
                   style: t.headlineMedium?.copyWith(
                     color: cs.primary,
                     fontWeight: FontWeight.w800,
@@ -1147,7 +1147,7 @@ class _Footer extends StatelessWidget {
             Icon(Icons.dashboard_customize, color: cs.primary),
             const SizedBox(width: 8),
             Text(
-              'Venue Manager',
+              'Venue Flow',
               style: t.headlineMedium?.copyWith(
                 color: cs.primary,
                 fontWeight: FontWeight.w800,
@@ -1240,7 +1240,7 @@ class _Footer extends StatelessWidget {
               spacing: 24,
               children: [
                 Text(
-                  '© ${DateTime.now().year} Venue Manager Inc. All rights reserved.',
+                  '© ${DateTime.now().year} Venue Flow Inc. All rights reserved.',
                   style: t.labelSmall,
                 ),
                 Row(
