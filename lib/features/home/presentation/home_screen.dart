@@ -367,93 +367,6 @@ class _DashboardPreview extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Glow
-          // Positioned.fill(
-          //   child: Container(
-          //     margin: const EdgeInsets.all(-4),
-          //     decoration: BoxDecoration(
-          //       borderRadius: BorderRadius.circular(20),
-          //       gradient: LinearGradient(colors: [
-          //         cs.primary.withValues(alpha: 0.25),
-          //         cs.secondary.withValues(alpha: 0.25),
-          //       ]),
-          //     ),
-          //   ),
-          // ),
-
-          // Positioned(
-          //   left: -4,
-          //   right: -4,
-          //   top: -4,
-          //   bottom: -4,
-          //   child: DecoratedBox(
-          //     decoration: BoxDecoration(
-          //       borderRadius: BorderRadius.circular(20),
-          //       gradient: LinearGradient(colors: [
-          //         cs.primary.withValues(alpha: 0.25),
-          //         cs.secondary.withValues(alpha: 0.25),
-          //       ]),
-          //     ),
-          //   ),
-          // ),
-          // Window
-          // Container(
-          //   decoration: BoxDecoration(
-          //     color: cs.surface,
-          //     borderRadius: BorderRadius.circular(16),
-          //     border: Border.all(color: sem.borderSubtle),
-          //     boxShadow: const [
-          //       BoxShadow(
-          //           color: Color(0x33000000),
-          //           blurRadius: 40,
-          //           offset: Offset(0, 20)),
-          //     ],
-          //   ),
-          //   clipBehavior: Clip.antiAlias,
-          //   child: Column(
-          //     children: [
-          //       // Browser bar
-          //       Container(
-          //         padding:
-          //         const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          //         color: cs.surfaceContainerLow,
-          //         child: Row(
-          //           children: [
-          //             for (final c in [cs.error, sem.warning, sem.success])
-          //               Container(
-          //                 width: 12,
-          //                 height: 12,
-          //                 margin: const EdgeInsets.only(right: 6),
-          //                 decoration: BoxDecoration(
-          //                     color: c.withValues(alpha: 0.3),
-          //                     shape: BoxShape.circle),
-          //               ),
-          //             const SizedBox(width: 10),
-          //             Container(
-          //               height: 24,
-          //               padding: const EdgeInsets.symmetric(horizontal: 8),
-          //               decoration: BoxDecoration(
-          //                 color: cs.surfaceContainerHigh,
-          //                 borderRadius: BorderRadius.circular(6),
-          //               ),
-          //               child: Row(
-          //                 mainAxisSize: MainAxisSize.min,
-          //                 children: [
-          //                   Icon(Icons.lock, size: 12, color: sem.textMuted),
-          //                   const SizedBox(width: 4),
-          //                   Text('admin.venuemanager.io/dashboard',
-          //                       style: TextStyle(
-          //                           fontSize: 10, color: sem.textMuted)),
-          //                 ],
-          //               ),
-          //             ),
-          //           ],
-          //         ),
-          //       ),
-          //       const AspectRatio(aspectRatio: 16 / 9, child: _MockDashboard()),
-          //     ],
-          //   ),
-          // ),
           Container(
             decoration: BoxDecoration(
               color: cs.surface,
@@ -503,7 +416,7 @@ class _DashboardPreview extends StatelessWidget {
                             Icon(Icons.lock, size: 12, color: sem.textMuted),
                             const SizedBox(width: 4),
                             Text(
-                              'admin.venuemanager.io/dashboard',
+                              'venueflow.co.za/dashboard',
                               style: TextStyle(
                                 fontSize: 10,
                                 color: sem.textMuted,
