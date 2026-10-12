@@ -468,21 +468,20 @@ class _LoginScreenState extends State<LoginScreen>
                                               child: _buildSocialButton(
                                                 cs: cs,
                                                 label: 'Google',
-                                                iconPath:
-                                                    'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+                                                iconPath: 'assets/google.webp',
                                                 onPressed: () {},
                                               ),
                                             ),
-                                            const SizedBox(width: 16),
-                                            Expanded(
-                                              child: _buildSocialButton(
-                                                cs: cs,
-                                                label: 'Microsoft',
-                                                iconPath:
-                                                    'https://authjs.dev/img/providers/microsoft.svg',
-                                                onPressed: () {},
-                                              ),
-                                            ),
+                                            // const SizedBox(width: 16),
+                                            // Expanded(
+                                            //   child: _buildSocialButton(
+                                            //     cs: cs,
+                                            //     label: 'Microsoft',
+                                            //     iconPath:
+                                            //         'https://authjs.dev/img/providers/microsoft.svg',
+                                            //     onPressed: () {},
+                                            //   ),
+                                            // ),
                                           ],
                                         ),
 
