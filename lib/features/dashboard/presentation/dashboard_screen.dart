@@ -357,8 +357,8 @@ class _DashboardBody extends StatelessWidget {
         _KpiGrid(),
         SizedBox(height: 32),
         _ChartsSection(),
-        // SizedBox(height: 32),
-        // _BottomSection(),
+        SizedBox(height: 32),
+        _BottomSection(),
         // SizedBox(height: 32),
       ],
     );
@@ -957,6 +957,7 @@ class _BottomSection extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, c) {
         if (c.maxWidth < 900) {
+          print('Triggering bottom section column layout for width: ${c.maxWidth}');
           return const Column(
             children: [
               _ActivityCard(),
@@ -1155,17 +1156,17 @@ class _QuickActionsCard extends StatelessWidget {
         children: [
           const Text('Quick Actions', style: _cardTitle),
           const SizedBox(height: 24),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 1.5,
-            children: [
-              for (final a in _actions) _QuickAction(icon: a.$1, label: a.$2),
-            ],
-          ),
+          // GridView.count(
+          //   crossAxisCount: 2,
+          //   shrinkWrap: true,
+          //   physics: const NeverScrollableScrollPhysics(),
+          //   mainAxisSpacing: 16,
+          //   crossAxisSpacing: 16,
+          //   childAspectRatio: 1.5,
+          //   children: [
+          //     for (final a in _actions) _QuickAction(icon: a.$1, label: a.$2),
+          //   ],
+          // ),
         ],
       ),
     );
