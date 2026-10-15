@@ -11,7 +11,6 @@ fi
 FLUTTER_VERSION="${FLUTTER_VERSION:-3.47.3}"
 FLUTTER_CHANNEL="${FLUTTER_CHANNEL:-stable}"
 
-# Fixed: RESTORED the array index [0] to fix directory path logic
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FLUTTER_DIR="${ROOT_DIR}/.flutter"
 
@@ -65,11 +64,11 @@ if [ "${needs_download}" = "1" ]; then
   # Git tags are more reliable than guessing archive URLs
   if command -v git >/dev/null 2>&1; then
     echo "Cloning Flutter ${FLUTTER_VERSION} from GitHub..."
-    git clone --depth 1 --branch "${FLUTTER_VERSION}" https://github.com "${FLUTTER_DIR}"
+    git clone --depth 1 --branch "${FLUTTER_VERSION}" https://github.com/flutter/flutter.git "${FLUTTER_DIR}"
   else
     echo "Git is not available; falling back to archive download..."
     ARCHIVE="flutter_linux_${FLUTTER_VERSION}-${FLUTTER_CHANNEL}.tar.xz"
-    URL="https://googleapis.com{FLUTTER_CHANNEL}/linux/${ARCHIVE}"
+    URL="https://storage.googleapis.com/flutter_infra_release/releases/${FLUTTER_CHANNEL}/linux/${ARCHIVE}"
 
     curl -fsSL "${URL}" -o "${ARCHIVE}"
     tar xf "${ARCHIVE}" -C "${ROOT_DIR}"
@@ -114,7 +113,7 @@ fi
 # Cloudflare Pages MUST provide these env vars, unless you commit .env to the repo.
 supabase_url="${SUPABASE_URL-}"
 supabase_anon="${SUPABASE_ANON_KEY-}"
-api_base_url="${API_BASE_URL-}"
+api_base_url="${API_BASE_URL}"
 
 echo "SUPABASE_URL present? $([ -n "${supabase_url}" ] && echo yes || echo no)"
 echo "SUPABASE_ANON_KEY present? $([ -n "${supabase_anon}" ] && echo yes || echo no)"
@@ -139,29 +138,41 @@ else
   fi
 fi
 
-# Get dependencies
-echo "Fetching project dependencies..."
-"${FLUTTER_BIN}" pub get
+# Create the compilation flag argument if a URL is provided
+DART_DEFINE_ARGS=""
+if [ -n "${api_base_url}" ]; then
+  echo "Injecting API_BASE_URL into compilation bundle..."
+  DART_DEFINE_ARGS="--dart-define=API_BASE_URL=${api_base_url}"
+else
+  echo "WARNING: API_BASE_URL is not set in Cloudflare environments. Using Dart code default fallback value."
+fi
 
-# Determine if --web-renderer is supported
 WEB_BUILD_HELP="$(${FLUTTER_BIN} build web -h 2>&1 || true)"
-
-# Execute compilation using structured explicit statements to prevent Bash argument splitting errors
 if echo "${WEB_BUILD_HELP}" | grep -q -- "--web-renderer"; then
   echo "Building web with explicit renderer flag..."
-  if [ -n "${api_base_url}" ]; then
-    "${FLUTTER_BIN}" build web --release --web-renderer canvaskit --dart-define=API_BASE_URL="${api_base_url}"
-  else
-    "${FLUTTER_BIN}" build web --release --web-renderer canvaskit
-  fi
+  "${FLUTTER_BIN}" build web --release --web-renderer canvaskit ${DART_DEFINE_ARGS}
 else
-  echo "Building web with default renderer..."
-  if [ -n "${api_base_url}" ]; then
-    "${FLUTTER_BIN}" build web --release --dart-define=API_BASE_URL="${api_base_url}"
-  else
-    "${FLUTTER_BIN}" build web --release
-  fi
+  echo "Building web with default renderer (current Flutter CLI does not support --web-renderer)..."
+  "${FLUTTER_BIN}" build web --release ${DART_DEFINE_ARGS}
 fi
+
+# Build
+"${FLUTTER_BIN}" pub get
+
+WEB_BUILD_HELP="$(${FLUTTER_BIN} build web -h 2>&1 || true)"
+if echo "${WEB_BUILD_HELP}" | grep -q -- "--web-renderer"; then
+  echo "Building web with explicit renderer flag..."
+  "${FLUTTER_BIN}" build web --release --web-renderer canvaskit
+else
+  echo "Building web with default renderer (current Flutter CLI does not support --web-renderer)..."
+  "${FLUTTER_BIN}" build web --release
+fi
+
+# Optional: improve SPA routing on static hosts like Cloudflare Pages
+# mkdir -p "${ROOT_DIR}/build/web"
+# cat > "${ROOT_DIR}/build/web/_redirects" <<'EOF'
+# /*    /index.html   200
+# EOF
 
 echo "Build complete. Output:"
 ls -la "${ROOT_DIR}/build/web" | head -n 60
