@@ -12,7 +12,7 @@ class AuthRepository {
   final Dio _dio;
 
   Future<LoginResponse> login(LoginRequest request) async {
-    final res = await _dio.post('/auth/login', data: request.toJson());
+    final res = await _dio.post('api/auth/login', data: request.toJson());
     return LoginResponse.fromJson(res.data as Map<String, dynamic>);
   }
 }
