@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/side_nav.dart';
 import '../../auth/presentation/auth_session.dart';
 import 'dashboard_providers.dart';
 
@@ -40,11 +41,11 @@ class DashboardScreen extends ConsumerWidget {
           : const Drawer(
         width: 240,
         backgroundColor: _C.background,
-        child: _SideNav(activePath: '/dashboard'),
+        child: SideNav(activePath: '/dashboard'),
       ),
       body: Row(
         children: [
-          if (wide) const _SideNav(activePath: '/dashboard'),
+          if (wide) const SideNav(activePath: '/dashboard'),
           Expanded(
             child: Column(
               children: [
@@ -64,160 +65,6 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ───────────────────────── SIDE NAV ─────────────────────────
-
-class _NavItem {
-  const _NavItem(this.icon, this.label, [this.route]);
-  final IconData icon;
-  final String label;
-  final String? route; // null = page not built yet
-}
-
-const _navItems = [
-  _NavItem(Icons.dashboard_outlined, 'Dashboard', '/dashboard'),
-  _NavItem(Icons.location_on_outlined, 'Venues', '/venues'),
-  _NavItem(Icons.event_outlined, 'Events'),
-  _NavItem(Icons.confirmation_number_outlined, 'Bookings'),
-  _NavItem(Icons.group_outlined, 'Customers'),
-  _NavItem(Icons.badge_outlined, 'Staff'),
-  _NavItem(Icons.construction_outlined, 'Equipment'),
-  _NavItem(Icons.receipt_outlined, 'Invoices'),
-  _NavItem(Icons.description_outlined, 'Forms'),
-  _NavItem(Icons.calendar_month_outlined, 'Calendar'),
-  _NavItem(Icons.notifications_outlined, 'Notifications'),
-  _NavItem(Icons.settings_outlined, 'Settings'),
-];
-
-const _navFooter = [
-  _NavItem(Icons.swap_horiz, 'Switch Venue'),
-  _NavItem(Icons.account_circle_outlined, 'Profile'),
-];
-
-class _SideNav extends StatelessWidget {
-  const _SideNav({required this.activePath});
-
-  final String activePath;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 240,
-      decoration: const BoxDecoration(
-        color: _C.background,
-        border: Border(right: BorderSide(color: _C.border)),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      child: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Main Street Arena', // TODO: tenant name from API
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: _C.primary,
-                    ),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Tenant Admin',
-                    style: TextStyle(fontSize: 14, color: _C.textMuted),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 32),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              children: [
-                for (final item in _navItems)
-                  _NavTile(item: item, active: item.route == activePath),
-              ],
-            ),
-          ),
-          const Divider(height: 1, color: _C.border),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: Column(
-              children: [
-                for (final item in _navFooter)
-                  _NavTile(item: item, active: false),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavTile extends StatelessWidget {
-  const _NavTile({required this.item, required this.active});
-
-  final _NavItem item;
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = active ? _C.primary : _C.textMuted;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Material(
-          color: active ? _C.primary.withValues(alpha: 0.1) : Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              final route = item.route;
-              if (route == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${item.label} is coming soon')),
-                );
-                return;
-              }
-              if (route != '/dashboard') context.go(route);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(
-                    color: active ? _C.primary : Colors.transparent,
-                    width: 4,
-                  ),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              child: Row(
-                children: [
-                  Icon(item.icon, size: 22, color: color),
-                  const SizedBox(width: 12),
-                  Text(
-                    item.label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: color,
-                      fontWeight: active ? FontWeight.w700 : FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

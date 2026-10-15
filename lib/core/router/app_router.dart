@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/auth/presentation/auth_session.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
+import '../../features/form/presentation/form_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/venues/presentation/venue_list_screen.dart';
 import '../error/error_service.dart';
@@ -27,36 +28,8 @@ GoRouter router(Ref ref) {
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/venues', builder: (_, __) => const VenueListScreen()),
       GoRoute(path: '/dashboard', builder: (_, __) => const DashboardScreen()),
+      GoRoute(path: '/forms', builder: (_, __) => const FormScreen()),
     ],
-    // redirect: (_, state) {
-    //   final auth = ref.read(authSessionProvider);
-    //
-    //   // Mid-login: stay where you are
-    //   if (auth.isLoading) return null;
-    //
-    //   final isAuthed = auth.value ?? false;
-    //   final loc = state.matchedLocation;
-    //   final goingToLogin = loc == '/login';
-    //
-    //   if (!isAuthed) {
-    //     if (goingToLogin) return null;
-    //     // Remember where the user was trying to go
-    //     final from = Uri.encodeComponent(state.uri.toString());
-    //     return '/login?from=$from';
-    //   }
-    //
-    //   if (goingToLogin) {
-    //     // Return to the original URL, or home
-    //     final from = state.uri.queryParameters['from'];
-    //     if (from != null && from.isNotEmpty && !from.startsWith('/login')) {
-    //       return from;
-    //     }
-    //     return '/home';
-    //   }
-    //
-    //   return null; // logged in: stay on the current URL
-    // },
-
     redirect: (_, state) {
       final auth = ref.read(authSessionProvider);
 
