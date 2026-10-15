@@ -113,10 +113,13 @@ fi
 # Cloudflare Pages MUST provide these env vars, unless you commit .env to the repo.
 supabase_url="${SUPABASE_URL-}"
 supabase_anon="${SUPABASE_ANON_KEY-}"
+api_base_url="${API_BASE_URL}"
 
 echo "SUPABASE_URL present? $([ -n "${supabase_url}" ] && echo yes || echo no)"
 echo "SUPABASE_ANON_KEY present? $([ -n "${supabase_anon}" ] && echo yes || echo no)"
 echo "SUPABASE_ANON_KEY length: ${#supabase_anon}"
+echo "API_BASE_URL present? $([ -n "${api_base_url}" ] && echo yes || echo no)"
+echo "API_BASE_URL length: ${#api_base_url}"
 
 if [ -n "${supabase_url}" ] && [ -n "${supabase_anon}" ]; then
   echo "Generating .env from Cloudflare environment variables..."
@@ -133,6 +136,24 @@ else
     echo "Add BOTH variables in the correct environment (Production/Preview) and redeploy."
     exit 1
   fi
+fi
+
+# Create the compilation flag argument if a URL is provided
+DART_DEFINE_ARGS=""
+if [ -n "${api_base_url}" ]; then
+  echo "Injecting API_BASE_URL into compilation bundle..."
+  DART_DEFINE_ARGS="--dart-define=API_BASE_URL=${api_base_url}"
+else
+  echo "WARNING: API_BASE_URL is not set in Cloudflare environments. Using Dart code default fallback value."
+fi
+
+WEB_BUILD_HELP="$(${FLUTTER_BIN} build web -h 2>&1 || true)"
+if echo "${WEB_BUILD_HELP}" | grep -q -- "--web-renderer"; then
+  echo "Building web with explicit renderer flag..."
+  "${FLUTTER_BIN}" build web --release --web-renderer canvaskit ${DART_DEFINE_ARGS}
+else
+  echo "Building web with default renderer (current Flutter CLI does not support --web-renderer)..."
+  "${FLUTTER_BIN}" build web --release ${DART_DEFINE_ARGS}
 fi
 
 # Build
