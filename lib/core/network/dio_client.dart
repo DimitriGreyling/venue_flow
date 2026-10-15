@@ -29,7 +29,7 @@ Dio dio(Ref ref) {
 
       // Expired session: clear token; router redirects to /login.
       // Skip for the login call itself (wrong password also returns 401).
-      final isLogin = error.requestOptions.path.contains('api/auth/login');
+      final isLogin = error.requestOptions.path.contains('/api/auth/login');
       if (ex.type == AppErrorType.unauthorized && !isLogin) {
         await ref.read(authSessionProvider.notifier).logout();
         ref.read(errorServiceProvider).show(ex);
