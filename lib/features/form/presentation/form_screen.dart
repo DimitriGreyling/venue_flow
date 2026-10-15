@@ -56,13 +56,47 @@ class _FormScreenState extends ConsumerState<FormScreen> {
                     padding: EdgeInsets.all(wide ? 24 : 16),
                     child: Center(
                       child: ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: 1440),
+                        constraints: BoxConstraints(
+                          maxWidth: 1440,
+                          maxHeight: MediaQuery.sizeOf(context).height * 0.89,
+                        ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Container(child: Text('Block 1')),
-                            Container(child: Text('Block 1')),
-                            Container(child: Text('Block 1')),
+                            // Left Block (Takes 30% of remaining space)
+                            Expanded(
+                              flex: 3,
+                              child: Container(
+                                child: Card(
+                                  color: cs.inverseSurface.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  child: const Text('Block 1'),
+                                ),
+                              ),
+                            ),
+
+                            // Middle Block (Takes 40% of remaining space - wider)
+                            Expanded(
+                              flex: 4,
+                              child: Container(
+                                color: cs.surfaceContainerHighest,
+                                child: const Text('Block 2'),
+                              ),
+                            ),
+
+                            // Right Block (Takes 30% of remaining space)
+                            Expanded(
+                              flex: 3,
+                              child: Container(
+                                child: Card(
+                                  color: cs.inverseSurface.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  child: const Text('Block 3'),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -94,7 +128,6 @@ class _FormScreenState extends ConsumerState<FormScreen> {
             ),
       body: Row(
         children: [
-          if (wide) const SideNav(activePath: '/dashboard'),
           Expanded(
             child: Column(children: [TopBar(wide: wide)]),
           ),
