@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/core/widgets/responsive.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_x.dart';
 import 'auth_session.dart';
 
@@ -66,10 +68,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     final auth = ref.read(authSessionProvider.notifier);
 
     try {
-      await auth.login(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
+      await auth.login(_emailController.text.trim(), _passwordController.text);
 
       if (!mounted) return;
 
@@ -78,9 +77,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       if (session.hasError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              session.error?.toString() ?? 'Failed to sign in',
-            ),
+            content: Text(session.error?.toString() ?? 'Failed to sign in'),
             backgroundColor: Colors.red,
           ),
         );
@@ -127,6 +124,190 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
     final isLoading = ref.watch(authSessionProvider).isLoading;
 
+    return Responsive(
+      mobile: mobileView(
+        isDesktop: isDesktop,
+        cs: cs,
+        sem: sem,
+        isLoading: isLoading,
+      ),
+      desktop: desktopView(
+        isDesktop: isDesktop,
+        cs: cs,
+        sem: sem,
+        isLoading: isLoading,
+      ),
+    );
+  }
+
+  Widget mobileView({
+    required bool isDesktop,
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+    required bool isLoading,
+  }) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 48),
+                const Text(
+                  'Venue Flow',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Login to manage your venues',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 32),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: _buildInputDecoration(
+                          cs: cs,
+                          hintText: 'admin@venue.com',
+                          prefixIcon: Icons.mail_outline_rounded,
+                        ),
+                        validator: (value) {
+                          if (value == null ||
+                              value.isEmpty ||
+                              !value.contains('@')) {
+                            return 'Please enter a valid email address';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'PASSWORD',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {},
+                            child: const Text(
+                              'Forgot Password?',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: _buildInputDecoration(
+                          cs: cs,
+                          hintText: '••••••••',
+                          prefixIcon: Icons.lock_outline_rounded,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null ||
+                              value.isEmpty ||
+                              value.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 54,
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : _handleSignIn,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF4F46E5),
+                            foregroundColor: Colors.white,
+                            elevation: 6,
+                            shadowColor: const Color(
+                              0xFF4F46E5,
+                            ).withOpacity(0.4),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Sign In',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Icon(Icons.arrow_forward_rounded, size: 18),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget desktopView({
+    required bool isDesktop,
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+    required bool isLoading,
+  }) {
     return Scaffold(
       body: SafeArea(
         child: LayoutBuilder(
@@ -237,12 +418,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               position: _slideAnimation,
                               child: Center(
                                 child: Container(
-                                  constraints: const BoxConstraints(maxWidth: 420),
+                                  constraints: const BoxConstraints(
+                                    maxWidth: 420,
+                                  ),
                                   child: Form(
                                     key: _formKey,
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
@@ -251,11 +436,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                               height: 48,
                                               decoration: BoxDecoration(
                                                 color: const Color(0xFF4F46E5),
-                                                borderRadius: BorderRadius.circular(12),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
                                                 boxShadow: [
                                                   BoxShadow(
-                                                    color: const Color(0xFF4F46E5)
-                                                        .withOpacity(0.3),
+                                                    color: const Color(
+                                                      0xFF4F46E5,
+                                                    ).withOpacity(0.3),
                                                     blurRadius: 16,
                                                     offset: const Offset(0, 4),
                                                   ),
@@ -290,9 +477,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                         const SizedBox(height: 8),
                                         const Text(
                                           'Login to manage your venues',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                          ),
+                                          style: TextStyle(fontSize: 14),
                                         ),
                                         const SizedBox(height: 32),
                                         Text(
@@ -307,11 +492,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                         const SizedBox(height: 8),
                                         TextFormField(
                                           controller: _emailController,
-                                          keyboardType: TextInputType.emailAddress,
+                                          keyboardType:
+                                              TextInputType.emailAddress,
                                           decoration: _buildInputDecoration(
                                             cs: cs,
                                             hintText: 'admin@venue.com',
-                                            prefixIcon: Icons.mail_outline_rounded,
+                                            prefixIcon:
+                                                Icons.mail_outline_rounded,
                                           ),
                                           validator: (value) {
                                             if (value == null ||
@@ -325,7 +512,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                         const SizedBox(height: 20),
                                         Row(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             const Text(
                                               'PASSWORD',
@@ -354,7 +541,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                           decoration: _buildInputDecoration(
                                             cs: cs,
                                             hintText: '••••••••',
-                                            prefixIcon: Icons.lock_outline_rounded,
+                                            prefixIcon:
+                                                Icons.lock_outline_rounded,
                                             suffixIcon: IconButton(
                                               icon: Icon(
                                                 _obscurePassword
@@ -365,7 +553,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                               onPressed: () {
                                                 setState(() {
                                                   _obscurePassword =
-                                                  !_obscurePassword;
+                                                      !_obscurePassword;
                                                 });
                                               },
                                             ),
@@ -388,46 +576,50 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                                 ? null
                                                 : _handleSignIn,
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                              const Color(0xFF4F46E5),
+                                              backgroundColor: const Color(
+                                                0xFF4F46E5,
+                                              ),
                                               foregroundColor: Colors.white,
                                               elevation: 6,
-                                              shadowColor: const Color(0xFF4F46E5)
-                                                  .withOpacity(0.4),
+                                              shadowColor: const Color(
+                                                0xFF4F46E5,
+                                              ).withOpacity(0.4),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
-                                                BorderRadius.circular(12),
+                                                    BorderRadius.circular(12),
                                               ),
                                             ),
                                             child: isLoading
                                                 ? const SizedBox(
-                                              width: 24,
-                                              height: 24,
-                                              child:
-                                              CircularProgressIndicator(
-                                                color: Colors.white,
-                                                strokeWidth: 2.5,
-                                              ),
-                                            )
+                                                    width: 24,
+                                                    height: 24,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                          color: Colors.white,
+                                                          strokeWidth: 2.5,
+                                                        ),
+                                                  )
                                                 : const Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  'Sign In',
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight:
-                                                    FontWeight.bold,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text(
+                                                        'Sign In',
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      SizedBox(width: 8),
+                                                      Icon(
+                                                        Icons
+                                                            .arrow_forward_rounded,
+                                                        size: 18,
+                                                      ),
+                                                    ],
                                                   ),
-                                                ),
-                                                SizedBox(width: 8),
-                                                Icon(
-                                                  Icons.arrow_forward_rounded,
-                                                  size: 18,
-                                                ),
-                                              ],
-                                            ),
                                           ),
                                         ),
                                         const Padding(
