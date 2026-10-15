@@ -19,7 +19,7 @@ class AuthController extends _$AuthController {
       final response = await ref.read(authRepositoryProvider).login(
         LoginRequest(email: email, password: password),
       );
-      await ref.read(tokenStorageProvider).saveToken(response.token);
+      await ref.read(tokenStorageProvider).saveToken(response.accessToken);
     });
   }
 
