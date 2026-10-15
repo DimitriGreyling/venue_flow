@@ -48,7 +48,29 @@ class _FormScreenState extends ConsumerState<FormScreen> {
         children: [
           if (wide) const SideNav(activePath: '/dashboard'),
           Expanded(
-            child: Column(children: [TopBar(wide: wide)]),
+            child: Column(
+              children: [
+                TopBar(wide: wide),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(wide ? 24 : 16),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: 1440),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(child: Text('Block 1')),
+                            Container(child: Text('Block 1')),
+                            Container(child: Text('Block 1')),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -66,10 +88,10 @@ class _FormScreenState extends ConsumerState<FormScreen> {
       drawer: wide
           ? null
           : Drawer(
-        width: 240,
-        backgroundColor: cs.surface,
-        child: SideNav(activePath: '/forms'),
-      ),
+              width: 240,
+              backgroundColor: cs.surface,
+              child: SideNav(activePath: '/forms'),
+            ),
       body: Row(
         children: [
           if (wide) const SideNav(activePath: '/dashboard'),
