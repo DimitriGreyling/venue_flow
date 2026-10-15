@@ -43,8 +43,9 @@ class _FormScreenState extends ConsumerState<FormScreen> {
       final screenSize = MediaQuery.sizeOf(context);
 
       // 1. Fields bar starts at Top Left
-      _floatingFieldsTop = statusBarHeight + 65.0; // Pushed down past status bar
-      _floatingFieldsLeft = 20.0;                  // Pinned to left edge
+      _floatingFieldsTop =
+          statusBarHeight + 65.0; // Pushed down past status bar
+      _floatingFieldsLeft = 20.0; // Pinned to left edge
 
       // 2. Settings bar starts at Top Right
       _floatingSettingsTop = statusBarHeight + 65.0;
@@ -54,6 +55,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
       _isPositionsInitialized = true;
     }
 
+    //Display mobile of desktop view based on the screen size
     return Responsive(
       mobile: mobileView(cs: cs, sem: sem, wideBreakpoint: _wideBreakpoint),
       desktop: desktopView(cs: cs, sem: sem, wideBreakpoint: _wideBreakpoint),
@@ -86,11 +88,51 @@ class _FormScreenState extends ConsumerState<FormScreen> {
               // Base Layer: Page layout content
               Row(
                 children: [
-                  if (wide) const SideNav(activePath: '/dashboard'),
                   Expanded(
                     child: Column(
                       children: [
                         TopBar(wide: wide),
+                        Row(
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _showFloatingFieldsBar =
+                                      !(_showFloatingFieldsBar ?? false);
+                                });
+                              },
+                              icon: Icon(
+                                showFields
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              label: Text(
+                                showFields
+                                    ? 'Hide Fields Floating Bar'
+                                    : 'Show Fields Floating Bar',
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _showFloatingSettingsBar =
+                                      !(_showFloatingSettingsBar ?? false);
+                                });
+                              },
+                              icon: Icon(
+                                showSettings
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                              ),
+                              label: Text(
+                                showSettings
+                                    ? 'Hide Settings Floating Bar'
+                                    : 'Show Settings Floating Bar',
+                              ),
+                            ),
+                          ],
+                        ),
                         Expanded(
                           child: SingleChildScrollView(
                             padding: EdgeInsets.all(wide ? 24 : 16),
@@ -115,45 +157,6 @@ class _FormScreenState extends ConsumerState<FormScreen> {
                                           children: [
                                             const Text('Block 2'),
                                             const SizedBox(height: 16),
-                                            ElevatedButton.icon(
-                                              onPressed: () {
-                                                setState(() {
-                                                  _showFloatingFieldsBar =
-                                                      !(_showFloatingFieldsBar ??
-                                                          false);
-                                                });
-                                              },
-                                              icon: Icon(
-                                                showFields
-                                                    ? Icons.visibility_off
-                                                    : Icons.visibility,
-                                              ),
-                                              label: Text(
-                                                showFields
-                                                    ? 'Hide Fields Floating Bar'
-                                                    : 'Show Fields Floating Bar',
-                                              ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            ElevatedButton.icon(
-                                              onPressed: () {
-                                                setState(() {
-                                                  _showFloatingSettingsBar =
-                                                      !(_showFloatingSettingsBar ??
-                                                          false);
-                                                });
-                                              },
-                                              icon: Icon(
-                                                showSettings
-                                                    ? Icons.visibility_off
-                                                    : Icons.visibility,
-                                              ),
-                                              label: Text(
-                                                showSettings
-                                                    ? 'Hide Settings Floating Bar'
-                                                    : 'Show Settings Floating Bar',
-                                              ),
-                                            ),
                                           ],
                                         ),
                                       ),
