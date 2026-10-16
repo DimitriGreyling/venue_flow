@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:venue_flow_app/core/widgets/status_badge.dart';
 
 import '../../../core/enums/badge_status.dart';
@@ -19,18 +20,38 @@ class AppointmentTile extends StatelessWidget {
 
     return Card(
       child: ListTile(
-        leading: const CircleAvatar(child: Icon(Icons.event)),
-        title: Text(appointment.venueName),
+        leading: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [const CircleAvatar(child: Icon(Icons.event))],
+        ),
+        title: Text(
+          appointment.venueName,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         subtitle: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: Text('$time\n${_formatLabel(appointment.type.name)}'),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '$time\n${_formatLabel(appointment.type.name)}',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+
+                const SizedBox(width: 8),
+                StatusBadge(
+                  label: _formatLabel(appointment.status.name),
+                  status: appointment.status.badgeStatus,
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            StatusBadge(
-              label: _formatLabel(appointment.status.name),
-              status: appointment.status.badgeStatus,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                IconButton(onPressed: () {}, icon: Icon(Mdi.eye)),
+                IconButton(onPressed: () {}, icon: Icon(Mdi.bookEdit)),
+              ],
             ),
           ],
         ),

@@ -6,6 +6,7 @@ import 'package:venue_flow_app/core/widgets/status_badge.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_x.dart' show ThemeX;
+import '../../../core/widgets/generic_loader.dart';
 import '../../../core/widgets/side_nav.dart';
 import '../domain/appointment.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -119,8 +120,9 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                     ),
                     Expanded(
                       child: appointmentsAsync.when(
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
+                        loading: () => const GenericLoader(
+                          message: 'Loading your appointments...',
+                        ),
                         error: (error, stackTrace) => Center(
                           child: Padding(
                             padding: const EdgeInsets.all(24),
