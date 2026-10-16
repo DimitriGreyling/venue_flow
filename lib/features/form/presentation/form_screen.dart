@@ -3,13 +3,11 @@ import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/core/widgets/responsive.dart';
 
+import '../../../core/config/tool_bar_options.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_x.dart';
 import '../../../core/widgets/side_nav.dart';
 import '../../../core/widgets/top_bar.dart';
-
-//Toolbar options
-enum ToolbarOptions { FormFields }
 
 class FormScreen extends ConsumerStatefulWidget {
   const FormScreen({super.key});
@@ -78,7 +76,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
               backgroundColor: cs.surface,
               child: SideNav(activePath: '/forms'),
             ),
-      floatingActionButton: PopupMenuButton<ToolbarOptions>(
+      floatingActionButton: PopupMenuButton<FormToolbarOptions>(
         tooltip: 'Toolbar',
         offset: const Offset(-50, -50),
         position: PopupMenuPosition.over,
@@ -92,7 +90,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
         ),
         onSelected: (value) {
           switch (value) {
-            case ToolbarOptions.FormFields:
+            case FormToolbarOptions.FormFields:
               setState(() {
                 _showFloatingFieldsBar = !(_showFloatingFieldsBar);
               });
@@ -101,7 +99,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
         },
         itemBuilder: (context) => [
           PopupMenuItem(
-            value: ToolbarOptions.FormFields,
+            value: FormToolbarOptions.FormFields,
             child: Row(
               children: [
                 Icon(Mdi.formSelect, color: sem.textMuted),
@@ -193,7 +191,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
         backgroundColor: cs.surface,
         child: SideNav(activePath: '/forms'),
       ),
-      floatingActionButton: PopupMenuButton<ToolbarOptions>(
+      floatingActionButton: PopupMenuButton<FormToolbarOptions>(
         tooltip: 'Toolbar',
         offset: const Offset(-50, -50),
         position: PopupMenuPosition.over,
@@ -207,7 +205,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
         ),
         onSelected: (value) {
           switch (value) {
-            case ToolbarOptions.FormFields:
+            case FormToolbarOptions.FormFields:
               setState(() {
                 _showFloatingFieldsBar = !(_showFloatingFieldsBar);
               });
@@ -216,7 +214,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
         },
         itemBuilder: (context) => [
           PopupMenuItem(
-            value: ToolbarOptions.FormFields,
+            value: FormToolbarOptions.FormFields,
             child: Row(
               children: [
                 Icon(Mdi.formSelect, color: sem.textMuted),
