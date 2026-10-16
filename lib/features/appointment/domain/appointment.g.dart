@@ -34,19 +34,18 @@ Map<String, dynamic> _$AppointmentToJson(_Appointment instance) =>
     };
 
 const _$AppointmentTypeEnumMap = {
-  AppointmentType.venueViewing: 'venueViewing',
-  AppointmentType.consultation: 'consultation',
-  AppointmentType.planningMeeting: 'planningMeeting',
-  AppointmentType.unknown: 'unknown',
+  AppointmentType.venueViewing: 'VenueViewing',
+  AppointmentType.consultation: 'Consultation',
+  AppointmentType.planningMeeting: 'PlanningMeeting',
+  AppointmentType.unknown: 'Unknown',
 };
 
 const _$AppointmentStatusEnumMap = {
-  AppointmentStatus.pending: 'pending',
-  AppointmentStatus.confirmed: 'confirmed',
-  AppointmentStatus.rescheduleProposed: 'rescheduleProposed',
-  AppointmentStatus.declined: 'declined',
-  AppointmentStatus.cancelled: 'cancelled',
-  AppointmentStatus.completed: 'completed',
-  AppointmentStatus.noShow: 'noShow',
-  AppointmentStatus.unknown: 'unknown',
+  AppointmentStatus.pending: 'Pending',
+  AppointmentStatus.confirmed: 'Confirmed',
+  AppointmentStatus.rescheduleProposed: 'RescheduleProposed',
+  AppointmentStatus.declined: 'Declined',
+  AppointmentStatus.cancelled: 'Cancelled',
+  AppointmentStatus.completed: 'Completed',
+  AppointmentStatus.noShow: 'NoShow',
 };

@@ -16,7 +16,7 @@ const _navItems = [
   NavItem(Icons.construction_outlined, 'Equipment'),
   NavItem(Icons.receipt_outlined, 'Invoices'),
   NavItem(Icons.description_outlined, 'Forms', '/forms'),
-  NavItem(Icons.calendar_month_outlined, 'Calendar'),
+  NavItem(Icons.calendar_month_outlined, 'Calendar','/appointments'),
   NavItem(Icons.notifications_outlined, 'Notifications'),
   NavItem(Icons.settings_outlined, 'Settings'),
 ];

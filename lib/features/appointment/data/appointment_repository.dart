@@ -16,17 +16,19 @@ class AppointmentsRepository {
     required DateTime toUtc,
   }) async {
     final response = await _dio.get(
-      '/api/appointments/calendar',
-      queryParameters: {
-        'fromUtc': fromUtc.toUtc().toIso8601String(),
-        'toUtc': toUtc.toUtc().toIso8601String(),
-      },
+      '/api/appointments/my',
+      // queryParameters: {
+      //   'fromUtc': fromUtc.toUtc().toIso8601String(),
+      //   'toUtc': toUtc.toUtc().toIso8601String(),
+      // },
     );
 
     final data = response.data;
 
     // Supports either a direct JSON array or a common wrapped response.
     final List<dynamic> items;
+    
+    print('Response data: $data');
 
     if (data is List) {
       items = data;

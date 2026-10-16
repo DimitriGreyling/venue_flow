@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:venue_flow_app/core/enums/appointment_type.dart';
+import '../enums/appointment_status.dart';
+import '../enums/badge_status.dart';
 import '../theme/theme_x.dart';
-
-enum BadgeStatus { success, warning, error, info }
 
 class StatusBadge extends StatelessWidget {
   const StatusBadge({super.key, required this.label, required this.status});
@@ -16,6 +17,7 @@ class StatusBadge extends StatelessWidget {
       BadgeStatus.warning => context.semantic.warning,
       BadgeStatus.info => context.semantic.info,
       BadgeStatus.error => Theme.of(context).colorScheme.error,
+      BadgeStatus.neutral => context.semantic.textMuted,
     };
 
     return Container(
