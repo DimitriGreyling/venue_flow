@@ -4,6 +4,8 @@ import 'package:venue_flow_app/core/enums/badge_status.dart';
 import 'package:venue_flow_app/core/widgets/responsive.dart';
 import 'package:venue_flow_app/core/widgets/status_badge.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
+import 'package:venue_flow_app/features/appointment/domain/appointment_days.dart';
+import 'package:venue_flow_app/features/appointment/domain/appointment_month.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_x.dart' show ThemeX;
 import '../../../core/widgets/generic_loader.dart';
@@ -25,12 +27,12 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
 
-  CalendarMonth get _month =>
+  CalendarMonthYearAndVenue get _month =>
       (year: _focusedDay.year, month: _focusedDay.month);
 
   @override
   Widget build(BuildContext context) {
-    final appointmentsAsync = ref.watch(appointmentsForMonthProvider(_month));
+    final appointmentsAsync = ref.watch(appointmentIdsProvider(_month));
     final cs = Theme.of(context).colorScheme;
     final sem = context.semantic;
     const _wideBreakpoint = 1000.0;
@@ -52,7 +54,7 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
   }
 
   Widget viewMobile({
-    required AsyncValue<List<Appointment>> appointmentsAsync,
+    required AsyncValue<AppointmentMonth> appointmentsAsync,
     required ColorScheme cs,
     required AppSemanticColors sem,
     required double wideBreakpoint,
@@ -94,9 +96,7 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                         children: [
                           ElevatedButton.icon(
                             onPressed: () {
-                              ref.invalidate(
-                                appointmentsForMonthProvider(_month),
-                              );
+                              ref.invalidate(appointmentIdsProvider(_month));
                             },
                             icon: const Icon(Icons.refresh),
                             label: Text(
@@ -141,7 +141,7 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                                 FilledButton(
                                   onPressed: () {
                                     ref.invalidate(
-                                      appointmentsForMonthProvider(_month),
+                                      appointmentIdsProvider(_month),
                                     );
                                   },
                                   child: const Text('Retry'),
@@ -151,20 +151,28 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                           ),
                         ),
                         data: (appointments) {
-                          final selectedAppointments =
-                              appointments.where((appointment) {
-                                return isSameDay(
-                                  appointment.startAtUtc.toLocal(),
-                                  _selectedDay,
-                                );
-                              }).toList()..sort(
-                                (a, b) => a.startAtUtc.compareTo(b.startAtUtc),
+                          final selectedAppointments = appointments.days.where((
+                            appointment,
+                          ) {
+                            return isSameDay(
+                              appointment.date.toLocal(),
+                              _selectedDay,
+                            );
+                          }).toList()..sort((a, b) => a.date.compareTo(b.date));
+
+                          final appointmentItems = selectedAppointments.expand((appointment) {
+                            return appointment.appointmentIds.map((appointmentId) {
+                              return (
+                              id: appointmentId,
+                              date: appointment.date,
                               );
+                            });
+                          }).toList();
 
                           return Column(
                             children: [
                               Card(
-                                child: TableCalendar<Appointment>(
+                                child: TableCalendar<AppointmentDays>(
                                   firstDay: DateTime(2020),
                                   lastDay: DateTime(2100),
                                   focusedDay: _focusedDay,
@@ -172,9 +180,11 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                                   selectedDayPredicate: (day) =>
                                       isSameDay(day, _selectedDay),
                                   eventLoader: (day) {
-                                    return appointments.where((appointment) {
+                                    return appointments.days.where((
+                                      appointment,
+                                    ) {
                                       return isSameDay(
-                                        appointment.startAtUtc.toLocal(),
+                                        appointment.date.toLocal(),
                                         day,
                                       );
                                     }).toList();
@@ -192,17 +202,17 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                                   },
                                   calendarStyle: CalendarStyle(
                                     markerDecoration: BoxDecoration(
-                                      color: cs.tertiary,
+                                      color: Colors.green,
                                       shape: BoxShape.circle,
                                     ),
                                     todayDecoration: BoxDecoration(
                                       color: cs.secondary.withValues(
-                                        alpha: 0.2,
+                                        alpha: 0.3,
                                       ),
                                       shape: BoxShape.circle,
                                     ),
                                     selectedDecoration: BoxDecoration(
-                                      color: cs.primary,
+                                      color: cs.secondaryFixed,
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -219,14 +229,18 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                                         '${_selectedDay.day}/'
                                         '${_selectedDay.month}/'
                                         '${_selectedDay.year}',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.titleMedium,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20,
+                                            ),
                                       ),
                                     ),
                                     StatusBadge(
                                       label:
-                                          'Total: ${selectedAppointments.length}',
+                                          'Total Appointments: ${selectedAppointments.length}',
                                       status: BadgeStatus.neutral,
                                     ),
                                   ],
@@ -239,22 +253,57 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                                           'No appointments for this day.',
                                         ),
                                       )
-                                    : ListView.separated(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                        ),
-                                        itemCount: selectedAppointments.length,
-                                        separatorBuilder: (_, __) =>
-                                            const SizedBox(height: 8),
-                                        itemBuilder: (context, index) {
-                                          final appointment =
-                                              selectedAppointments[index];
+                                    :ListView.separated(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  itemCount: appointmentItems.length,
+                                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                                  itemBuilder: (context, index) {
+                                    final item = appointmentItems[index];
 
-                                          return AppointmentTile(
-                                            appointment: appointment,
-                                          );
-                                        },
-                                      ),
+                                    return AppointmentTitle(
+                                      appointmentId: item.id,
+                                      appointmentStartDate: item.date,
+                                      appointmentEndDate: item.date,
+                                    );
+                                  },
+                                ),
+
+                                // ListView.separated(
+                                //   padding: const EdgeInsets.symmetric(
+                                //     horizontal: 16,
+                                //   ),
+                                //   itemCount: selectedAppointments.length,
+                                //   separatorBuilder: (_, __) =>
+                                //   const SizedBox(height: 8),
+                                //   itemBuilder: (context, index) {
+                                //     final appointment =
+                                //     selectedAppointments[index];
+                                //
+                                //     return ListView.separated(
+                                //       padding: const EdgeInsets.symmetric(
+                                //         horizontal: 16,
+                                //       ),
+                                //       itemCount: appointment
+                                //           .appointmentIds
+                                //           .length,
+                                //       separatorBuilder: (_, __) =>
+                                //       const SizedBox(height: 8),
+                                //       itemBuilder: (context, index) {
+                                //         final appointmentDate =
+                                //         appointment
+                                //             .appointmentIds[index];
+                                //
+                                //         return AppointmentTitle(
+                                //           appointmentId: appointmentDate,
+                                //           appointmentStartDate:
+                                //           appointment.date,
+                                //           appointmentEndDate:
+                                //           appointment.date,
+                                //         );
+                                //       },
+                                //     );
+                                //   },
+                                // ),
                               ),
                             ],
                           );
@@ -272,7 +321,7 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
   }
 
   Widget viewDesktop({
-    required AsyncValue<List<Appointment>> appointmentsAsync,
+    required AsyncValue<AppointmentMonth> appointmentsAsync,
     required ColorScheme cs,
     required AppSemanticColors sem,
     required double wideBreakpoint,
@@ -299,105 +348,213 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
               backgroundColor: cs.surface,
               child: SideNav(activePath: '/appointments'),
             ),
-      body: appointmentsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline, size: 40),
-                const SizedBox(height: 12),
-                const Text('Could not load appointments.'),
-                const SizedBox(height: 8),
-                Text(error.toString(), textAlign: TextAlign.center),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: () {
-                    ref.invalidate(appointmentsForMonthProvider(_month));
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
-        ),
-        data: (appointments) {
-          final selectedAppointments = appointments.where((appointment) {
-            return isSameDay(appointment.startAtUtc.toLocal(), _selectedDay);
-          }).toList()..sort((a, b) => a.startAtUtc.compareTo(b.startAtUtc));
-
+      body: LayoutBuilder(
+        builder: (context, constraints) {
           return Column(
             children: [
-              TableCalendar<Appointment>(
-                firstDay: DateTime(2020),
-                lastDay: DateTime(2100),
-                focusedDay: _focusedDay,
-                calendarFormat: CalendarFormat.month,
-                selectedDayPredicate: (day) => isSameDay(day, _selectedDay),
-                eventLoader: (day) {
-                  return appointments.where((appointment) {
-                    return isSameDay(appointment.startAtUtc.toLocal(), day);
-                  }).toList();
-                },
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _selectedDay = selectedDay;
-                    _focusedDay = focusedDay;
-                  });
-                },
-                onPageChanged: (focusedDay) {
-                  setState(() {
-                    _focusedDay = focusedDay;
-                  });
-                },
-                calendarStyle: const CalendarStyle(
-                  markerDecoration: BoxDecoration(
-                    color: Colors.deepOrange,
-                    shape: BoxShape.circle,
-                  ),
-                  todayDecoration: BoxDecoration(
-                    color: Colors.blueGrey,
-                    shape: BoxShape.circle,
-                  ),
-                  selectedDecoration: BoxDecoration(
-                    color: Colors.deepOrange,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-              const Divider(height: 1),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
+              Expanded(
+                child: Column(
                   children: [
-                    Expanded(
-                      child: Text(
-                        'Appointments for '
-                        '${_selectedDay.day}/'
-                        '${_selectedDay.month}/'
-                        '${_selectedDay.year}',
-                        style: Theme.of(context).textTheme.titleMedium,
+                    TopBar(wide: wide),
+                    Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              ref.invalidate(appointmentIdsProvider(_month));
+                            },
+                            icon: const Icon(Icons.refresh),
+                            label: Text(
+                              'Refresh',
+                              style: TextStyle(color: cs.onSecondary),
+                            ),
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all(
+                                cs.secondary,
+                              ),
+                              iconColor: WidgetStateProperty.all(
+                                cs.onSecondary,
+                              ),
+                              textStyle: WidgetStateProperty.all(
+                                TextStyle(color: cs.onSecondary),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text('${selectedAppointments.length}'),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: selectedAppointments.isEmpty
-                    ? const Center(child: Text('No appointments for this day.'))
-                    : ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: selectedAppointments.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 8),
-                        itemBuilder: (context, index) {
-                          final appointment = selectedAppointments[index];
+                    Expanded(
+                      child: appointmentsAsync.when(
+                        loading: () => const GenericLoader(
+                          message: 'Loading your appointments...',
+                        ),
+                        error: (error, stackTrace) => Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.error_outline, size: 40),
+                                const SizedBox(height: 12),
+                                const Text('Could not load appointments.'),
+                                const SizedBox(height: 8),
+                                Text(
+                                  error.toString(),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 16),
+                                FilledButton(
+                                  onPressed: () {
+                                    ref.invalidate(
+                                      appointmentIdsProvider(_month),
+                                    );
+                                  },
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        data: (appointments) {
+                          final selectedAppointments = appointments.days.where((
+                            appointment,
+                          ) {
+                            return isSameDay(
+                              appointment.date.toLocal(),
+                              _selectedDay,
+                            );
+                          }).toList()..sort((a, b) => a.date.compareTo(b.date));
 
-                          return AppointmentTile(appointment: appointment);
+                          return Column(
+                            children: [
+                              Card(
+                                child: TableCalendar<AppointmentDays>(
+                                  firstDay: DateTime(2020),
+                                  lastDay: DateTime(2100),
+                                  focusedDay: _focusedDay,
+                                  calendarFormat: CalendarFormat.month,
+                                  selectedDayPredicate: (day) =>
+                                      isSameDay(day, _selectedDay),
+                                  eventLoader: (day) {
+                                    return appointments.days.where((
+                                      appointment,
+                                    ) {
+                                      return isSameDay(
+                                        appointment.date.toLocal(),
+                                        day,
+                                      );
+                                    }).toList();
+                                  },
+                                  onDaySelected: (selectedDay, focusedDay) {
+                                    setState(() {
+                                      _selectedDay = selectedDay;
+                                      _focusedDay = focusedDay;
+                                    });
+                                  },
+                                  onPageChanged: (focusedDay) {
+                                    setState(() {
+                                      _focusedDay = focusedDay;
+                                    });
+                                  },
+                                  calendarStyle: CalendarStyle(
+                                    markerDecoration: BoxDecoration(
+                                      color: Colors.green,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    todayDecoration: BoxDecoration(
+                                      color: cs.secondary.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    selectedDecoration: BoxDecoration(
+                                      color: cs.secondaryFixed,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        'Appointments for '
+                                        '${_selectedDay.day}/'
+                                        '${_selectedDay.month}/'
+                                        '${_selectedDay.year}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20,
+                                            ),
+                                      ),
+                                    ),
+                                    StatusBadge(
+                                      label:
+                                          'Total Appointments: ${selectedAppointments.length}',
+                                      status: BadgeStatus.neutral,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: selectedAppointments.isEmpty
+                                    ? const Center(
+                                        child: Text(
+                                          'No appointments for this day.',
+                                        ),
+                                      )
+                                    : ListView.separated(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                        ),
+                                        itemCount: selectedAppointments.length,
+                                        separatorBuilder: (_, __) =>
+                                            const SizedBox(height: 8),
+                                        itemBuilder: (context, index) {
+                                          final appointment =
+                                              selectedAppointments[index];
+
+                                          return ListView.separated(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                            ),
+                                            itemCount: appointment
+                                                .appointmentIds
+                                                .length,
+                                            separatorBuilder: (_, __) =>
+                                                const SizedBox(height: 8),
+                                            itemBuilder: (context, index) {
+                                              final appointmentDate =
+                                                  appointment
+                                                      .appointmentIds[index];
+
+                                              return AppointmentTitle(
+                                                appointmentId: appointmentDate,
+                                                appointmentStartDate:
+                                                    appointment.date,
+                                                appointmentEndDate:
+                                                    appointment.date,
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                              ),
+                            ],
+                          );
                         },
                       ),
+                    ),
+                  ],
+                ),
               ),
             ],
           );

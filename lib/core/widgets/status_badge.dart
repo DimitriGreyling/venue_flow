@@ -5,10 +5,16 @@ import '../enums/badge_status.dart';
 import '../theme/theme_x.dart';
 
 class StatusBadge extends StatelessWidget {
-  const StatusBadge({super.key, required this.label, required this.status});
+  const StatusBadge({
+    super.key,
+    required this.label,
+    required this.status,
+    this.showBulletPoint = false,
+  });
 
   final String label;
   final BadgeStatus status;
+  final bool showBulletPoint;
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +35,13 @@ class StatusBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
+          if (showBulletPoint)
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+          if (showBulletPoint) const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
