@@ -49,8 +49,8 @@ class _FormScreenState extends ConsumerState<FormScreen> {
 
       // 2. Settings bar starts at Top Right
       _floatingSettingsTop = statusBarHeight + 65.0;
-      // Subtracting ~180px gives the card enough breathing room so it doesn't spawn off-screen
-      _floatingSettingsLeft = screenSize.width - 190.0;
+      //Show settings bar on the right side of the screen
+      _floatingSettingsLeft = 20.0;
 
       _isPositionsInitialized = true;
     }
@@ -615,7 +615,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
 
     return Positioned(
       top: _floatingSettingsTop,
-      left: _floatingSettingsLeft,
+      right: _floatingSettingsLeft,
       child: GestureDetector(
         onPanUpdate: (details) {
           setState(() {
