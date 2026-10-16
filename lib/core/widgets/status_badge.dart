@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:venue_flow_app/core/enums/appointment_type.dart';
+import '../enums/appointment_status.dart';
+import '../enums/badge_status.dart';
 import '../theme/theme_x.dart';
 
-enum BadgeStatus { success, warning, error, info }
-
 class StatusBadge extends StatelessWidget {
-  const StatusBadge({super.key, required this.label, required this.status});
+  const StatusBadge({
+    super.key,
+    required this.label,
+    required this.status,
+    this.showBulletPoint = false,
+  });
 
   final String label;
   final BadgeStatus status;
+  final bool showBulletPoint;
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +23,7 @@ class StatusBadge extends StatelessWidget {
       BadgeStatus.warning => context.semantic.warning,
       BadgeStatus.info => context.semantic.info,
       BadgeStatus.error => Theme.of(context).colorScheme.error,
+      BadgeStatus.neutral => context.semantic.textMuted,
     };
 
     return Container(
@@ -27,12 +35,13 @@ class StatusBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 6),
+          if (showBulletPoint)
+            Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+          if (showBulletPoint) const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(

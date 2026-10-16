@@ -55,9 +55,9 @@ class AppTheme {
   // Brand colors from design.md
   static const _primary = Color(0xFF3525CD);
   static const _primaryContainer = Color(0xFF4F46E5);
-  static const _secondary = Color(0xFF4442E3);
+  static const _secondary = Color(0xFF6161FF);
   static const _secondaryContainer = Color(0xFF5F5FFD);
-  static const _tertiary = Color(0xFF7E3000);
+  static const _tertiary = Color(0xFFA54100);
   static const _error = Color(0xFFEF4444);
 
   // Surfaces

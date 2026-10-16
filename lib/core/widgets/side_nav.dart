@@ -16,7 +16,7 @@ const _navItems = [
   NavItem(Icons.construction_outlined, 'Equipment'),
   NavItem(Icons.receipt_outlined, 'Invoices'),
   NavItem(Icons.description_outlined, 'Forms', '/forms'),
-  NavItem(Icons.calendar_month_outlined, 'Calendar'),
+  NavItem(Icons.calendar_month_outlined, 'Calendar','/appointments'),
   NavItem(Icons.notifications_outlined, 'Notifications'),
   NavItem(Icons.settings_outlined, 'Settings'),
 ];
@@ -35,7 +35,7 @@ class SideNav extends StatelessWidget {
       width: 240,
       decoration:  BoxDecoration(
         color: cs.surface,
-        border: Border(right: BorderSide(color: sem.textMuted)),
+        border: Border(right: BorderSide(color: sem.textMuted.withValues(alpha: 0.1))),
       ),
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Column(
@@ -74,7 +74,7 @@ class SideNav extends StatelessWidget {
               ],
             ),
           ),
-          Divider(height: 1, color: sem.textMuted),
+          Divider(height: 1, color: sem.textMuted.withValues(alpha: 0.1)),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
             child: Column(
