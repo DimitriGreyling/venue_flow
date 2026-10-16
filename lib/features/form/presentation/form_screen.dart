@@ -43,8 +43,6 @@ class _FormScreenState extends ConsumerState<FormScreen> {
 
     // Initialize positions dynamically on first build based on screen dimensions
     if (!_isPositionsInitialized) {
-      final screenSize = MediaQuery.sizeOf(context);
-
       // 1. Fields bar starts at Top Left
       _floatingFieldsTop =
           statusBarHeight + 65.0; // Pushed down past status bar
@@ -96,12 +94,10 @@ class _FormScreenState extends ConsumerState<FormScreen> {
           switch (value) {
             case ToolbarOptions.FormFields:
               setState(() {
-                _showFloatingFieldsBar = !(_showFloatingFieldsBar ?? false);
+                _showFloatingFieldsBar = !(_showFloatingFieldsBar);
               });
               break;
-            default:
-              break;
-          }
+            }
         },
         itemBuilder: (context) => [
           PopupMenuItem(
@@ -119,8 +115,8 @@ class _FormScreenState extends ConsumerState<FormScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           // SAFE NULL-CHECK: Safeguard boolean states before reading them inside the Stack layout template
-          final showFields = _showFloatingFieldsBar ?? false;
-          final showSettings = _showFloatingSettingsBar ?? false;
+          final showFields = _showFloatingFieldsBar  ;
+          final showSettings = _showFloatingSettingsBar  ;
 
           return Stack(
             children: [
@@ -213,10 +209,8 @@ class _FormScreenState extends ConsumerState<FormScreen> {
           switch (value) {
             case ToolbarOptions.FormFields:
               setState(() {
-                _showFloatingFieldsBar = !(_showFloatingFieldsBar ?? false);
+                _showFloatingFieldsBar = !(_showFloatingFieldsBar);
               });
-              break;
-            default:
               break;
           }
         },
@@ -236,8 +230,8 @@ class _FormScreenState extends ConsumerState<FormScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           // SAFE NULL-CHECK: Safeguard boolean states before reading them inside the Stack layout template
-          final showFields = _showFloatingFieldsBar ?? false;
-          final showSettings = _showFloatingSettingsBar ?? false;
+          final showFields = _showFloatingFieldsBar;
+          final showSettings = _showFloatingSettingsBar;
 
           return Stack(
             children: [
@@ -301,7 +295,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
   }
 
   Widget _buildFieldsFloatingBar(ColorScheme cs, BoxConstraints constraints) {
-    final showFields = _showFloatingFieldsBar ?? false;
+    final showFields = _showFloatingFieldsBar;
     if (!showFields) return const SizedBox.shrink();
 
     // The button needs ~20px of extra room to stick out without hit-test clipping
@@ -421,7 +415,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
 
   // Floating Bar 2: Form Settings
   Widget _buildSettingsFloatingBar(ColorScheme cs, BoxConstraints constraints) {
-    final showSettings = _showFloatingSettingsBar ?? false;
+    final showSettings = _showFloatingSettingsBar;
     // The button needs ~20px of extra room to stick out without hit-test clipping
     const double buttonOverhang = 20.0;
 
