@@ -6,8 +6,8 @@ part 'appointment.freezed.dart';
 part 'appointment.g.dart';
 
 @freezed
-abstract class AppointmentModel with _$AppointmentModel {
-  const factory AppointmentModel({
+abstract class Appointment with _$Appointment {
+  const factory Appointment({
     required String id,
     required String venueId,
     required String venueName,
@@ -18,8 +18,8 @@ abstract class AppointmentModel with _$AppointmentModel {
     required DateTime startAtUtc,
     required DateTime endAtUtc,
     String? clientNotes,
-  }) = _AppointmentModel;
+  }) = _Appointment;
 
-  factory AppointmentModel.fromJson(Map<String, dynamic> json) =>
-      _$AppointmentModelFromJson(json);
+  factory Appointment.fromJson(Map<String, dynamic> json) =>
+      _$AppointmentFromJson(json);
 }

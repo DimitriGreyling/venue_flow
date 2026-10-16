@@ -6,21 +6,20 @@ part of 'appointment.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_AppointmentModel _$AppointmentModelFromJson(Map<String, dynamic> json) =>
-    _AppointmentModel(
-      id: json['id'] as String,
-      venueId: json['venueId'] as String,
-      venueName: json['venueName'] as String,
-      clientUserId: json['clientUserId'] as String?,
-      coordinatorUserId: json['coordinatorUserId'] as String?,
-      type: $enumDecode(_$AppointmentTypeEnumMap, json['type']),
-      status: $enumDecode(_$AppointmentStatusEnumMap, json['status']),
-      startAtUtc: DateTime.parse(json['startAtUtc'] as String),
-      endAtUtc: DateTime.parse(json['endAtUtc'] as String),
-      clientNotes: json['clientNotes'] as String?,
-    );
+_Appointment _$AppointmentFromJson(Map<String, dynamic> json) => _Appointment(
+  id: json['id'] as String,
+  venueId: json['venueId'] as String,
+  venueName: json['venueName'] as String,
+  clientUserId: json['clientUserId'] as String?,
+  coordinatorUserId: json['coordinatorUserId'] as String?,
+  type: $enumDecode(_$AppointmentTypeEnumMap, json['type']),
+  status: $enumDecode(_$AppointmentStatusEnumMap, json['status']),
+  startAtUtc: DateTime.parse(json['startAtUtc'] as String),
+  endAtUtc: DateTime.parse(json['endAtUtc'] as String),
+  clientNotes: json['clientNotes'] as String?,
+);
 
-Map<String, dynamic> _$AppointmentModelToJson(_AppointmentModel instance) =>
+Map<String, dynamic> _$AppointmentToJson(_Appointment instance) =>
     <String, dynamic>{
       'id': instance.id,
       'venueId': instance.venueId,

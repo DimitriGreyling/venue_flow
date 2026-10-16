@@ -14,44 +14,44 @@ part of 'appointment.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$AppointmentModel {
+mixin _$Appointment {
 
  String get id; String get venueId; String get venueName; String? get clientUserId; String? get coordinatorUserId; AppointmentType get type; AppointmentStatus get status; DateTime get startAtUtc; DateTime get endAtUtc; String? get clientNotes;
-/// Create a copy of AppointmentModel
+/// Create a copy of Appointment
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$AppointmentModelCopyWith<AppointmentModel> get copyWith => _$AppointmentModelCopyWithImpl<AppointmentModel>(this as AppointmentModel, _$identity);
+$AppointmentCopyWith<Appointment> get copyWith => _$AppointmentCopyWithImpl<Appointment>(this as Appointment, _$identity);
 
-  /// Serializes this AppointmentModel to a JSON map.
+  /// Serializes this Appointment to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  final _this = this as AppointmentModel;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppointmentModel&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.venueId, _this.venueId) || other.venueId == _this.venueId)&&(identical(other.venueName, _this.venueName) || other.venueName == _this.venueName)&&(identical(other.clientUserId, _this.clientUserId) || other.clientUserId == _this.clientUserId)&&(identical(other.coordinatorUserId, _this.coordinatorUserId) || other.coordinatorUserId == _this.coordinatorUserId)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.startAtUtc, _this.startAtUtc) || other.startAtUtc == _this.startAtUtc)&&(identical(other.endAtUtc, _this.endAtUtc) || other.endAtUtc == _this.endAtUtc)&&(identical(other.clientNotes, _this.clientNotes) || other.clientNotes == _this.clientNotes));
+  final _this = this as Appointment;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Appointment&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.venueId, _this.venueId) || other.venueId == _this.venueId)&&(identical(other.venueName, _this.venueName) || other.venueName == _this.venueName)&&(identical(other.clientUserId, _this.clientUserId) || other.clientUserId == _this.clientUserId)&&(identical(other.coordinatorUserId, _this.coordinatorUserId) || other.coordinatorUserId == _this.coordinatorUserId)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.startAtUtc, _this.startAtUtc) || other.startAtUtc == _this.startAtUtc)&&(identical(other.endAtUtc, _this.endAtUtc) || other.endAtUtc == _this.endAtUtc)&&(identical(other.clientNotes, _this.clientNotes) || other.clientNotes == _this.clientNotes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-  final _this = this as AppointmentModel;
+  final _this = this as Appointment;
   return Object.hash(runtimeType,_this.id,_this.venueId,_this.venueName,_this.clientUserId,_this.coordinatorUserId,_this.type,_this.status,_this.startAtUtc,_this.endAtUtc,_this.clientNotes);
 }
 
 @override
 String toString() {
-  final _this = this as AppointmentModel;
-  return 'AppointmentModel(id: ${_this.id}, venueId: ${_this.venueId}, venueName: ${_this.venueName}, clientUserId: ${_this.clientUserId}, coordinatorUserId: ${_this.coordinatorUserId}, type: ${_this.type}, status: ${_this.status}, startAtUtc: ${_this.startAtUtc}, endAtUtc: ${_this.endAtUtc}, clientNotes: ${_this.clientNotes})';
+  final _this = this as Appointment;
+  return 'Appointment(id: ${_this.id}, venueId: ${_this.venueId}, venueName: ${_this.venueName}, clientUserId: ${_this.clientUserId}, coordinatorUserId: ${_this.coordinatorUserId}, type: ${_this.type}, status: ${_this.status}, startAtUtc: ${_this.startAtUtc}, endAtUtc: ${_this.endAtUtc}, clientNotes: ${_this.clientNotes})';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $AppointmentModelCopyWith<$Res>  {
-  factory $AppointmentModelCopyWith(AppointmentModel value, $Res Function(AppointmentModel) _then) = _$AppointmentModelCopyWithImpl;
+abstract mixin class $AppointmentCopyWith<$Res>  {
+  factory $AppointmentCopyWith(Appointment value, $Res Function(Appointment) _then) = _$AppointmentCopyWithImpl;
 @useResult
 $Res call({
  String id, String venueId, String venueName, String? clientUserId, String? coordinatorUserId, AppointmentType type, AppointmentStatus status, DateTime startAtUtc, DateTime endAtUtc, String? clientNotes
@@ -62,17 +62,17 @@ $Res call({
 
 }
 /// @nodoc
-class _$AppointmentModelCopyWithImpl<$Res>
-    implements $AppointmentModelCopyWith<$Res> {
-  _$AppointmentModelCopyWithImpl(this._self, this._then);
+class _$AppointmentCopyWithImpl<$Res>
+    implements $AppointmentCopyWith<$Res> {
+  _$AppointmentCopyWithImpl(this._self, this._then);
 
-  final AppointmentModel _self;
-  final $Res Function(AppointmentModel) _then;
+  final Appointment _self;
+  final $Res Function(Appointment) _then;
 
-/// Create a copy of AppointmentModel
+/// Create a copy of Appointment
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? venueId = null,Object? venueName = null,Object? clientUserId = freezed,Object? coordinatorUserId = freezed,Object? type = null,Object? status = null,Object? startAtUtc = null,Object? endAtUtc = null,Object? clientNotes = freezed,}) {
-  return _then(AppointmentModel(
+  return _then(Appointment(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,venueId: null == venueId ? _self.venueId : venueId // ignore: cast_nullable_to_non_nullable
 as String,venueName: null == venueName ? _self.venueName : venueName // ignore: cast_nullable_to_non_nullable
@@ -90,8 +90,8 @@ as String?,
 }
 
 
-/// Adds pattern-matching-related methods to [AppointmentModel].
-extension AppointmentModelPatterns on AppointmentModel {
+/// Adds pattern-matching-related methods to [Appointment].
+extension AppointmentPatterns on Appointment {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -104,10 +104,10 @@ extension AppointmentModelPatterns on AppointmentModel {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _AppointmentModel value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _Appointment value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _AppointmentModel() when $default != null:
+case _Appointment() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -126,10 +126,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _AppointmentModel value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _Appointment value)  $default,){
 final _that = this;
 switch (_that) {
-case _AppointmentModel():
+case _Appointment():
 return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -147,10 +147,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _AppointmentModel value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _Appointment value)?  $default,){
 final _that = this;
 switch (_that) {
-case _AppointmentModel() when $default != null:
+case _Appointment() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -170,7 +170,7 @@ return $default(_that);case _:
 
 @optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String venueId,  String venueName,  String? clientUserId,  String? coordinatorUserId,  AppointmentType type,  AppointmentStatus status,  DateTime startAtUtc,  DateTime endAtUtc,  String? clientNotes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _AppointmentModel() when $default != null:
+case _Appointment() when $default != null:
 return $default(_that.id,_that.venueId,_that.venueName,_that.clientUserId,_that.coordinatorUserId,_that.type,_that.status,_that.startAtUtc,_that.endAtUtc,_that.clientNotes);case _:
   return orElse();
 
@@ -191,7 +191,7 @@ return $default(_that.id,_that.venueId,_that.venueName,_that.clientUserId,_that.
 
 @optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String venueId,  String venueName,  String? clientUserId,  String? coordinatorUserId,  AppointmentType type,  AppointmentStatus status,  DateTime startAtUtc,  DateTime endAtUtc,  String? clientNotes)  $default,) {final _that = this;
 switch (_that) {
-case _AppointmentModel():
+case _Appointment():
 return $default(_that.id,_that.venueId,_that.venueName,_that.clientUserId,_that.coordinatorUserId,_that.type,_that.status,_that.startAtUtc,_that.endAtUtc,_that.clientNotes);case _:
   throw StateError('Unexpected subclass');
 
@@ -211,7 +211,7 @@ return $default(_that.id,_that.venueId,_that.venueName,_that.clientUserId,_that.
 
 @optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String venueId,  String venueName,  String? clientUserId,  String? coordinatorUserId,  AppointmentType type,  AppointmentStatus status,  DateTime startAtUtc,  DateTime endAtUtc,  String? clientNotes)?  $default,) {final _that = this;
 switch (_that) {
-case _AppointmentModel() when $default != null:
+case _Appointment() when $default != null:
 return $default(_that.id,_that.venueId,_that.venueName,_that.clientUserId,_that.coordinatorUserId,_that.type,_that.status,_that.startAtUtc,_that.endAtUtc,_that.clientNotes);case _:
   return null;
 
@@ -223,9 +223,9 @@ return $default(_that.id,_that.venueId,_that.venueName,_that.clientUserId,_that.
 /// @nodoc
 @JsonSerializable()
 
-class _AppointmentModel implements AppointmentModel {
-  const _AppointmentModel({required this.id, required this.venueId, required this.venueName, this.clientUserId, this.coordinatorUserId, required this.type, required this.status, required this.startAtUtc, required this.endAtUtc, this.clientNotes});
-  factory _AppointmentModel.fromJson(Map<String, dynamic> json) => _$AppointmentModelFromJson(json);
+class _Appointment implements Appointment {
+  const _Appointment({required this.id, required this.venueId, required this.venueName, this.clientUserId, this.coordinatorUserId, required this.type, required this.status, required this.startAtUtc, required this.endAtUtc, this.clientNotes});
+  factory _Appointment.fromJson(Map<String, dynamic> json) => _$AppointmentFromJson(json);
 
 @override final  String id;
 @override final  String venueId;
@@ -238,20 +238,20 @@ class _AppointmentModel implements AppointmentModel {
 @override final  DateTime endAtUtc;
 @override final  String? clientNotes;
 
-/// Create a copy of AppointmentModel
+/// Create a copy of Appointment
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$AppointmentModelCopyWith<_AppointmentModel> get copyWith => __$AppointmentModelCopyWithImpl<_AppointmentModel>(this, _$identity);
+_$AppointmentCopyWith<_Appointment> get copyWith => __$AppointmentCopyWithImpl<_Appointment>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$AppointmentModelToJson(this, );
+  return _$AppointmentToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppointmentModel&&(identical(other.id, id) || other.id == id)&&(identical(other.venueId, venueId) || other.venueId == venueId)&&(identical(other.venueName, venueName) || other.venueName == venueName)&&(identical(other.clientUserId, clientUserId) || other.clientUserId == clientUserId)&&(identical(other.coordinatorUserId, coordinatorUserId) || other.coordinatorUserId == coordinatorUserId)&&(identical(other.type, type) || other.type == type)&&(identical(other.status, status) || other.status == status)&&(identical(other.startAtUtc, startAtUtc) || other.startAtUtc == startAtUtc)&&(identical(other.endAtUtc, endAtUtc) || other.endAtUtc == endAtUtc)&&(identical(other.clientNotes, clientNotes) || other.clientNotes == clientNotes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Appointment&&(identical(other.id, id) || other.id == id)&&(identical(other.venueId, venueId) || other.venueId == venueId)&&(identical(other.venueName, venueName) || other.venueName == venueName)&&(identical(other.clientUserId, clientUserId) || other.clientUserId == clientUserId)&&(identical(other.coordinatorUserId, coordinatorUserId) || other.coordinatorUserId == coordinatorUserId)&&(identical(other.type, type) || other.type == type)&&(identical(other.status, status) || other.status == status)&&(identical(other.startAtUtc, startAtUtc) || other.startAtUtc == startAtUtc)&&(identical(other.endAtUtc, endAtUtc) || other.endAtUtc == endAtUtc)&&(identical(other.clientNotes, clientNotes) || other.clientNotes == clientNotes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -262,15 +262,15 @@ int get hashCode {
 
 @override
 String toString() {
-    return 'AppointmentModel(id: $id, venueId: $venueId, venueName: $venueName, clientUserId: $clientUserId, coordinatorUserId: $coordinatorUserId, type: $type, status: $status, startAtUtc: $startAtUtc, endAtUtc: $endAtUtc, clientNotes: $clientNotes)';
+    return 'Appointment(id: $id, venueId: $venueId, venueName: $venueName, clientUserId: $clientUserId, coordinatorUserId: $coordinatorUserId, type: $type, status: $status, startAtUtc: $startAtUtc, endAtUtc: $endAtUtc, clientNotes: $clientNotes)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$AppointmentModelCopyWith<$Res> implements $AppointmentModelCopyWith<$Res> {
-  factory _$AppointmentModelCopyWith(_AppointmentModel value, $Res Function(_AppointmentModel) _then) = __$AppointmentModelCopyWithImpl;
+abstract mixin class _$AppointmentCopyWith<$Res> implements $AppointmentCopyWith<$Res> {
+  factory _$AppointmentCopyWith(_Appointment value, $Res Function(_Appointment) _then) = __$AppointmentCopyWithImpl;
 @override @useResult
 $Res call({
  String id, String venueId, String venueName, String? clientUserId, String? coordinatorUserId, AppointmentType type, AppointmentStatus status, DateTime startAtUtc, DateTime endAtUtc, String? clientNotes
@@ -281,17 +281,17 @@ $Res call({
 
 }
 /// @nodoc
-class __$AppointmentModelCopyWithImpl<$Res>
-    implements _$AppointmentModelCopyWith<$Res> {
-  __$AppointmentModelCopyWithImpl(this._self, this._then);
+class __$AppointmentCopyWithImpl<$Res>
+    implements _$AppointmentCopyWith<$Res> {
+  __$AppointmentCopyWithImpl(this._self, this._then);
 
-  final _AppointmentModel _self;
-  final $Res Function(_AppointmentModel) _then;
+  final _Appointment _self;
+  final $Res Function(_Appointment) _then;
 
-/// Create a copy of AppointmentModel
+/// Create a copy of Appointment
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? venueId = null,Object? venueName = null,Object? clientUserId = freezed,Object? coordinatorUserId = freezed,Object? type = null,Object? status = null,Object? startAtUtc = null,Object? endAtUtc = null,Object? clientNotes = freezed,}) {
-  return _then(_AppointmentModel(
+  return _then(_Appointment(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,venueId: null == venueId ? _self.venueId : venueId // ignore: cast_nullable_to_non_nullable
 as String,venueName: null == venueName ? _self.venueName : venueName // ignore: cast_nullable_to_non_nullable
