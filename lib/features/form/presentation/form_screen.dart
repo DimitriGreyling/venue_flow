@@ -3,7 +3,7 @@ import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/core/widgets/responsive.dart';
 
-import '../../../core/config/tool_bar_options.dart';
+import '../../../core/enums/tool_bar_options.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_x.dart';
 import '../../../core/widgets/side_nav.dart';
