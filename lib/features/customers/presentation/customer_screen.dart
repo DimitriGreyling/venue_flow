@@ -6,8 +6,8 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:venue_flow_app/core/widgets/customer_auto_complete.dart';
 import 'package:venue_flow_app/core/widgets/responsive.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
+import 'package:venue_flow_app/features/customers/data/member_response.dart';
 import 'package:venue_flow_app/features/customers/presentation/customer_controller.dart';
-
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_x.dart';
 import '../../../core/widgets/side_nav.dart';
@@ -24,7 +24,13 @@ class CustomerScreen extends ConsumerStatefulWidget {
 class _CustomerScreenState extends ConsumerState<CustomerScreen> {
   bool isNewCustomer = false;
   bool isLoading = true;
-  List<Customer> customers = [];
+  List<MemberResponse> customers = [];
+
+  List<DataColumn> columns = [
+    DataColumn(label: Text('Name')),
+    DataColumn(label: Text('Email')),
+    DataColumn(label: Text('Status')),
+  ];
 
   @override
   void initState() {
@@ -46,24 +52,10 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
 
   Future<void> _fetchCustomers() async {
     // Simulate network delay
-    await Future.delayed(const Duration(seconds: 10));
-    final repository = ref.read(customerRepositoryProvider);
+    final repository = ref.watch(customerControllerProvider.notifier);
     customers = await repository.getMembersForOrg();
 
     setState(() {
-      // customers = [
-      //   Customer(
-      //     fullName: 'Alice Smith',
-      //     email: 'alice@example.com',
-      //     userId: '',
-      //   ),
-      //   Customer(fullName: 'Bob Jones', email: 'bob@example.com', userId: ''),
-      //   Customer(
-      //     fullName: 'Charlie Brown',
-      //     email: 'charlie@express.com',
-      //     userId: '',
-      //   ),
-      // ];
       isLoading = false; // Turn off loading when data arrives
     });
   }
@@ -197,6 +189,38 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
     );
   }
 
+  DataRow buildAsyncDataRow<T>({
+    required AsyncValue<T> value,
+    required int cellCount,
+    required List<DataCell> Function(T data) buildCells,
+    required ColorScheme cs,
+  }) {
+    return value.when(
+      loading: () => DataRow(
+        cells: List.generate(
+          cellCount,
+          (_) => DataCell(
+            Skeletonizer(
+              effect: ShimmerEffect(
+                baseColor: cs.surfaceContainerLow,
+                highlightColor: cs.surface,
+              ),
+              enabled: true,
+              child: Text('Loading placeholder'),
+            ),
+          ),
+        ),
+      ),
+      error: (error, stackTrace) => DataRow(
+        cells: List.generate(
+          cellCount,
+          (index) => DataCell(Text(index == 0 ? 'Failed to load' : '-')),
+        ),
+      ),
+      data: (data) => DataRow(cells: buildCells(data)),
+    );
+  }
+
   Widget viewMobile({
     required ColorScheme cs,
     required AppSemanticColors sem,
@@ -244,11 +268,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                   child: ConstrainedBox(
                     constraints: BoxConstraints(minWidth: constraints.maxWidth),
                     child: DataTable(
-                      columns: const [
-                        DataColumn(label: Text('Name')),
-                        DataColumn(label: Text('Email')),
-                        DataColumn(label: Text('Status')),
-                      ],
+                      columns: columns,
                       rows: isLoading
                           ? <DataRow>[
                               DataRow(
@@ -287,19 +307,16 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                               ),
                             ]
                           : customers.map((customer) {
-                              return DataRow(
-                                cells: [
+                              return buildAsyncDataRow(
+                                cs: cs,
+                                value: ref.watch(
+                                  customerDetailsProvider(customer.userId),
+                                ),
+                                cellCount: columns.length,
+                                buildCells: (customer) => [
                                   DataCell(Text(customer.fullName)),
                                   DataCell(Text(customer.email ?? '')),
-                                  DataCell(
-                                    Chip(
-                                      label: Text(
-                                        customer.userId != null
-                                            ? 'New'
-                                            : 'Returning',
-                                      ),
-                                    ),
-                                  ),
+                                  DataCell(Text(customer.email ?? '')),
                                 ],
                               );
                             }).toList(),

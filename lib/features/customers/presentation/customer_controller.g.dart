@@ -9,35 +9,34 @@ part of 'customer_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(CustomerSearchController)
-final customerSearchControllerProvider = CustomerSearchControllerProvider._();
+@ProviderFor(CustomerController)
+final customerControllerProvider = CustomerControllerProvider._();
 
-final class CustomerSearchControllerProvider
-    extends $AsyncNotifierProvider<CustomerSearchController, List<Customer>> {
-  CustomerSearchControllerProvider._()
+final class CustomerControllerProvider
+    extends $AsyncNotifierProvider<CustomerController, List<Customer>> {
+  CustomerControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'customerSearchControllerProvider',
+        name: r'customerControllerProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$customerSearchControllerHash();
+  String debugGetCreateSourceHash() => _$customerControllerHash();
 
   @$internal
   @override
-  CustomerSearchController create() => CustomerSearchController();
+  CustomerController create() => CustomerController();
 }
 
-String _$customerSearchControllerHash() =>
-    r'2c5a5aa425ab0cdac57965ce61fbafcee7f11364';
+String _$customerControllerHash() =>
+    r'4df8097e481d23e09dadd44c496e42730b391f3e';
 
-abstract class _$CustomerSearchController
-    extends $AsyncNotifier<List<Customer>> {
+abstract class _$CustomerController extends $AsyncNotifier<List<Customer>> {
   FutureOr<List<Customer>> build();
   @$mustCallSuper
   @override
@@ -52,5 +51,94 @@ abstract class _$CustomerSearchController
               Object?
             >;
     return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(CustomerDetails)
+final customerDetailsProvider = CustomerDetailsFamily._();
+
+final class CustomerDetailsProvider
+    extends $AsyncNotifierProvider<CustomerDetails, Customer> {
+  CustomerDetailsProvider._({
+    required CustomerDetailsFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'customerDetailsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$customerDetailsHash();
+
+  @override
+  String toString() {
+    return r'customerDetailsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  CustomerDetails create() => CustomerDetails();
+
+  @override
+  bool operator ==(Object other) {
+    return other is CustomerDetailsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$customerDetailsHash() => r'b2edb687ee0fb2e4ff90d3c82c55215c7a6c3734';
+
+final class CustomerDetailsFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          CustomerDetails,
+          AsyncValue<Customer>,
+          Customer,
+          FutureOr<Customer>,
+          String
+        > {
+  CustomerDetailsFamily._()
+    : super(
+        retry: null,
+        name: r'customerDetailsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  CustomerDetailsProvider call(String customerId) =>
+      CustomerDetailsProvider._(argument: customerId, from: this);
+
+  @override
+  String toString() => r'customerDetailsProvider';
+}
+
+abstract class _$CustomerDetails extends $AsyncNotifier<Customer> {
+  late final _$args = ref.$arg as String;
+  String get customerId => _$args;
+
+  FutureOr<Customer> build(String customerId);
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<Customer>, Customer>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<Customer>, Customer>,
+              AsyncValue<Customer>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:venue_flow_app/features/customers/data/member_response.dart';
 import '../../../core/network/dio_client.dart';
 import '../domain/customer.dart';
 
@@ -20,10 +21,10 @@ class CustomerRepository {
   }
 
   //Get List of memebers for a organization
-  Future<List<Customer>> getMembersForOrg() async {
+  Future<List<MemberResponse>> getMembersForOrg() async {
     final response = await _dio.get('/organizations/members');
     final list = (response.data as List<dynamic>);
-    return list.map((e) => Customer.fromJson(e)).toList();
+    return list.map((e) => MemberResponse.fromJson(e)).toList();
   }
 
   //Get customer details by ID

@@ -1,11 +1,12 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:venue_flow_app/features/customers/data/member_response.dart';
 import '../data/customer_repository.dart';
 import '../domain/customer.dart';
 
 part 'customer_controller.g.dart';
 
 @riverpod
-class CustomerSearchController extends _$CustomerSearchController {
+class CustomerController extends _$CustomerController {
   @override
   FutureOr<List<Customer>> build() async {
     // Initial state can be an empty list or fetch default customers
@@ -30,14 +31,22 @@ class CustomerSearchController extends _$CustomerSearchController {
   }
 
   //Get List of members for a organization
-  Future<List<Customer>> getMembersForOrg() async {
+  Future<List<MemberResponse>> getMembersForOrg() async {
     final repository = ref.read(customerRepositoryProvider);
     return await repository.getMembersForOrg();
   }
 
-  //Get customer details by ID
-  Future<Customer> getMemberDetailsById(String userId) async {
-    final repository = ref.read(customerRepositoryProvider);
-    return await repository.getMemberDetailsById(userId);
+  Future<Customer> customerDetails(Ref ref, String customerId) async {
+    final repository = ref.watch(customerRepositoryProvider);
+    return await repository.getMemberDetailsById(customerId);
+  }
+}
+
+@riverpod
+class CustomerDetails extends _$CustomerDetails {
+  @override
+  Future<Customer> build(String customerId) async {
+    final repository = ref.watch(customerRepositoryProvider);
+    return await repository.getMemberDetailsById(customerId);
   }
 }
