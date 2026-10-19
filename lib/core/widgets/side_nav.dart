@@ -11,7 +11,7 @@ const _navItems = [
   NavItem(Icons.location_on_outlined, 'Venues', '/venues'),
   NavItem(Icons.event_outlined, 'Events'),
   NavItem(Icons.confirmation_number_outlined, 'Bookings'),
-  NavItem(Icons.group_outlined, 'Customers'),
+  NavItem(Icons.group_outlined, 'Customers','/customers'),
   NavItem(Icons.badge_outlined, 'Staff'),
   NavItem(Icons.construction_outlined, 'Equipment'),
   NavItem(Icons.receipt_outlined, 'Invoices'),
