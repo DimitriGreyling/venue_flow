@@ -8,6 +8,7 @@ import 'package:venue_flow_app/core/widgets/responsive.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
 import 'package:venue_flow_app/features/customers/data/member_response.dart';
 import 'package:venue_flow_app/features/customers/presentation/customer_controller.dart';
+import 'package:venue_flow_app/features/customers/presentation/customer_data_table.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_x.dart';
 import '../../../core/widgets/side_nav.dart';
@@ -190,38 +191,6 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
     );
   }
 
-  DataRow buildAsyncDataRow<T>({
-    required AsyncValue<T> value,
-    required int cellCount,
-    required List<DataCell> Function(T data) buildCells,
-    required ColorScheme cs,
-  }) {
-    return value.when(
-      loading: () => DataRow(
-        cells: List.generate(
-          cellCount,
-          (_) => DataCell(
-            Skeletonizer(
-              effect: ShimmerEffect(
-                baseColor: cs.surfaceContainerLow,
-                highlightColor: cs.surface,
-              ),
-              enabled: true,
-              child: Text('Loading placeholder'),
-            ),
-          ),
-        ),
-      ),
-      error: (error, stackTrace) => DataRow(
-        cells: List.generate(
-          cellCount,
-          (index) => DataCell(Text(index == 0 ? 'Failed to load' : '-')),
-        ),
-      ),
-      data: (data) => DataRow(cells: buildCells(data)),
-    );
-  }
-
   Widget viewMobile({
     required ColorScheme cs,
     required AppSemanticColors sem,
@@ -265,92 +234,11 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
 
               Padding(
                 padding: EdgeInsets.all(16),
-                child: Card(
-                  elevation: 2,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                    child: DataTable(
-                      columns: columns,
-                      rows: isLoading
-                          ? <DataRow>[
-                              DataRow(
-                                cells: [
-                                  DataCell(
-                                    Skeletonizer(
-                                      enabled: true,
-                                      effect: ShimmerEffect(
-                                        baseColor: cs.surfaceContainerLow,
-                                        highlightColor: cs.surface,
-                                      ),
-                                      child: Text('Loading...'),
-                                    ),
-                                  ),
-                                  DataCell(
-                                    Skeletonizer(
-                                      enabled: true,
-                                      effect: ShimmerEffect(
-                                        baseColor: cs.surfaceContainerLow,
-                                        highlightColor: cs.surface,
-                                      ),
-                                      child: Text('Loading...'),
-                                    ),
-                                  ),
-                                  DataCell(
-                                    Skeletonizer(
-                                      enabled: true,
-                                      effect: ShimmerEffect(
-                                        baseColor: cs.surfaceContainerLow,
-                                        highlightColor: cs.surface,
-                                      ),
-                                      child: Text('Loading...'),
-                                    ),
-                                  ),
-                                  DataCell(
-                                    Skeletonizer(
-                                      enabled: true,
-                                      effect: ShimmerEffect(
-                                        baseColor: cs.surfaceContainerLow,
-                                        highlightColor: cs.surface,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          IconButton(
-                                            onPressed: () {},
-                                            icon: Icon(Mdi.accountEdit),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ]
-                          : customers.map((customer) {
-                              return buildAsyncDataRow(
-                                cs: cs,
-                                value: ref.watch(
-                                  customerDetailsProvider(customer.userId),
-                                ),
-                                cellCount: columns.length,
-                                buildCells: (customer) => [
-                                  DataCell(Text(customer.fullName)),
-                                  DataCell(Text(customer.email ?? '')),
-                                  DataCell(Text(customer.email ?? '')),
-                                  DataCell(
-                                    Row(
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {},
-                                          icon: Icon(Mdi.accountEdit),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                    ),
-                  ),
+                child: CustomerDataTable(
+                  columns: columns,
+                  customers: customers,
+                  constraints: constraints,
+                  isLoading: isLoading,
                 ),
               ),
             ],
