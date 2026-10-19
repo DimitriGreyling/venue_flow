@@ -75,7 +75,6 @@ class AppointmentsRepository {
   Future<Appointment> getAppointmentInformationById({
     required String appointmentId,
   }) async {
-    await Future.delayed(Duration(seconds: 10));
     final response = await _dio.get('/appointments/$appointmentId');
 
     final data = response.data;
