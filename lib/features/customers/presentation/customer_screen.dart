@@ -30,6 +30,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
     DataColumn(label: Text('Name')),
     DataColumn(label: Text('Email')),
     DataColumn(label: Text('Status')),
+    DataColumn(label: Text('')),
   ];
 
   @override
@@ -265,6 +266,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
               Padding(
                 padding: EdgeInsets.all(16),
                 child: Card(
+                  elevation: 2,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(minWidth: constraints.maxWidth),
                     child: DataTable(
@@ -303,6 +305,23 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                                       child: Text('Loading...'),
                                     ),
                                   ),
+                                  DataCell(
+                                    Skeletonizer(
+                                      enabled: true,
+                                      effect: ShimmerEffect(
+                                        baseColor: cs.surfaceContainerLow,
+                                        highlightColor: cs.surface,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                            onPressed: () {},
+                                            icon: Icon(Mdi.accountEdit),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ]
@@ -317,6 +336,16 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                                   DataCell(Text(customer.fullName)),
                                   DataCell(Text(customer.email ?? '')),
                                   DataCell(Text(customer.email ?? '')),
+                                  DataCell(
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {},
+                                          icon: Icon(Mdi.accountEdit),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               );
                             }).toList(),
