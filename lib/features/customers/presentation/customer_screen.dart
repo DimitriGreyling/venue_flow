@@ -9,6 +9,7 @@ import 'package:venue_flow_app/core/widgets/top_bar.dart';
 import 'package:venue_flow_app/features/customers/data/member_response.dart';
 import 'package:venue_flow_app/features/customers/presentation/customer_controller.dart';
 import 'package:venue_flow_app/features/customers/presentation/customer_data_table.dart';
+import 'package:venue_flow_app/features/customers/presentation/dialogs/add_customer_dialog.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_x.dart';
 import '../../../core/widgets/side_nav.dart';
@@ -217,7 +218,8 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                   children: [
                     ElevatedButton.icon(
                       onPressed: () async {
-                        await addCustomer(cs: cs);
+                        // await addCustomer(cs: cs);
+                        await AddCustomerDialog.show(context);
                       },
                       label: Text('Add Customer'),
                       icon: Icon(Mdi.accountPlusOutline),
