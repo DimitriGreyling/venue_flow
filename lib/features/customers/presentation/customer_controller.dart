@@ -28,4 +28,16 @@ class CustomerSearchController extends _$CustomerSearchController {
       return await repository.searchCustomers(searchTerm: searchTerm);
     });
   }
+
+  //Get List of members for a organization
+  Future<List<Customer>> getMembersForOrg() async {
+    final repository = ref.read(customerRepositoryProvider);
+    return await repository.getMembersForOrg();
+  }
+
+  //Get customer details by ID
+  Future<Customer> getMemberDetailsById(String userId) async {
+    final repository = ref.read(customerRepositoryProvider);
+    return await repository.getMemberDetailsById(userId);
+  }
 }

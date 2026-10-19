@@ -7,6 +7,7 @@ part 'customer_repository.g.dart';
 
 class CustomerRepository {
   CustomerRepository(this._dio);
+
   final Dio _dio;
 
   Future<List<Customer>> searchCustomers({required String searchTerm}) async {
@@ -16,6 +17,23 @@ class CustomerRepository {
     );
     final list = (response.data as List<dynamic>);
     return list.map((e) => Customer.fromJson(e)).toList();
+  }
+
+  //Get List of memebers for a organization
+  Future<List<Customer>> getMembersForOrg() async {
+    final response = await _dio.get('/organizations/members');
+    final list = (response.data as List<dynamic>);
+    return list.map((e) => Customer.fromJson(e)).toList();
+  }
+
+  //Get customer details by ID
+  Future<Customer> getMemberDetailsById(String userId) async {
+    final response = await _dio.get(
+      '/organizations/members/member/',
+      queryParameters: {'id': userId},
+    );
+
+    return Customer.fromJson(response.data);
   }
 }
 

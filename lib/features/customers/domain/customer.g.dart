@@ -9,7 +9,7 @@ part of 'customer.dart';
 _Customer _$CustomerFromJson(Map<String, dynamic> json) => _Customer(
   userId: json['userId'] as String,
   fullName: json['fullName'] as String,
-  email: json['email'] as String,
+  email: json['email'] as String?,
 );
 
 Map<String, dynamic> _$CustomerToJson(_Customer instance) => <String, dynamic>{

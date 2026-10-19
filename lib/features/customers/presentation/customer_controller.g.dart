@@ -34,7 +34,7 @@ final class CustomerSearchControllerProvider
 }
 
 String _$customerSearchControllerHash() =>
-    r'e8aabf21d1b4eaa110f4690684c71606afd6fd24';
+    r'2c5a5aa425ab0cdac57965ce61fbafcee7f11364';
 
 abstract class _$CustomerSearchController
     extends $AsyncNotifier<List<Customer>> {

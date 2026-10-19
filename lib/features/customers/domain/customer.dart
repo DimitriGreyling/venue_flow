@@ -9,7 +9,7 @@ abstract class Customer with _$Customer{
   const factory Customer({
     required String userId,
     required String fullName,
-    required String email,
+    String? email,
 })=_Customer;
 
   factory Customer.fromJson(Map<String, dynamic> json) => _$CustomerFromJson(json);
