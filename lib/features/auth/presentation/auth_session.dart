@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
 import '../../../core/storage/token_storage.dart';
 import '../data/auth_repository.dart';
 import '../domain/login_request.dart';
@@ -20,7 +18,10 @@ bool _isJwtValid(String token) {
     final exp = payload['exp'];
     if (exp is! num) return false;
 
-    final expiry = DateTime.fromMillisecondsSinceEpoch(exp.toInt() * 1000);
+    final expiry = DateTime.fromMillisecondsSinceEpoch(
+      exp.toInt() * 1000,
+    );
+
     return expiry.isAfter(DateTime.now());
   } catch (_) {
     return false;
@@ -36,7 +37,6 @@ class AuthSession extends _$AuthSession {
 
     if (token == null || token.isEmpty) return false;
 
-    // If token is expired/invalid, wipe and force login.
     if (!_isJwtValid(token)) {
       await storage.clearToken();
       return false;
@@ -46,11 +46,22 @@ class AuthSession extends _$AuthSession {
   }
 
   Future<void> login(String email, String password) async {
-    final response = await ref
-        .read(authRepositoryProvider)
-        .login(LoginRequest(email: email, password: password));
-    await ref.read(tokenStorageProvider).saveToken(response.accessToken);
-    state = const AsyncData(true);
+    state = const AsyncLoading();
+    print('LOGIN: ${state.isLoading}');
+
+    state = await AsyncValue.guard(() async {
+      final response = await ref
+          .read(authRepositoryProvider)
+          .login(LoginRequest(email: email, password: password));
+
+      await ref
+          .read(tokenStorageProvider)
+          .saveToken(response.accessToken);
+
+      return true;
+    });
+
+    print('LOGIN FINISHED: ${state.isLoading}');
   }
 
   Future<void> logout() async {
