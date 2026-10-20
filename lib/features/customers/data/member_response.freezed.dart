@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MemberResponse {
 
- String get organizationId; String get userId; String get roleId; String get roleName; String get createdAtUtc;
+ String get orgMemberId; String get organizationId; String get userId; String get roleId; String get roleName; String get createdAtUtc;
 /// Create a copy of MemberResponse
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $MemberResponseCopyWith<MemberResponse> get copyWith => _$MemberResponseCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as MemberResponse;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MemberResponse&&(identical(other.organizationId, _this.organizationId) || other.organizationId == _this.organizationId)&&(identical(other.userId, _this.userId) || other.userId == _this.userId)&&(identical(other.roleId, _this.roleId) || other.roleId == _this.roleId)&&(identical(other.roleName, _this.roleName) || other.roleName == _this.roleName)&&(identical(other.createdAtUtc, _this.createdAtUtc) || other.createdAtUtc == _this.createdAtUtc));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MemberResponse&&(identical(other.orgMemberId, _this.orgMemberId) || other.orgMemberId == _this.orgMemberId)&&(identical(other.organizationId, _this.organizationId) || other.organizationId == _this.organizationId)&&(identical(other.userId, _this.userId) || other.userId == _this.userId)&&(identical(other.roleId, _this.roleId) || other.roleId == _this.roleId)&&(identical(other.roleName, _this.roleName) || other.roleName == _this.roleName)&&(identical(other.createdAtUtc, _this.createdAtUtc) || other.createdAtUtc == _this.createdAtUtc));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MemberResponse;
-  return Object.hash(runtimeType,_this.organizationId,_this.userId,_this.roleId,_this.roleName,_this.createdAtUtc);
+  return Object.hash(runtimeType,_this.orgMemberId,_this.organizationId,_this.userId,_this.roleId,_this.roleName,_this.createdAtUtc);
 }
 
 @override
 String toString() {
   final _this = this as MemberResponse;
-  return 'MemberResponse(organizationId: ${_this.organizationId}, userId: ${_this.userId}, roleId: ${_this.roleId}, roleName: ${_this.roleName}, createdAtUtc: ${_this.createdAtUtc})';
+  return 'MemberResponse(orgMemberId: ${_this.orgMemberId}, organizationId: ${_this.organizationId}, userId: ${_this.userId}, roleId: ${_this.roleId}, roleName: ${_this.roleName}, createdAtUtc: ${_this.createdAtUtc})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $MemberResponseCopyWith<$Res>  {
   factory $MemberResponseCopyWith(MemberResponse value, $Res Function(MemberResponse) _then) = _$MemberResponseCopyWithImpl;
 @useResult
 $Res call({
- String organizationId, String userId, String roleId, String roleName, String createdAtUtc
+ String orgMemberId, String organizationId, String userId, String roleId, String roleName, String createdAtUtc
 });
 
 
@@ -71,9 +71,10 @@ class _$MemberResponseCopyWithImpl<$Res>
 
 /// Create a copy of MemberResponse
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? organizationId = null,Object? userId = null,Object? roleId = null,Object? roleName = null,Object? createdAtUtc = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? orgMemberId = null,Object? organizationId = null,Object? userId = null,Object? roleId = null,Object? roleName = null,Object? createdAtUtc = null,}) {
   return _then(MemberResponse(
-organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
+orgMemberId: null == orgMemberId ? _self.orgMemberId : orgMemberId // ignore: cast_nullable_to_non_nullable
+as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,roleId: null == roleId ? _self.roleId : roleId // ignore: cast_nullable_to_non_nullable
 as String,roleName: null == roleName ? _self.roleName : roleName // ignore: cast_nullable_to_non_nullable
@@ -163,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String organizationId,  String userId,  String roleId,  String roleName,  String createdAtUtc)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String orgMemberId,  String organizationId,  String userId,  String roleId,  String roleName,  String createdAtUtc)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MemberResponse() when $default != null:
-return $default(_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.createdAtUtc);case _:
+return $default(_that.orgMemberId,_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.createdAtUtc);case _:
   return orElse();
 
 }
@@ -184,10 +185,10 @@ return $default(_that.organizationId,_that.userId,_that.roleId,_that.roleName,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String organizationId,  String userId,  String roleId,  String roleName,  String createdAtUtc)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String orgMemberId,  String organizationId,  String userId,  String roleId,  String roleName,  String createdAtUtc)  $default,) {final _that = this;
 switch (_that) {
 case _MemberResponse():
-return $default(_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.createdAtUtc);case _:
+return $default(_that.orgMemberId,_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.createdAtUtc);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +205,10 @@ return $default(_that.organizationId,_that.userId,_that.roleId,_that.roleName,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String organizationId,  String userId,  String roleId,  String roleName,  String createdAtUtc)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String orgMemberId,  String organizationId,  String userId,  String roleId,  String roleName,  String createdAtUtc)?  $default,) {final _that = this;
 switch (_that) {
 case _MemberResponse() when $default != null:
-return $default(_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.createdAtUtc);case _:
+return $default(_that.orgMemberId,_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.createdAtUtc);case _:
   return null;
 
 }
@@ -219,9 +220,10 @@ return $default(_that.organizationId,_that.userId,_that.roleId,_that.roleName,_t
 @JsonSerializable()
 
 class _MemberResponse implements MemberResponse {
-  const _MemberResponse({required this.organizationId, required this.userId, required this.roleId, required this.roleName, required this.createdAtUtc});
+  const _MemberResponse({required this.orgMemberId, required this.organizationId, required this.userId, required this.roleId, required this.roleName, required this.createdAtUtc});
   factory _MemberResponse.fromJson(Map<String, dynamic> json) => _$MemberResponseFromJson(json);
 
+@override final  String orgMemberId;
 @override final  String organizationId;
 @override final  String userId;
 @override final  String roleId;
@@ -241,18 +243,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MemberResponse&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.roleId, roleId) || other.roleId == roleId)&&(identical(other.roleName, roleName) || other.roleName == roleName)&&(identical(other.createdAtUtc, createdAtUtc) || other.createdAtUtc == createdAtUtc));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MemberResponse&&(identical(other.orgMemberId, orgMemberId) || other.orgMemberId == orgMemberId)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.roleId, roleId) || other.roleId == roleId)&&(identical(other.roleName, roleName) || other.roleName == roleName)&&(identical(other.createdAtUtc, createdAtUtc) || other.createdAtUtc == createdAtUtc));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,organizationId,userId,roleId,roleName,createdAtUtc);
+    return Object.hash(runtimeType,orgMemberId,organizationId,userId,roleId,roleName,createdAtUtc);
 }
 
 @override
 String toString() {
-    return 'MemberResponse(organizationId: $organizationId, userId: $userId, roleId: $roleId, roleName: $roleName, createdAtUtc: $createdAtUtc)';
+    return 'MemberResponse(orgMemberId: $orgMemberId, organizationId: $organizationId, userId: $userId, roleId: $roleId, roleName: $roleName, createdAtUtc: $createdAtUtc)';
 }
 
 
@@ -263,7 +265,7 @@ abstract mixin class _$MemberResponseCopyWith<$Res> implements $MemberResponseCo
   factory _$MemberResponseCopyWith(_MemberResponse value, $Res Function(_MemberResponse) _then) = __$MemberResponseCopyWithImpl;
 @override @useResult
 $Res call({
- String organizationId, String userId, String roleId, String roleName, String createdAtUtc
+ String orgMemberId, String organizationId, String userId, String roleId, String roleName, String createdAtUtc
 });
 
 
@@ -280,9 +282,10 @@ class __$MemberResponseCopyWithImpl<$Res>
 
 /// Create a copy of MemberResponse
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? organizationId = null,Object? userId = null,Object? roleId = null,Object? roleName = null,Object? createdAtUtc = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? orgMemberId = null,Object? organizationId = null,Object? userId = null,Object? roleId = null,Object? roleName = null,Object? createdAtUtc = null,}) {
   return _then(_MemberResponse(
-organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
+orgMemberId: null == orgMemberId ? _self.orgMemberId : orgMemberId // ignore: cast_nullable_to_non_nullable
+as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,roleId: null == roleId ? _self.roleId : roleId // ignore: cast_nullable_to_non_nullable
 as String,roleName: null == roleName ? _self.roleName : roleName // ignore: cast_nullable_to_non_nullable

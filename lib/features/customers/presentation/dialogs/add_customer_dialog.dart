@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/core/theme/app_theme.dart';
+import 'package:venue_flow_app/features/customers/domain/register_customer.dart';
+import 'package:venue_flow_app/features/customers/presentation/customer_controller.dart';
+import '../../../../core/theme/theme_x.dart' show ThemeX;
 import '../../../../core/widgets/customer_auto_complete.dart';
 import '../../domain/customer.dart';
+import '../../domain/link_customer_to_org.dart';
 
-class AddCustomerDialog extends StatefulWidget {
+///
+/// Dialog popup to add a customer to a organization
+///
+class AddCustomerDialog extends ConsumerStatefulWidget {
   const AddCustomerDialog({super.key});
 
   static Future<bool?> show(BuildContext context) {
@@ -13,10 +22,10 @@ class AddCustomerDialog extends StatefulWidget {
   }
 
   @override
-  State<AddCustomerDialog> createState() => _AddCustomerDialogState();
+  ConsumerState<AddCustomerDialog> createState() => _AddCustomerDialogState();
 }
 
-class _AddCustomerDialogState extends State<AddCustomerDialog>
+class _AddCustomerDialogState extends ConsumerState<AddCustomerDialog>
     with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
 
@@ -26,6 +35,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog>
 
   bool _isNewCustomer = false;
   bool _hasSelectedCustomer = false;
+  bool _isSaving = false;
 
   Customer? _selectedCustomer;
 
@@ -45,17 +55,74 @@ class _AddCustomerDialogState extends State<AddCustomerDialog>
     });
   }
 
-  void _save() {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _save({
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+  }) async {
+    try {
+      if (_isSaving) return;
 
-    // TODO: Save the customer using your service/provider.
-    Navigator.of(context).pop(true);
+      setState(() {
+        _isSaving = true;
+      });
+
+      if (!_formKey.currentState!.validate()) {
+        setState(() {
+          _isSaving = false;
+        });
+        return;
+      }
+
+      final repo = ref.watch(customerControllerProvider.notifier);
+
+      if (_isNewCustomer) {
+        await repo.registerCustomer(
+          /// Password will be over written by the system and sent to the user via email
+          RegisterCustomer(
+            firstName: _firstNameController.text,
+            lastName: _surnameController.text,
+            email: _emailController.text,
+          ),
+        );
+      } else {
+        await repo.linkCustomer(
+          LinkCustomerToOrg(userId: _selectedCustomer!.userId, roleId: ''),
+        );
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: sem.success,
+          content: Text('Customer added successfully'),
+        ),
+      );
+
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      setState(() {
+        _isSaving = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: cs.error,
+          content: Text('An error occurred: $e'),
+        ),
+      );
+    } finally {
+      setState(() {
+        _isSaving = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context);
     final cs = Theme.of(context).colorScheme;
+    final sem = context.semantic;
+
     final textTheme = Theme.of(context).textTheme;
 
     final dialogWidth = screenSize.width > 800
@@ -85,7 +152,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           CustomerAutoComplete(
-                            isDisabled: _isNewCustomer,
+                            isDisabled: _isSaving || _isNewCustomer,
                             onCustomerSelected: (customer) {
                               _selectedCustomer = customer;
                               if (_selectedCustomer != null) {
@@ -103,10 +170,10 @@ class _AddCustomerDialogState extends State<AddCustomerDialog>
                           ),
 
                           CheckboxListTile(
-                            enabled: !_hasSelectedCustomer,
+                            enabled: !_isSaving && !_hasSelectedCustomer,
                             contentPadding: EdgeInsets.zero,
                             value: _isNewCustomer,
-                            onChanged: _toggleNewCustomer,
+                            onChanged: !_isSaving && !_hasSelectedCustomer ? _toggleNewCustomer : null,
                             title: const Text('Register new customer'),
                             controlAffinity: ListTileControlAffinity.leading,
                           ),
@@ -140,7 +207,9 @@ class _AddCustomerDialogState extends State<AddCustomerDialog>
                         backgroundColor: cs.error,
                         foregroundColor: cs.onError,
                       ),
-                      onPressed: () => Navigator.of(context).pop(false),
+                      onPressed: _isSaving
+                          ? null
+                          : () => Navigator.of(context).pop(false),
                       child: const Text('Cancel'),
                     ),
                     ElevatedButton(
@@ -148,8 +217,16 @@ class _AddCustomerDialogState extends State<AddCustomerDialog>
                         backgroundColor: cs.primary,
                         foregroundColor: cs.onPrimary,
                       ),
-                      onPressed: _save,
-                      child: const Text('Save'),
+                      onPressed: _isSaving
+                          ? null
+                          : () => _save(cs: cs, sem: sem),
+                      child: _isSaving
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Save'),
                     ),
                   ],
                 ),
@@ -167,6 +244,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog>
       children: [
         const SizedBox(height: 16),
         TextFormField(
+          enabled: !_isSaving,
           controller: _firstNameController,
           decoration: const InputDecoration(
             labelText: 'First Name',
@@ -181,6 +259,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog>
         ),
         const SizedBox(height: 16),
         TextFormField(
+          enabled: !_isSaving,
           controller: _surnameController,
           decoration: const InputDecoration(
             labelText: 'Surname',
@@ -195,6 +274,7 @@ class _AddCustomerDialogState extends State<AddCustomerDialog>
         ),
         const SizedBox(height: 16),
         TextFormField(
+          enabled: !_isSaving,
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
           decoration: const InputDecoration(
@@ -227,17 +307,17 @@ class _AddCustomerDialogState extends State<AddCustomerDialog>
         Text('Selected Customer:'),
         const SizedBox(height: 16),
         TextFormField(
+          enabled: false,
           controller: TextEditingController(text: customer?.fullName ?? ''),
           decoration: const InputDecoration(
             labelText: 'Full Name',
             border: OutlineInputBorder(),
           ),
-          enabled: false,
         ),
         const SizedBox(height: 16),
         TextFormField(
-          controller: TextEditingController(text: customer?.email ?? ''),
           enabled: false,
+          controller: TextEditingController(text: customer?.email ?? ''),
           decoration: const InputDecoration(
             labelText: 'Email',
             border: OutlineInputBorder(),

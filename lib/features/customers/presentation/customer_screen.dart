@@ -58,6 +58,11 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
     });
   }
 
+  Future<void> _refresh() async {
+    ref.invalidate(customerControllerProvider);
+    await _fetchCustomers();
+  }
+
   Widget viewMobile({
     required ColorScheme cs,
     required AppSemanticColors sem,
@@ -88,8 +93,8 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                       child: CircleAvatar(
                         child: IconButton(
                           onPressed: () async {
-                            // await addCustomer(cs: cs);
                             await AddCustomerDialog.show(context);
+                            _refresh();
                           },
                           icon: Icon(Mdi.accountPlusOutline),
                         ),
@@ -103,8 +108,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                         backgroundColor: cs.tertiary,
                         child: IconButton(
                           onPressed: () {
-                            ref.invalidate(customerControllerProvider);
-                            _fetchCustomers();
+                            _refresh();
                           },
                           tooltip: 'Refresh',
                           icon: Icon(Mdi.refresh),
@@ -122,6 +126,9 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                   customers: customers,
                   constraints: constraints,
                   isLoading: isLoading,
+                  requiresRefresh: (value) {
+                    _refresh();
+                  },
                 ),
               ),
             ],

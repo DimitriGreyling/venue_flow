@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:venue_flow_app/features/customers/presentation/dialogs/delete_customer_dialog.dart';
 
 import '../../../core/theme/theme_x.dart';
 import '../data/member_response.dart';
@@ -15,12 +16,14 @@ class CustomerDataTable extends ConsumerStatefulWidget {
     required this.customers,
     required this.constraints,
     required this.isLoading,
+    this.requiresRefresh,
   });
 
   final List<DataColumn> columns;
   final List<MemberResponse> customers;
   final BoxConstraints constraints;
   final bool isLoading;
+  final ValueChanged<bool>? requiresRefresh;
 
   @override
   ConsumerState<CustomerDataTable> createState() => _CustomerDataTableState();
@@ -109,8 +112,23 @@ class _CustomerDataTableState extends ConsumerState<CustomerDataTable> {
                           Row(
                             children: [
                               IconButton(
-                                onPressed: () {},
+                                onPressed: () async {},
+                                tooltip: 'Edit ${customer.fullName}',
                                 icon: Icon(Mdi.accountEdit),
+                              ),
+                              IconButton(
+                                onPressed: () async {
+                                  await DeleteCustomerDialog.show(
+                                    context,
+                                    customer,
+                                  );
+
+                                  if (widget.requiresRefresh != null) {
+                                    widget.requiresRefresh?.call(true);
+                                  }
+                                },
+                                tooltip: 'Remove ${customer.fullName}',
+                                icon: Icon(Mdi.delete, color: cs.error),
                               ),
                             ],
                           ),
