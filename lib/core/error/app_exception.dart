@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:venue_flow_app/core/router/app_router.dart';
 
 enum AppErrorType {
   network,
@@ -14,18 +15,26 @@ enum AppErrorType {
 
 class AppException implements Exception {
   AppException(
-      this.type,
-      this.message, {
-        this.title,
-        this.fieldErrors = const {},
-        this.statusCode,
-      });
+    this.type,
+    this.message, {
+    this.title,
+    this.fieldErrors = const {},
+    this.statusCode,
+  });
 
   final AppErrorType type;
   final String message;
   final String? title;
   final Map<String, List<String>> fieldErrors;
   final int? statusCode;
+
+  /// Retrieves the current route to determine which error message should be
+  /// displayed based on the active screen.
+  static String get currentRoute {
+    final router = appRouterInstance;
+
+    return router?.routerDelegate.currentConfiguration.uri.toString() ?? '';
+  }
 
   /// Convert ANY thrown object into an AppException.
   factory AppException.from(Object error) {
@@ -45,13 +54,17 @@ class AppException implements Exception {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return AppException(AppErrorType.timeout,
-            'The server took too long to respond.',
-            title: 'Timeout');
+        return AppException(
+          AppErrorType.timeout,
+          'The server took too long to respond.',
+          title: 'Timeout',
+        );
       case DioExceptionType.connectionError:
-        return AppException(AppErrorType.network,
-            'Cannot reach the server. Check your connection (or CORS/certificate in dev).',
-            title: 'No connection');
+        return AppException(
+          AppErrorType.network,
+          'Cannot reach the server. Check your connection (or CORS/certificate in dev).',
+          title: 'No connection',
+        );
       case DioExceptionType.cancel:
         return AppException(AppErrorType.cancelled, 'Request cancelled.');
       default:
@@ -90,26 +103,51 @@ class AppException implements Exception {
           statusCode: status,
         );
       case 401:
-        return AppException(AppErrorType.unauthorized,
+        if (currentRoute == '/login') {
+          return AppException(
+            AppErrorType.unauthorized,
+            detail ??
+                'The email address or password you entered is incorrect. Please try again.',
+            title: 'Login failed',
+            statusCode: status,
+          );
+        } else {
+          return AppException(
+            AppErrorType.unauthorized,
             detail ?? 'Your session has expired. Please sign in again.',
-            title: 'Session expired', statusCode: status);
+            title: 'Session expired',
+            statusCode: status,
+          );
+        }
+
       case 403:
-        return AppException(AppErrorType.forbidden,
-            detail ?? 'You do not have permission to do that.',
-            title: 'Access denied', statusCode: status);
+        return AppException(
+          AppErrorType.forbidden,
+          detail ?? 'You do not have permission to do that.',
+          title: 'Access denied',
+          statusCode: status,
+        );
       case 404:
-        return AppException(AppErrorType.notFound,
-            detail ?? 'The requested item was not found.',
-            title: 'Not found', statusCode: status);
+        return AppException(
+          AppErrorType.notFound,
+          detail ?? 'The requested item was not found.',
+          title: 'Not found',
+          statusCode: status,
+        );
       default:
         if (status != null && status >= 500) {
-          return AppException(AppErrorType.server,
-              'The server hit a problem. Please try again later.',
-              title: 'Server error', statusCode: status);
+          return AppException(
+            AppErrorType.server,
+            'The server hit a problem. Please try again later.',
+            title: 'Server error',
+            statusCode: status,
+          );
         }
-        return AppException(AppErrorType.unknown,
-            detail ?? 'Something went wrong. Please try again.',
-            statusCode: status);
+        return AppException(
+          AppErrorType.unknown,
+          detail ?? 'Something went wrong. Please try again.',
+          statusCode: status,
+        );
     }
   }
 

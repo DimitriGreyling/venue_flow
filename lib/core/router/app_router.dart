@@ -14,13 +14,26 @@ import '../error/error_service.dart';
 
 part 'app_router.g.dart';
 
+/// Stores the GoRouter instance in a globally accessible variable so that
+/// the current route can be retrieved from classes that do not have access
+/// to a BuildContext or Riverpod Ref.
+///
+/// Example:
+/// ```dart
+/// static String get currentRoute {
+///   return appRouterInstance
+///       ?.routerDelegate.currentConfiguration.uri.toString() ?? '';
+/// }
+/// ```
+GoRouter? appRouterInstance;
+
 @Riverpod(keepAlive: true)
 GoRouter router(Ref ref) {
   final refresh = ValueNotifier<int>(0);
   ref.listen(authSessionProvider, (_, __) => refresh.value++);
   ref.onDispose(refresh.dispose);
 
-  return GoRouter(
+  final appRouter = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: '/home',
     refreshListenable: refresh,
@@ -31,7 +44,10 @@ GoRouter router(Ref ref) {
       GoRoute(path: '/venues', builder: (_, __) => const VenueListScreen()),
       GoRoute(path: '/dashboard', builder: (_, __) => const DashboardScreen()),
       GoRoute(path: '/forms', builder: (_, __) => const FormScreen()),
-      GoRoute(path: '/appointments', builder: (_, __) => const AppointmentScreen()),
+      GoRoute(
+        path: '/appointments',
+        builder: (_, __) => const AppointmentScreen(),
+      ),
       GoRoute(path: '/customers', builder: (_, __) => const CustomerScreen()),
     ],
     redirect: (_, state) {
@@ -64,4 +80,11 @@ GoRouter router(Ref ref) {
       return null;
     },
   );
+
+  ///
+  /// Set the app router instance to global accessible variable so that current route can be retrieved
+  ///
+  appRouterInstance = appRouter;
+
+  return appRouter;
 }

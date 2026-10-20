@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/core/error/app_exception.dart';
 import 'package:venue_flow_app/core/widgets/responsive.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -75,12 +76,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       final session = ref.read(authSessionProvider);
 
       if (session.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(session.error?.toString() ?? 'Failed to sign in'),
-            backgroundColor: Colors.red,
-          ),
-        );
         return;
       }
 
@@ -89,12 +84,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to sign in: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
   }
 
@@ -109,21 +98,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       if (!mounted) return;
 
       if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.error?.toString() ?? 'Login failed'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        return;
       }
 
-      if (next.value == true) {
-        context.go('/venues');
+      // Navigate only when authentication changes to true.
+      if (previous?.value != true && next.value == true) {
+        context.go('/dashboard');
       }
     });
 
-    final isLoading = ref.watch(authSessionProvider).isLoading;
+    final authState = ref.watch(authSessionProvider);
 
+    final isLoading = authState.isLoading;
+    print('isLoading: $isLoading');
     return Responsive(
       mobile: mobileView(
         isDesktop: isDesktop,
@@ -178,6 +165,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       TextFormField(
+                        enabled: !isLoading,
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: _buildInputDecoration(
@@ -200,6 +188,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         children: [
                           const Text(
                             'PASSWORD',
+
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -220,6 +209,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
+                        enabled: !isLoading,
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         decoration: _buildInputDecoration(
