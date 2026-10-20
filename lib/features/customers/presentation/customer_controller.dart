@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:venue_flow_app/features/customers/data/member_response.dart';
 import 'package:venue_flow_app/features/customers/domain/register_customer.dart';
+import 'package:venue_flow_app/features/customers/domain/update_customer.dart';
 import '../data/customer_repository.dart';
 import '../domain/customer.dart';
 import '../domain/link_customer_to_org.dart';
@@ -62,6 +63,15 @@ class CustomerController extends _$CustomerController {
   Future<void> removeCustomer(String userId) async {
     final repository = ref.watch(customerRepositoryProvider);
     return await repository.removeCustomer(userId);
+  }
+
+  ///
+  /// Update customer details
+  ///
+  ///
+  Future<void> updateCustomerDetails(UpdateCustomer customer) async {
+    final repository = ref.watch(customerRepositoryProvider);
+    return await repository.updateCustomerDetails(customer);
   }
 }
 

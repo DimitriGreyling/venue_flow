@@ -9,6 +9,8 @@ abstract class Customer with _$Customer{
   const factory Customer({
     required String userId,
     required String fullName,
+    required String firstName,
+    required String lastName,
     String? email,
 })=_Customer;
 

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/core/theme/app_theme.dart';
 import 'package:venue_flow_app/features/customers/domain/register_customer.dart';
+import 'package:venue_flow_app/features/customers/domain/update_customer.dart';
 import 'package:venue_flow_app/features/customers/presentation/customer_controller.dart';
+import '../../../../core/theme/theme_x.dart';
 import '../../../../core/widgets/customer_auto_complete.dart';
 import '../../domain/customer.dart';
 import '../../domain/link_customer_to_org.dart';
@@ -10,12 +13,17 @@ import '../../domain/link_customer_to_org.dart';
 /// Dialog popup to edit a customer to a organization
 ///
 class EditCustomerDialog extends ConsumerStatefulWidget {
-  const EditCustomerDialog({super.key});
+  const EditCustomerDialog({super.key, required this.customer});
 
-  static Future<bool?> show(BuildContext context) {
+  final UpdateCustomer customer;
+
+  static Future<bool?> show(
+    BuildContext context, {
+    required UpdateCustomer customer,
+  }) {
     return showDialog<bool>(
       context: context,
-      builder: (_) => const EditCustomerDialog(),
+      builder: (_) => EditCustomerDialog(customer: customer),
     );
   }
 
@@ -31,11 +39,15 @@ class _EditCustomerDialogState extends ConsumerState<EditCustomerDialog>
   final _surnameController = TextEditingController();
   final _emailController = TextEditingController();
 
-  bool _isNewCustomer = false;
-  bool _hasSelectedCustomer = false;
   bool _isSaving = false;
 
-  Customer? _selectedCustomer;
+  @override
+  void initState() {
+    super.initState();
+    _firstNameController.text = widget.customer.firstName;
+    _surnameController.text = widget.customer.lastName;
+    _emailController.text = widget.customer.email ?? '';
+  }
 
   @override
   void dispose() {
@@ -45,15 +57,10 @@ class _EditCustomerDialogState extends ConsumerState<EditCustomerDialog>
     super.dispose();
   }
 
-  void _toggleNewCustomer(bool? value) {
-    if (value == null || value == _isNewCustomer) return;
-
-    setState(() {
-      _isNewCustomer = value;
-    });
-  }
-
-  Future<void> _save() async {
+  Future<void> _save({
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+  }) async {
     try {
       if (_isSaving) return;
 
@@ -70,36 +77,35 @@ class _EditCustomerDialogState extends ConsumerState<EditCustomerDialog>
 
       final repo = ref.watch(customerControllerProvider.notifier);
 
-      if (_isNewCustomer) {
-        await repo.registerCustomer(
-          RegisterCustomer(
-            firstName: _firstNameController.text,
-            lastName: _surnameController.text,
-            email: _emailController.text,
-
-            /// Password will be over written by the system and sent to the user via email
-          ),
-        );
-      } else {
-        await repo.linkCustomer(
-          LinkCustomerToOrg(userId: _selectedCustomer!.userId, roleId: ''),
-        );
-      }
+      await repo.updateCustomerDetails(
+        UpdateCustomer(
+          userId: widget.customer.userId,
+          firstName: _firstNameController.text,
+          lastName: _surnameController.text,
+          email: _emailController.text,
+        ),
+      );
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Customer added successfully')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: sem.success,
+          content: Text('Customer updated successfully'),
+        ),
+      );
 
       Navigator.of(context).pop(true);
     } catch (e) {
       setState(() {
         _isSaving = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: cs.error,
+          content: Text('An error occurred: $e'),
+        ),
+      );
     } finally {
       setState(() {
         _isSaving = false;
@@ -111,6 +117,7 @@ class _EditCustomerDialogState extends ConsumerState<EditCustomerDialog>
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context);
     final cs = Theme.of(context).colorScheme;
+    final sem = context.semantic;
     final textTheme = Theme.of(context).textTheme;
 
     final dialogWidth = screenSize.width > 800
@@ -129,7 +136,7 @@ class _EditCustomerDialogState extends ConsumerState<EditCustomerDialog>
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Add Customer', style: textTheme.headlineSmall),
+                Text('Edit Customer', style: textTheme.headlineSmall),
                 const SizedBox(height: 16),
 
                 Flexible(
@@ -139,45 +146,14 @@ class _EditCustomerDialogState extends ConsumerState<EditCustomerDialog>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          CustomerAutoComplete(
-                            isDisabled: _isSaving || _isNewCustomer,
-                            onCustomerSelected: (customer) {
-                              _selectedCustomer = customer;
-                              if (_selectedCustomer != null) {
-                                setState(() {
-                                  _isNewCustomer = false;
-                                  _hasSelectedCustomer = true;
-                                });
-                              } else {
-                                setState(() {
-                                  _isNewCustomer = false;
-                                  _hasSelectedCustomer = false;
-                                });
-                              }
-                            },
-                          ),
-
-                          CheckboxListTile(
-                            enabled: !_isSaving || !_hasSelectedCustomer,
-                            contentPadding: EdgeInsets.zero,
-                            value: _isNewCustomer,
-                            onChanged: _toggleNewCustomer,
-                            title: const Text('Register new customer'),
-                            controlAffinity: ListTileControlAffinity.leading,
-                          ),
-
                           // Animate the height change when the fields appear.
                           AnimatedSize(
                             duration: const Duration(milliseconds: 200),
                             curve: Curves.easeInOut,
                             alignment: Alignment.topCenter,
-                            child: _isNewCustomer
-                                ? addNewCustomer()
-                                : _hasSelectedCustomer
-                                ? selectedCustomerDetailsView(
-                                    customer: _selectedCustomer,
-                                  )
-                                : const SizedBox.shrink(),
+                            child: selectedCustomerDetailsView(
+                              customer: widget.customer,
+                            ),
                           ),
                         ],
                       ),
@@ -205,7 +181,9 @@ class _EditCustomerDialogState extends ConsumerState<EditCustomerDialog>
                         backgroundColor: cs.primary,
                         foregroundColor: cs.onPrimary,
                       ),
-                      onPressed: _isSaving ? null : _save,
+                      onPressed: _isSaving
+                          ? null
+                          : () => _save(cs: cs, sem: sem),
                       child: _isSaving
                           ? const SizedBox(
                               width: 16,
@@ -224,69 +202,7 @@ class _EditCustomerDialogState extends ConsumerState<EditCustomerDialog>
     );
   }
 
-  Widget addNewCustomer() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const SizedBox(height: 16),
-        TextFormField(
-          enabled: !_isSaving,
-          controller: _firstNameController,
-          decoration: const InputDecoration(
-            labelText: 'First Name',
-            border: OutlineInputBorder(),
-          ),
-          validator: (value) {
-            if (_isNewCustomer && (value == null || value.trim().isEmpty)) {
-              return 'Enter a first name';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          enabled: !_isSaving,
-          controller: _surnameController,
-          decoration: const InputDecoration(
-            labelText: 'Surname',
-            border: OutlineInputBorder(),
-          ),
-          validator: (value) {
-            if (_isNewCustomer && (value == null || value.trim().isEmpty)) {
-              return 'Enter a surname';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 16),
-        TextFormField(
-          enabled: !_isSaving,
-          controller: _emailController,
-          keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            border: OutlineInputBorder(),
-          ),
-          validator: (value) {
-            if (!_isNewCustomer) return null;
-
-            final email = value?.trim() ?? '';
-            if (email.isEmpty) {
-              return 'Enter an email address';
-            }
-
-            if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
-              return 'Enter a valid email address';
-            }
-
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget selectedCustomerDetailsView({Customer? customer}) {
+  Widget selectedCustomerDetailsView({UpdateCustomer? customer}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -294,7 +210,7 @@ class _EditCustomerDialogState extends ConsumerState<EditCustomerDialog>
         const SizedBox(height: 16),
         TextFormField(
           enabled: !_isSaving,
-          controller: TextEditingController(text: customer?.fullName ?? ''),
+          controller: _firstNameController,
           decoration: const InputDecoration(
             labelText: 'Full Name',
             border: OutlineInputBorder(),
@@ -303,7 +219,16 @@ class _EditCustomerDialogState extends ConsumerState<EditCustomerDialog>
         const SizedBox(height: 16),
         TextFormField(
           enabled: !_isSaving,
-          controller: TextEditingController(text: customer?.email ?? ''),
+          controller: _surnameController,
+          decoration: const InputDecoration(
+            labelText: 'Last Name',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          enabled: !_isSaving,
+          controller: _emailController,
           decoration: const InputDecoration(
             labelText: 'Email',
             border: OutlineInputBorder(),

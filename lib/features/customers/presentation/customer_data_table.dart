@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:venue_flow_app/features/customers/domain/update_customer.dart';
 import 'package:venue_flow_app/features/customers/presentation/dialogs/delete_customer_dialog.dart';
+import 'package:venue_flow_app/features/customers/presentation/dialogs/edit_customer_dialog.dart';
 
 import '../../../core/theme/theme_x.dart';
 import '../data/member_response.dart';
@@ -112,7 +114,21 @@ class _CustomerDataTableState extends ConsumerState<CustomerDataTable> {
                           Row(
                             children: [
                               IconButton(
-                                onPressed: () async {},
+                                onPressed: () async {
+                                  await EditCustomerDialog.show(
+                                    context,
+                                    customer: UpdateCustomer(
+                                      userId: customer.userId,
+                                      firstName: customer.firstName,
+                                      lastName: customer.lastName,
+                                      email: customer.email,
+                                    ),
+                                  );
+
+                                  if (widget.requiresRefresh != null) {
+                                    widget.requiresRefresh?.call(true);
+                                  }
+                                },
                                 tooltip: 'Edit ${customer.fullName}',
                                 icon: Icon(Mdi.accountEdit),
                               ),

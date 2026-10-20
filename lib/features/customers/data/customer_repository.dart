@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:venue_flow_app/features/customers/data/member_response.dart';
 import 'package:venue_flow_app/features/customers/domain/link_customer_to_org.dart';
 import 'package:venue_flow_app/features/customers/domain/register_customer.dart';
+import 'package:venue_flow_app/features/customers/domain/update_customer.dart';
 import '../../../core/network/dio_client.dart';
 import '../domain/customer.dart';
 
@@ -74,6 +75,21 @@ class CustomerRepository {
 
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception('Failed to remove customer');
+    }
+  }
+
+  ///
+  /// Update customer details
+  ///
+  ///
+  Future<void> updateCustomerDetails(UpdateCustomer customer) async {
+    final response = await _dio.put(
+      '/organizations/members/update/${customer.userId}',
+      data: customer.toJson(),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to update customer details');
     }
   }
 }

@@ -60,6 +60,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
 
   Future<void> _refresh() async {
     ref.invalidate(customerControllerProvider);
+    ref.invalidate(customerDetailsProvider);
     await _fetchCustomers();
   }
 
