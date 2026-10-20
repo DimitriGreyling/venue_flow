@@ -120,7 +120,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
       // Navigate only when authentication changes to true.
       if (previous?.value != true && next.value == true) {
-        context.go('/venues');
+        context.go('/dashboard');
       }
     });
 
