@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:venue_flow_app/features/customers/data/member_response.dart';
 import 'package:venue_flow_app/features/customers/domain/link_customer_to_org.dart';
 import 'package:venue_flow_app/features/customers/domain/register_customer.dart';
 import 'package:venue_flow_app/features/customers/domain/update_customer.dart';
+import '../../../core/domain/paged_response.dart';
 import '../../../core/network/dio_client.dart';
 import '../domain/customer.dart';
 
@@ -24,17 +26,32 @@ class CustomerRepository {
     return list.map((e) => Customer.fromJson(e)).toList();
   }
 
+  ///
   ///Get List of memebers for a organization
-  Future<List<MemberResponse>> getMembersForOrg() async {
-    final response = await _dio.get('/organizations/members');
-    final list = (response.data as List<dynamic>);
-    return list.map((e) => MemberResponse.fromJson(e)).toList();
+  ///Method takes in page and pageSize
+  ///
+  Future<PagedResponse<MemberResponse>> getMembersForOrg({
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    final response = await _dio.get(
+      '/organizations/members',
+      queryParameters: {'page': page, 'pageSize': pageSize},
+    );
+
+    print('Response: ${response}');
+    print('Response type: ${response.data.runtimeType}');
+
+    return PagedResponse<MemberResponse>.fromJson(
+      response.data as Map<String, dynamic>,
+      (json) => MemberResponse.fromJson(json as Map<String, dynamic>),
+    );
   }
 
   ///Get customer details by ID
   Future<Customer> getMemberDetailsById(String userId) async {
     final response = await _dio.get(
-      '/organizations/members/member/',
+      '/organizations/members/member',
       queryParameters: {'id': userId},
     );
 

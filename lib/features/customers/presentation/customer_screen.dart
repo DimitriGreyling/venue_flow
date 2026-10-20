@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/core/domain/paged_response.dart';
 import 'package:venue_flow_app/core/widgets/responsive.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
 import 'package:venue_flow_app/features/customers/data/member_response.dart';
@@ -21,7 +22,13 @@ class CustomerScreen extends ConsumerStatefulWidget {
 
 class _CustomerScreenState extends ConsumerState<CustomerScreen> {
   bool isLoading = true;
-  List<MemberResponse> customers = [];
+  PagedResponse<MemberResponse> customers = PagedResponse(
+    items: [],
+    totalCount: 0,
+    page: 1,
+    pageSize: 1,
+    totalPages: 1,
+  );
 
   List<DataColumn> columns = [
     DataColumn(label: Text('Name')),
@@ -49,7 +56,6 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
   }
 
   Future<void> _fetchCustomers() async {
-    // Simulate network delay
     final repository = ref.watch(customerControllerProvider.notifier);
     customers = await repository.getMembersForOrg();
 
@@ -59,6 +65,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
   }
 
   Future<void> _refresh() async {
+    print('Triggered refresh');
     ref.invalidate(customerControllerProvider);
     ref.invalidate(customerDetailsProvider);
     await _fetchCustomers();
@@ -129,6 +136,11 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                   isLoading: isLoading,
                   requiresRefresh: (value) {
                     _refresh();
+                  },
+                  onPageChanged: (page) {
+                    ref
+                        .read(customerControllerProvider.notifier)
+                        .getMembersForOrg(page: page, pageSize: 1);
                   },
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:venue_flow_app/core/domain/paged_response.dart';
 import 'package:venue_flow_app/features/customers/data/member_response.dart';
 import 'package:venue_flow_app/features/customers/domain/register_customer.dart';
 import 'package:venue_flow_app/features/customers/domain/update_customer.dart';
@@ -34,9 +35,12 @@ class CustomerController extends _$CustomerController {
   }
 
   ///Get List of members for a organization
-  Future<List<MemberResponse>> getMembersForOrg() async {
+  Future<PagedResponse<MemberResponse>> getMembersForOrg({
+    int page = 1,
+    int pageSize = 20,
+  }) async {
     final repository = ref.read(customerRepositoryProvider);
-    return await repository.getMembersForOrg();
+    return await repository.getMembersForOrg(page: page, pageSize: pageSize);
   }
 
   ///Fetch customer details by user id
@@ -72,6 +76,14 @@ class CustomerController extends _$CustomerController {
   Future<void> updateCustomerDetails(UpdateCustomer customer) async {
     final repository = ref.watch(customerRepositoryProvider);
     return await repository.updateCustomerDetails(customer);
+  }
+
+  ///
+  /// Get Customer details
+  ///
+  Future<Customer> getMemberDetailsById(String customerId) async {
+    final repository = ref.watch(customerRepositoryProvider);
+    return await repository.getMemberDetailsById(customerId);
   }
 }
 
