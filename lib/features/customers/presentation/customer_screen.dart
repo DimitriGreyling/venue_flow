@@ -30,6 +30,8 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
     totalPages: 1,
   );
 
+  int pageNumber = 1;
+
   List<DataColumn> columns = [
     DataColumn(label: Text('Name')),
     DataColumn(label: Text('Email')),
@@ -57,7 +59,10 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
 
   Future<void> _fetchCustomers() async {
     final repository = ref.watch(customerControllerProvider.notifier);
-    customers = await repository.getMembersForOrg();
+    customers = await repository.getMembersForOrg(
+      page: pageNumber,
+      pageSize: 1,
+    );
 
     setState(() {
       isLoading = false; // Turn off loading when data arrives
@@ -138,9 +143,8 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
                     _refresh();
                   },
                   onPageChanged: (page) {
-                    ref
-                        .read(customerControllerProvider.notifier)
-                        .getMembersForOrg(page: page, pageSize: 1);
+                    pageNumber = page;
+                    _fetchCustomers();
                   },
                 ),
               ),
