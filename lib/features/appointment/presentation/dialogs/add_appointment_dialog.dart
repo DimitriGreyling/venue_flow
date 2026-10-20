@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/core/theme/app_theme.dart';
+import 'package:venue_flow_app/core/widgets/customer_multi_select_autocomplete.dart';
 import 'package:venue_flow_app/core/widgets/date_picker_field.dart';
 import 'package:venue_flow_app/features/customers/domain/register_customer.dart';
 import 'package:venue_flow_app/features/customers/presentation/customer_controller.dart';
@@ -169,6 +170,17 @@ class _AddAppointmentDialogState extends ConsumerState<AddAppointmentDialog>
                               setState(() {
                                 _selectedDate = date;
                               });
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          CustomerMultiSelectAutoComplete(
+                            onCustomersChanged: (customers) {
+                              print(
+                                'Selected customers: ${customers.map((c) => c.fullName).join(', ')}',
+                              );
+                              // setState(() {
+                              //   _selectedCustomers = customers;
+                              // });
                             },
                           ),
                         ],
