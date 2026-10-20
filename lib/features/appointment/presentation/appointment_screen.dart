@@ -62,18 +62,6 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
     final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Appointments'),
-      //   actions: [
-      //     IconButton(
-      //       tooltip: 'Refresh appointments',
-      //       onPressed: () {
-      //         ref.invalidate(appointmentsForMonthProvider(_month));
-      //       },
-      //       icon: const Icon(Icons.refresh),
-      //     ),
-      //   ],
-      // ),
       drawer: wide
           ? null
           : Drawer(
@@ -97,6 +85,7 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                           ElevatedButton.icon(
                             onPressed: () {
                               ref.invalidate(appointmentIdsProvider(_month));
+                              ref.invalidate(appointmentInformationByIdProvider);
                             },
                             icon: const Icon(Icons.refresh),
                             label: Text(

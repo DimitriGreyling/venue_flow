@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../features/appointment/presentation/appointment_screen.dart';
 import '../../features/auth/presentation/auth_session.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/customers/presentation/customer_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/form/presentation/form_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
@@ -31,6 +32,7 @@ GoRouter router(Ref ref) {
       GoRoute(path: '/dashboard', builder: (_, __) => const DashboardScreen()),
       GoRoute(path: '/forms', builder: (_, __) => const FormScreen()),
       GoRoute(path: '/appointments', builder: (_, __) => const AppointmentScreen()),
+      GoRoute(path: '/customers', builder: (_, __) => const CustomerScreen()),
     ],
     redirect: (_, state) {
       final auth = ref.read(authSessionProvider);

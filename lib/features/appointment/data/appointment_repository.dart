@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:venue_flow_app/features/appointment/domain/appointment_month.dart';
 import '../../../core/network/dio_client.dart';
@@ -75,7 +74,6 @@ class AppointmentsRepository {
   Future<Appointment> getAppointmentInformationById({
     required String appointmentId,
   }) async {
-    await Future.delayed(Duration(seconds: 10));
     final response = await _dio.get('/appointments/$appointmentId');
 
     final data = response.data;
