@@ -61,7 +61,7 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
     final repository = ref.watch(customerControllerProvider.notifier);
     customers = await repository.getMembersForOrg(
       page: pageNumber,
-      pageSize: 1,
+      pageSize: 10,
     );
 
     setState(() {
