@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/core/enums/badge_status.dart';
 import 'package:venue_flow_app/core/widgets/responsive.dart';
@@ -6,6 +7,7 @@ import 'package:venue_flow_app/core/widgets/status_badge.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
 import 'package:venue_flow_app/features/appointment/domain/appointment_days.dart';
 import 'package:venue_flow_app/features/appointment/domain/appointment_month.dart';
+import 'package:venue_flow_app/features/appointment/presentation/dialogs/add_appointment_dialog.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_x.dart' show ThemeX;
 import '../../../core/widgets/generic_loader.dart';
@@ -53,6 +55,11 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
     );
   }
 
+  Future<void> _refresh() async {
+    ref.invalidate(appointmentIdsProvider(_month));
+    ref.invalidate(appointmentInformationByIdProvider);
+  }
+
   Widget viewMobile({
     required AsyncValue<AppointmentMonth> appointmentsAsync,
     required ColorScheme cs,
@@ -82,26 +89,26 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              ref.invalidate(appointmentIdsProvider(_month));
-                              ref.invalidate(appointmentInformationByIdProvider);
-                            },
-                            icon: const Icon(Icons.refresh),
-                            label: Text(
-                              'Refresh',
-                              style: TextStyle(color: cs.onSecondary),
+                          CircleAvatar(
+                            child: IconButton(
+                              onPressed: () async {
+                                await AddAppointmentDialog.show(
+                                  context: context,
+                                );
+                                _refresh();
+                              },
+                              tooltip: 'Add appointment to calendar',
+                              icon: const Icon(Mdi.calendarAccount),
                             ),
-                            style: ButtonStyle(
-                              backgroundColor: WidgetStateProperty.all(
-                                cs.secondary,
-                              ),
-                              iconColor: WidgetStateProperty.all(
-                                cs.onSecondary,
-                              ),
-                              textStyle: WidgetStateProperty.all(
-                                TextStyle(color: cs.onSecondary),
-                              ),
+                          ),
+                          const SizedBox(width: 8),
+                          CircleAvatar(
+                            child: IconButton(
+                              onPressed: () {
+                                _refresh();
+                              },
+                              tooltip: 'Refresh',
+                              icon: const Icon(Mdi.refresh),
                             ),
                           ),
                         ],
@@ -149,11 +156,15 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                             );
                           }).toList()..sort((a, b) => a.date.compareTo(b.date));
 
-                          final appointmentItems = selectedAppointments.expand((appointment) {
-                            return appointment.appointmentIds.map((appointmentId) {
+                          final appointmentItems = selectedAppointments.expand((
+                            appointment,
+                          ) {
+                            return appointment.appointmentIds.map((
+                              appointmentId,
+                            ) {
                               return (
-                              id: appointmentId,
-                              date: appointment.date,
+                                id: appointmentId,
+                                date: appointment.date,
                               );
                             });
                           }).toList();
@@ -242,20 +253,23 @@ class _AppointmentScreenState extends ConsumerState<AppointmentScreen> {
                                           'No appointments for this day.',
                                         ),
                                       )
-                                    :ListView.separated(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  itemCount: appointmentItems.length,
-                                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                                  itemBuilder: (context, index) {
-                                    final item = appointmentItems[index];
+                                    : ListView.separated(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                        ),
+                                        itemCount: appointmentItems.length,
+                                        separatorBuilder: (_, __) =>
+                                            const SizedBox(height: 8),
+                                        itemBuilder: (context, index) {
+                                          final item = appointmentItems[index];
 
-                                    return AppointmentTitle(
-                                      appointmentId: item.id,
-                                      appointmentStartDate: item.date,
-                                      appointmentEndDate: item.date,
-                                    );
-                                  },
-                                ),
+                                          return AppointmentTitle(
+                                            appointmentId: item.id,
+                                            appointmentStartDate: item.date,
+                                            appointmentEndDate: item.date,
+                                          );
+                                        },
+                                      ),
 
                                 // ListView.separated(
                                 //   padding: const EdgeInsets.symmetric(

@@ -125,7 +125,7 @@ class _NavBar extends StatelessWidget {
                       minimumSize: _btnMin,
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                     ),
-                    onPressed: () => context.go('/venues'),
+                    onPressed: () => context.go('/dashboard'),
                     child: const Text('Dashboard'),
                   )
                 else ...[
