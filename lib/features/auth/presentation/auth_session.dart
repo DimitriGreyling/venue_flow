@@ -47,7 +47,6 @@ class AuthSession extends _$AuthSession {
 
   Future<void> login(String email, String password) async {
     state = const AsyncLoading();
-    print('LOGIN: ${state.isLoading}');
 
     state = await AsyncValue.guard(() async {
       final response = await ref
@@ -60,8 +59,6 @@ class AuthSession extends _$AuthSession {
 
       return true;
     });
-
-    print('LOGIN FINISHED: ${state.isLoading}');
   }
 
   Future<void> logout() async {

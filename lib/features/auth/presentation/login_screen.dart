@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/core/error/app_exception.dart';
 import 'package:venue_flow_app/core/widgets/responsive.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -75,12 +76,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       final session = ref.read(authSessionProvider);
 
       if (session.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(session.error?.toString() ?? 'Failed to sign in'),
-            backgroundColor: Colors.red,
-          ),
-        );
         return;
       }
 
@@ -89,12 +84,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to sign in: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
   }
 
@@ -109,12 +98,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       if (!mounted) return;
 
       if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.error.toString()),
-            backgroundColor: cs.error,
-          ),
-        );
         return;
       }
 

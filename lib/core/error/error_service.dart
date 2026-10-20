@@ -37,7 +37,8 @@ class ErrorService {
         case AppErrorType.validation:
         case AppErrorType.network:
         case AppErrorType.timeout:
-          _toast(ex);
+          // _toast(ex);
+          _dialog(ex);
         default:
           _dialog(ex);
       }
@@ -49,13 +50,15 @@ class ErrorService {
     if (messenger == null) return;
     messenger
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        behavior: SnackBarBehavior.floating,
-        showCloseIcon: true,
-        backgroundColor: Colors.red.shade700,
-        content: Text(ex.message),
-        duration: const Duration(seconds: 5),
-      ));
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          showCloseIcon: true,
+          backgroundColor: Colors.red.shade700,
+          content: Text(ex.message),
+          duration: const Duration(seconds: 5),
+        ),
+      );
   }
 
   Future<void> _dialog(AppException ex) async {
@@ -78,7 +81,11 @@ class ErrorService {
       useRootNavigator: true,
       barrierDismissible: false,
       builder: (dialogCtx) => AlertDialog(
-        icon: Icon(icon, color: Theme.of(dialogCtx).colorScheme.error, size: 32),
+        icon: Icon(
+          icon,
+          color: Theme.of(dialogCtx).colorScheme.error,
+          size: 32,
+        ),
         title: Text(ex.title ?? 'Error'),
         content: SelectableText(ex.message),
         actions: [
