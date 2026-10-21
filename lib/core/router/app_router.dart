@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/appointment/presentation/appointment_screen.dart';
+import '../../features/appointment_configuration/presentation/appointment_configuration_screen.dart';
 import '../../features/auth/presentation/auth_session.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/customers/presentation/customer_screen.dart';
@@ -49,6 +50,10 @@ GoRouter router(Ref ref) {
         builder: (_, __) => const AppointmentScreen(),
       ),
       GoRoute(path: '/customers', builder: (_, __) => const CustomerScreen()),
+      GoRoute(
+        path: '/appointment-configuration',
+        builder: (_, __) => const AppointmentConfigurationScreen(),
+      ),
     ],
     redirect: (_, state) {
       final auth = ref.read(authSessionProvider);
