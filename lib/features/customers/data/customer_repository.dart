@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:venue_flow_app/features/customers/data/member_response.dart';
+import 'package:venue_flow_app/features/customers/domain/member_response.dart';
 import 'package:venue_flow_app/features/customers/domain/link_customer_to_org.dart';
 import 'package:venue_flow_app/features/customers/domain/register_customer.dart';
 import 'package:venue_flow_app/features/customers/domain/update_customer.dart';

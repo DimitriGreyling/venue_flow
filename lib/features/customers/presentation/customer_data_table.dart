@@ -7,7 +7,7 @@ import 'package:venue_flow_app/features/customers/presentation/dialogs/delete_cu
 import 'package:venue_flow_app/features/customers/presentation/dialogs/edit_customer_dialog.dart';
 import '../../../core/domain/paged_response.dart';
 import '../../../core/theme/theme_x.dart';
-import '../data/member_response.dart';
+import '../domain/member_response.dart';
 import '../domain/customer.dart';
 import 'customer_controller.dart';
 
