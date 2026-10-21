@@ -2,11 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:venue_flow_app/core/error/app_exception.dart';
+import 'package:venue_flow_app/core/error/error_service.dart';
 import 'package:venue_flow_app/core/utils/day_of_week_utils.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
+import 'package:venue_flow_app/core/widgets/venue_auto_complete.dart';
 import 'package:venue_flow_app/features/appointment_configuration/domain/appointment_configuration.dart';
 import 'package:venue_flow_app/features/appointment_configuration/domain/appointment_type.dart';
 import 'package:venue_flow_app/features/appointment_configuration/domain/working_hours.dart';
+import 'package:venue_flow_app/features/venues/domain/venue_search_response.dart';
 import '../../../../core/theme/theme_x.dart';
 import '../../../../core/widgets/side_nav.dart';
 import '../../data/repository/appointment_configuration_repository.dart';
@@ -39,6 +43,7 @@ class _AppointmentConfigMobileViewState
   late List<WorkingHours> _workingDays = [];
   late AppointmentConfiguration _appointmentConfiguration;
   late List<AppointmentType> _appointmentTypes = [];
+  VenueSearchResponse? _selectedVenue;
 
   int get _enabledTypes =>
       _appointmentTypes.where((type) => type.enabled).length;
@@ -48,25 +53,47 @@ class _AppointmentConfigMobileViewState
   @override
   void initState() {
     super.initState();
-    _fetchAppointmentConfiguration();
   }
 
   Future<void> _fetchAppointmentConfiguration() async {
-    setState(() {
-      isLoading = true;
-    });
-    final repository = ref.watch(appointmentConfigurationRepositoryProvider);
-    final appointmentConfig = await repository.getAppointmentConfiguration(
-      venueId: 'f2e2eac4-af1e-4105-a666-c1f9fbd3c181',
-    );
+    try {
+      setState(() {
+        isLoading = true;
+      });
 
-    setState(() {
-      _appointmentConfiguration = appointmentConfig;
-      _workingDays = _appointmentConfiguration.workingHours;
-      _enabled = _appointmentConfiguration.enabled;
-      _appointmentTypes = _appointmentConfiguration.appointmentTypes;
-      isLoading = false;
-    });
+      if (_selectedVenue == null) {
+        setState(() {
+          isLoading = false;
+        });
+
+        return;
+      }
+
+      final repository = ref.watch(appointmentConfigurationRepositoryProvider);
+      final appointmentConfig = await repository.getAppointmentConfiguration(
+        venueId: _selectedVenue?.id ?? '',
+      );
+
+      setState(() {
+        _appointmentConfiguration = appointmentConfig;
+        _workingDays = _appointmentConfiguration.workingHours;
+        _enabled = _appointmentConfiguration.enabled;
+        _appointmentTypes = _appointmentConfiguration.appointmentTypes;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _selectedVenue = null;
+        isLoading = false;
+      });
+      final errors = ErrorService();
+      print('ERROR: $e');
+      if (e is AppException) {
+        errors.show(e.message);
+      } else {
+        errors.show(e.toString());
+      }
+    }
   }
 
   Future<void> _selectTime(WorkingHours day, bool isStart) async {
@@ -148,43 +175,67 @@ class _AppointmentConfigMobileViewState
             child: Column(
               children: [
                 TopBar(wide: wide),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.all(24),
-                    children: [
-                      Text(
-                        widget.venueName ?? '',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Configure appointment availability, booking rules, '
-                        'working hours and approval settings for this venue.',
-                        style: theme.textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 24),
-                      _buildOverview(isLoading: isLoading, cs: cs),
-                      const SizedBox(height: 24),
-                      _buildGeneralSettings(isLoading: isLoading, cs: cs),
-                      const SizedBox(height: 24),
-                      _buildAppointmentTypes(isLoading: isLoading, cs: cs),
-                      const SizedBox(height: 24),
-                      _buildWorkingHours(isLoading: isLoading, cs: cs),
-                      const SizedBox(height: 24),
-                      _buildAvailabilityRules(isLoading: isLoading, cs: cs),
-                      const SizedBox(height: 32),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: FilledButton.icon(
-                          onPressed: isLoading ? null : _saveConfiguration,
-                          icon: const Icon(Icons.save_outlined),
-                          label: const Text('Save configuration'),
-                        ),
-                      ),
-                    ],
+                Padding(
+                  padding: EdgeInsets.all(wide ? 24 : 16),
+                  child: VenueAutoComplete(
+                    onVenueSelected: (venue) {
+                      setState(() {
+                        _selectedVenue = venue;
+                      });
+                      _fetchAppointmentConfiguration();
+                    },
                   ),
+                ),
+                Expanded(
+                  child: _selectedVenue == null
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [Text('Please select a venue')],
+                        )
+                      : ListView(
+                          padding: const EdgeInsets.all(24),
+                          children: [
+                            Text(
+                              _selectedVenue?.name ?? widget.venueName ?? '',
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Configure appointment availability, booking rules, '
+                              'working hours and approval settings for this venue.',
+                              style: theme.textTheme.bodyLarge,
+                            ),
+                            const SizedBox(height: 24),
+                            _buildOverview(isLoading: isLoading, cs: cs),
+                            const SizedBox(height: 24),
+                            _buildGeneralSettings(isLoading: isLoading, cs: cs),
+                            const SizedBox(height: 24),
+                            _buildAppointmentTypes(
+                              isLoading: isLoading,
+                              cs: cs,
+                            ),
+                            const SizedBox(height: 24),
+                            _buildWorkingHours(isLoading: isLoading, cs: cs),
+                            const SizedBox(height: 24),
+                            _buildAvailabilityRules(
+                              isLoading: isLoading,
+                              cs: cs,
+                            ),
+                            const SizedBox(height: 32),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: FilledButton.icon(
+                                onPressed: isLoading
+                                    ? null
+                                    : _saveConfiguration,
+                                icon: const Icon(Icons.save_outlined),
+                                label: const Text('Save configuration'),
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
               ],
             ),

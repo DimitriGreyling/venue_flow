@@ -20,6 +20,9 @@ class AppointmentConfigurationRepository {
     final response = await _dio.get(
       '/venues/$venueId/appointment-configuration',
     );
+
+    print('RESPONSE: ${response}');
+
     return AppointmentConfiguration.fromJson(response.data);
   }
 

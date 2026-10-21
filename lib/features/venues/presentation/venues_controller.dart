@@ -1,4 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:venue_flow_app/features/venues/domain/venue_search_response.dart';
 
 import '../data/venue_repository.dart';
 import '../domain/venue.dart';
@@ -15,7 +16,14 @@ class VenuesController extends _$VenuesController {
   Future<void> refresh() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-          () => ref.read(venueRepositoryProvider).getVenues(),
+      () => ref.read(venueRepositoryProvider).getVenues(),
     );
+  }
+
+  Future<List<VenueSearchResponse>> searchVenues({
+    required String searchTerm,
+  }) async {
+    final repository = ref.watch(venueRepositoryProvider);
+    return repository.searchVenues(searchTerm: searchTerm);
   }
 }
