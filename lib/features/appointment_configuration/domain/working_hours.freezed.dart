@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WorkingHours {
 
- String get id; int get dayOfWeek; DateTime get startTime; DateTime get endTime; bool get enabled;
+ String get id; int get dayOfWeek;@TimeOfDayConverter() TimeOfDay get startTime;@TimeOfDayConverter() TimeOfDay get endTime; bool get enabled;
 /// Create a copy of WorkingHours
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $WorkingHoursCopyWith<$Res>  {
   factory $WorkingHoursCopyWith(WorkingHours value, $Res Function(WorkingHours) _then) = _$WorkingHoursCopyWithImpl;
 @useResult
 $Res call({
- String id, int dayOfWeek, DateTime startTime, DateTime endTime, bool enabled
+ String id, int dayOfWeek,@TimeOfDayConverter() TimeOfDay startTime,@TimeOfDayConverter() TimeOfDay endTime, bool enabled
 });
 
 
@@ -76,8 +76,8 @@ class _$WorkingHoursCopyWithImpl<$Res>
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,dayOfWeek: null == dayOfWeek ? _self.dayOfWeek : dayOfWeek // ignore: cast_nullable_to_non_nullable
 as int,startTime: null == startTime ? _self.startTime : startTime // ignore: cast_nullable_to_non_nullable
-as DateTime,endTime: null == endTime ? _self.endTime : endTime // ignore: cast_nullable_to_non_nullable
-as DateTime,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as TimeOfDay,endTime: null == endTime ? _self.endTime : endTime // ignore: cast_nullable_to_non_nullable
+as TimeOfDay,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -163,7 +163,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int dayOfWeek,  DateTime startTime,  DateTime endTime,  bool enabled)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int dayOfWeek, @TimeOfDayConverter()  TimeOfDay startTime, @TimeOfDayConverter()  TimeOfDay endTime,  bool enabled)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WorkingHours() when $default != null:
 return $default(_that.id,_that.dayOfWeek,_that.startTime,_that.endTime,_that.enabled);case _:
@@ -184,7 +184,7 @@ return $default(_that.id,_that.dayOfWeek,_that.startTime,_that.endTime,_that.ena
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int dayOfWeek,  DateTime startTime,  DateTime endTime,  bool enabled)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int dayOfWeek, @TimeOfDayConverter()  TimeOfDay startTime, @TimeOfDayConverter()  TimeOfDay endTime,  bool enabled)  $default,) {final _that = this;
 switch (_that) {
 case _WorkingHours():
 return $default(_that.id,_that.dayOfWeek,_that.startTime,_that.endTime,_that.enabled);case _:
@@ -204,7 +204,7 @@ return $default(_that.id,_that.dayOfWeek,_that.startTime,_that.endTime,_that.ena
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int dayOfWeek,  DateTime startTime,  DateTime endTime,  bool enabled)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int dayOfWeek, @TimeOfDayConverter()  TimeOfDay startTime, @TimeOfDayConverter()  TimeOfDay endTime,  bool enabled)?  $default,) {final _that = this;
 switch (_that) {
 case _WorkingHours() when $default != null:
 return $default(_that.id,_that.dayOfWeek,_that.startTime,_that.endTime,_that.enabled);case _:
@@ -219,13 +219,13 @@ return $default(_that.id,_that.dayOfWeek,_that.startTime,_that.endTime,_that.ena
 @JsonSerializable()
 
 class _WorkingHours implements WorkingHours {
-  const _WorkingHours({required this.id, required this.dayOfWeek, required this.startTime, required this.endTime, required this.enabled});
+  const _WorkingHours({required this.id, required this.dayOfWeek, @TimeOfDayConverter() required this.startTime, @TimeOfDayConverter() required this.endTime, required this.enabled});
   factory _WorkingHours.fromJson(Map<String, dynamic> json) => _$WorkingHoursFromJson(json);
 
 @override final  String id;
 @override final  int dayOfWeek;
-@override final  DateTime startTime;
-@override final  DateTime endTime;
+@override@TimeOfDayConverter() final  TimeOfDay startTime;
+@override@TimeOfDayConverter() final  TimeOfDay endTime;
 @override final  bool enabled;
 
 /// Create a copy of WorkingHours
@@ -263,7 +263,7 @@ abstract mixin class _$WorkingHoursCopyWith<$Res> implements $WorkingHoursCopyWi
   factory _$WorkingHoursCopyWith(_WorkingHours value, $Res Function(_WorkingHours) _then) = __$WorkingHoursCopyWithImpl;
 @override @useResult
 $Res call({
- String id, int dayOfWeek, DateTime startTime, DateTime endTime, bool enabled
+ String id, int dayOfWeek,@TimeOfDayConverter() TimeOfDay startTime,@TimeOfDayConverter() TimeOfDay endTime, bool enabled
 });
 
 
@@ -285,8 +285,8 @@ class __$WorkingHoursCopyWithImpl<$Res>
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,dayOfWeek: null == dayOfWeek ? _self.dayOfWeek : dayOfWeek // ignore: cast_nullable_to_non_nullable
 as int,startTime: null == startTime ? _self.startTime : startTime // ignore: cast_nullable_to_non_nullable
-as DateTime,endTime: null == endTime ? _self.endTime : endTime // ignore: cast_nullable_to_non_nullable
-as DateTime,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as TimeOfDay,endTime: null == endTime ? _self.endTime : endTime // ignore: cast_nullable_to_non_nullable
+as TimeOfDay,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

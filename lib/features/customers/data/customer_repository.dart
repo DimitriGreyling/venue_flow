@@ -39,9 +39,6 @@ class CustomerRepository {
       queryParameters: {'page': page, 'pageSize': pageSize},
     );
 
-    print('Response: ${response}');
-    print('Response type: ${response.data.runtimeType}');
-
     return PagedResponse<MemberResponse>.fromJson(
       response.data as Map<String, dynamic>,
       (json) => MemberResponse.fromJson(json as Map<String, dynamic>),

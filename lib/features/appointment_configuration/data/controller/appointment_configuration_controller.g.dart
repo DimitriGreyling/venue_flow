@@ -41,7 +41,7 @@ final class AppointmentConfigurationControllerProvider
 }
 
 String _$appointmentConfigurationControllerHash() =>
-    r'9a0ec48bd7f65f21df4239bef16e218a88878b72';
+    r'ebf1237b3a18b7d19b8aeceac7522e0222868f09';
 
 abstract class _$AppointmentConfigurationController
     extends $AsyncNotifier<List<AppointmentConfigurationController>> {

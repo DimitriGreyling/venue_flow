@@ -1,7 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:venue_flow_app/features/appointment_configuration/domain/appointment_type.dart';
+import 'package:venue_flow_app/features/appointment_configuration/domain/working_hours.dart';
 
 part 'appointment_configuration.g.dart';
+
 part 'appointment_configuration.freezed.dart';
 
 @freezed
@@ -18,8 +20,9 @@ abstract class AppointmentConfiguration with _$AppointmentConfiguration {
     required int bufferMinutes,
     required int maximumBookingsPerSlot,
     required List<AppointmentType> appointmentTypes,
+    required List<WorkingHours> workingHours
+  }) = _AppointmentConfiguration;
 
-})=_AppointmentConfiguration;
-
-  factory AppointmentConfiguration.fromJson(Map<String, dynamic> json) => _$AppointmentConfigurationFromJson(json);
+  factory AppointmentConfiguration.fromJson(Map<String, dynamic> json) =>
+      _$AppointmentConfigurationFromJson(json);
 }

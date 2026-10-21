@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/core/widgets/responsive.dart';
 import 'package:venue_flow_app/features/customers/presentation/views/customer_desktop_view.dart';
-import 'package:venue_flow_app/features/customers/presentation/views/mobile_view.dart';
+import 'package:venue_flow_app/features/customers/presentation/views/customer_mobile_view.dart';
 
 class CustomerScreen extends ConsumerStatefulWidget {
   const CustomerScreen({super.key});

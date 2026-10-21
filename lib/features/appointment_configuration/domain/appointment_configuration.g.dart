@@ -22,6 +22,9 @@ _AppointmentConfiguration _$AppointmentConfigurationFromJson(
   appointmentTypes: (json['appointmentTypes'] as List<dynamic>)
       .map((e) => AppointmentType.fromJson(e as Map<String, dynamic>))
       .toList(),
+  workingHours: (json['workingHours'] as List<dynamic>)
+      .map((e) => WorkingHours.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
 Map<String, dynamic> _$AppointmentConfigurationToJson(
@@ -38,4 +41,5 @@ Map<String, dynamic> _$AppointmentConfigurationToJson(
   'bufferMinutes': instance.bufferMinutes,
   'maximumBookingsPerSlot': instance.maximumBookingsPerSlot,
   'appointmentTypes': instance.appointmentTypes,
+  'workingHours': instance.workingHours,
 };
