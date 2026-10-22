@@ -261,15 +261,24 @@ class _EditVenueDialogState extends ConsumerState<EditVenueDialog>
           const SizedBox(height: 16),
 
           // Tabs
-          const TabBar(
-            tabAlignment: TabAlignment.start,
-            isScrollable: true,
-            tabs: [
-              Tab(icon: Icon(Icons.store_outlined), text: 'General'),
-              Tab(icon: Icon(Icons.contact_phone_outlined), text: 'Contact'),
-              Tab(icon: Icon(Icons.location_on_outlined), text: 'Address'),
-              Tab(icon: Icon(Icons.groups_outlined), text: 'Capacity'),
-            ],
+          IgnorePointer(
+            ignoring: _isSaving,
+            child: Opacity(
+              opacity: _isSaving ? 0.5 : 1.0,
+              child: const TabBar(
+                tabAlignment: TabAlignment.start,
+                isScrollable: true,
+                tabs: [
+                  Tab(icon: Icon(Icons.store_outlined), text: 'General'),
+                  Tab(
+                    icon: Icon(Icons.contact_phone_outlined),
+                    text: 'Contact',
+                  ),
+                  Tab(icon: Icon(Icons.location_on_outlined), text: 'Address'),
+                  Tab(icon: Icon(Icons.groups_outlined), text: 'Capacity'),
+                ],
+              ),
+            ),
           ),
 
           const SizedBox(height: 16),
