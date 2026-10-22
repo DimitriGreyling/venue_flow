@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/core/enums/venue_type.dart';
 import 'package:venue_flow_app/core/theme/app_theme.dart';
-import 'package:venue_flow_app/features/customers/domain/update_customer.dart';
-import 'package:venue_flow_app/features/customers/presentation/customer_controller.dart';
 import 'package:venue_flow_app/features/venues/domain/update_venue_request.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_response.dart';
 import '../../../../core/theme/theme_x.dart';
@@ -317,13 +316,27 @@ class _EditVenueDialogState extends ConsumerState<EditVenueDialog>
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: TextFormField(
-                  enabled: !_isSaving,
-                  controller: _venueTypeController,
+                child: DropdownButtonFormField(
                   decoration: const InputDecoration(
                     labelText: 'Venue Type',
                     border: OutlineInputBorder(),
                   ),
+                  items: VenueType.values
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(e.toString()),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (venuType) {
+                    _venueTypeController.text = venuType.toString();
+                  },
+                  initialValue: _venueTypeController.text.isNotEmpty
+                      ? VenueType.values.firstWhere(
+                          (e) => e.toString() == _venueTypeController.text,
+                        )
+                      : null,
                 ),
               ),
             ],
