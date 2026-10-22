@@ -31,13 +31,13 @@ class TopBar extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          if (!wide)
-            Builder(
-              builder: (ctx) => IconButton(
-                icon: Icon(Icons.menu, color: cs.onSurface),
-                onPressed: () => Scaffold.of(ctx).openDrawer(),
-              ),
+          // if (!wide)
+          Builder(
+            builder: (ctx) => IconButton(
+              icon: Icon(Icons.menu, color: cs.onSurface),
+              onPressed: () => Scaffold.of(ctx).openDrawer(),
             ),
+          ),
           Expanded(
             child: Align(
               alignment: Alignment.centerLeft,

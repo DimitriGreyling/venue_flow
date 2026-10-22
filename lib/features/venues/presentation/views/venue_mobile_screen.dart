@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
 import 'package:venue_flow_app/features/venues/data/venues_controller.dart';
@@ -8,6 +9,7 @@ import 'package:venue_flow_app/features/venues/presentation/venue_data_table.dar
 import '../../../../core/domain/paged_response.dart';
 import '../../../../core/theme/theme_x.dart';
 import '../../../../core/widgets/side_nav.dart';
+import '../dialogs/add_venue_dialog.dart';
 
 class VenueMobileScreen extends ConsumerStatefulWidget {
   const VenueMobileScreen({super.key});
@@ -73,7 +75,7 @@ class _VenueMobileScreenState extends ConsumerState<VenueMobileScreen> {
           : Drawer(
               width: 240,
               backgroundColor: cs.surface,
-              child: SideNav(activePath: '/forms'),
+              child: SideNav(activePath: '/venues'),
             ),
       body: SafeArea(
         child: Center(
@@ -82,6 +84,42 @@ class _VenueMobileScreenState extends ConsumerState<VenueMobileScreen> {
               return Column(
                 children: [
                   TopBar(wide: wide),
+                  Padding(
+                    padding: EdgeInsets.only(top: 16, left: 16, right: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Material(
+                          elevation: 2,
+                          borderRadius: BorderRadius.circular(50),
+                          child: CircleAvatar(
+                            child: IconButton(
+                              onPressed: () async {
+                                await AddVenueDialog.show(context);
+                                _refresh();
+                              },
+                              icon: Icon(Mdi.accountPlusOutline),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Material(
+                          elevation: 2,
+                          borderRadius: BorderRadius.circular(50),
+                          child: CircleAvatar(
+                            backgroundColor: cs.tertiary,
+                            child: IconButton(
+                              onPressed: () {
+                                _refresh();
+                              },
+                              tooltip: 'Refresh',
+                              icon: Icon(Mdi.refresh),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Padding(
                     padding: EdgeInsets.all(16),
                     child: VenueDataTable(
