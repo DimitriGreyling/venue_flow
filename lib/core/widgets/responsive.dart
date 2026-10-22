@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:venue_flow_app/core/widgets/generic_loader.dart';
 
 typedef DeferredLoader = Future<void> Function();
 
@@ -29,7 +29,7 @@ class Responsive extends StatelessWidget {
 
   static bool isTablet(BuildContext context) =>
       MediaQuery.sizeOf(context).width >= 600 &&
-          MediaQuery.sizeOf(context).width < 1200;
+      MediaQuery.sizeOf(context).width < 1200;
 
   static bool isDesktop(BuildContext context) =>
       MediaQuery.sizeOf(context).width >= 1200;
@@ -127,9 +127,7 @@ class _DeferredLayoutState extends State<_DeferredLayout> {
         }
 
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return GenericLoader(message: 'Loading,Please wait...');
         }
 
         return widget.builder(context);

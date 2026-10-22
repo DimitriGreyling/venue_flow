@@ -107,7 +107,7 @@ class _CustomerDataTableState extends ConsumerState<CustomerDataTable> {
                                     },
                                     tooltip: 'Edit ${customer.fullName}',
                                     icon: Icon(
-                                      Mdi.accountEdit,
+                                      Mdi.pencil,
                                       color: cs.secondary,
                                     ),
                                   ),

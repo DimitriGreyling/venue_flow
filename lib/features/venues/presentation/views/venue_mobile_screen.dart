@@ -35,6 +35,12 @@ class _VenueMobileScreenState extends ConsumerState<VenueMobileScreen> {
     DataColumn(label: Text('')),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchVenues();
+  }
+
   Future<void> _fetchVenues() async {
     final repository = ref.watch(venuesControllerProvider.notifier);
     venues = await repository.getVenuesForOrganization(
@@ -52,8 +58,6 @@ class _VenueMobileScreenState extends ConsumerState<VenueMobileScreen> {
     ref.invalidate(venuesControllerProvider);
     await _fetchVenues();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +88,7 @@ class _VenueMobileScreenState extends ConsumerState<VenueMobileScreen> {
                       venues: venues,
                       constraints: constraints,
                       isLoading: isLoading,
-                      onPageChanged: (page){
+                      onPageChanged: (page) {
                         pageNumber = page;
                         _fetchVenues();
                       },

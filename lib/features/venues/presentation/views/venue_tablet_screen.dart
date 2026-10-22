@@ -35,6 +35,12 @@ class _VenueTabletScreenState extends ConsumerState<VenueTabletScreen> {
     DataColumn(label: Text('')),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchVenues();
+  }
+
   Future<void> _fetchVenues() async {
     final repository = ref.watch(venuesControllerProvider.notifier);
     venues = await repository.getVenuesForOrganization(
@@ -52,8 +58,6 @@ class _VenueTabletScreenState extends ConsumerState<VenueTabletScreen> {
     ref.invalidate(venuesControllerProvider);
     await _fetchVenues();
   }
-
-
 
   @override
   Widget build(BuildContext context) {

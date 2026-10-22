@@ -5,6 +5,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:venue_flow_app/features/venues/data/venues_controller.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_id_response.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_response.dart';
+import 'package:venue_flow_app/features/venues/presentation/dialogs/edit_venue_dialog.dart';
 import '../../../core/domain/paged_response.dart';
 
 class VenueDataTable extends ConsumerStatefulWidget {
@@ -83,29 +84,22 @@ class _VenueDataTableState extends ConsumerState<VenueDataTable> {
                                 children: [
                                   IconButton(
                                     onPressed: () async {
-                                      // await EditCustomerDialog.show(
-                                      //   context,
-                                      //   customer: UpdateCustomer(
-                                      //     userId: customer.userId,
-                                      //     firstName: customer.firstName,
-                                      //     lastName: customer.lastName,
-                                      //     email: customer.email,
-                                      //   ),
-                                      // );
+                                      await EditVenueDialog.show(
+                                          context, venue: venue);
 
                                       if (!mounted) return;
 
                                       widget.requiresRefresh?.call(true);
 
-                                      // ref.invalidate(
-                                      //   customerDetailsProvider(
-                                      //     customer.userId,
-                                      //   ),
-                                      // );
+                                      ref.invalidate(
+                                        venueDetailsProvider(
+                                          venue.id,
+                                        ),
+                                      );
                                     },
                                     tooltip: 'Edit ${venue.name}',
                                     icon: Icon(
-                                      Mdi.accountEdit,
+                                      Mdi.pencil,
                                       color: cs.secondary,
                                     ),
                                   ),
