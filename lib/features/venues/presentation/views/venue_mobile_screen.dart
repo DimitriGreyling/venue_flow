@@ -30,8 +30,9 @@ class _VenueMobileScreenState extends ConsumerState<VenueMobileScreen> {
 
   List<DataColumn> columns = [
     DataColumn(label: Text('Name')),
-    DataColumn(label: Text('Email')),
-    DataColumn(label: Text('Status')),
+    DataColumn(label: Text('Type')),
+    DataColumn(label: Text('Contact')),
+    DataColumn(label: Text('Capacity')),
     DataColumn(label: Text('')),
   ];
 

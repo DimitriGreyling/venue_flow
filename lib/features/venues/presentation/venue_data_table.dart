@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:venue_flow_app/core/widgets/dialog/details_popup.dart';
 import 'package:venue_flow_app/features/venues/data/venues_controller.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_id_response.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_response.dart';
@@ -32,8 +33,9 @@ class VenueDataTable extends ConsumerStatefulWidget {
 
 class _VenueDataTableState extends ConsumerState<VenueDataTable> {
   final venueDetailsProvider = FutureProvider.family<VenueResponse, String>((
-      ref,
-      venueId,) async {
+    ref,
+    venueId,
+  ) async {
     final controller = ref.read(venuesControllerProvider.notifier);
 
     return controller.getVenueDetailsById(venueId: venueId);
@@ -41,9 +43,7 @@ class _VenueDataTableState extends ConsumerState<VenueDataTable> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme
-        .of(context)
-        .colorScheme;
+    final cs = Theme.of(context).colorScheme;
 
     return SizedBox(
       height: widget.constraints.maxHeight * 0.8,
@@ -67,72 +67,104 @@ class _VenueDataTableState extends ConsumerState<VenueDataTable> {
                       rows: widget.isLoading
                           ? _buildLoadingRows(cs)
                           : widget.venues.items.map((venue) {
-                        return buildAsyncDataRow<VenueResponse>(
-                          cs: cs,
-                          value: ref.watch(
-                            venueDetailsProvider(venue.venueId),
-                          ),
-                          cellCount: widget.columns.length,
-                          buildCells: (venue) =>
-                          [
-                            DataCell(Text(venue.name)),
-                            DataCell(Text(venue.addressLine1 ?? '')),
-                            DataCell(Text(venue.addressLine2 ?? '')),
-                            DataCell(
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    onPressed: () async {
-                                      await EditVenueDialog.show(
-                                          context, venue: venue);
-
-                                      if (!mounted) return;
-
-                                      widget.requiresRefresh?.call(true);
-
-                                      ref.invalidate(
-                                        venueDetailsProvider(
-                                          venue.id,
+                              return buildAsyncDataRow<VenueResponse>(
+                                cs: cs,
+                                value: ref.watch(
+                                  venueDetailsProvider(venue.venueId),
+                                ),
+                                cellCount: widget.columns.length,
+                                buildCells: (venue) => [
+                                  DataCell(Text(venue.name)),
+                                  DataCell(Text(venue.venueType ?? '')),
+                                  DataCell(
+                                    Row(
+                                      children: [
+                                        Text('${venue.contactName}'),
+                                        IconButton(
+                                          tooltip:
+                                              'View Contact Information for ${venue.name}',
+                                          onPressed: () {
+                                            showDetailsPopup(
+                                              context: context,
+                                              title:
+                                                  'Contact Information for ${venue.name}',
+                                              details:
+                                                  'Name: ${venue.contactName}\nPhone: ${venue.contactPhone}\nEmail: ${venue.contactEmail}',
+                                            );
+                                          },
+                                          icon: Icon(
+                                            Mdi.information,
+                                            color: cs.outline.withValues(
+                                              alpha: 0.5,
+                                            ),
+                                          ),
                                         ),
-                                      );
-                                    },
-                                    tooltip: 'Edit ${venue.name}',
-                                    icon: Icon(
-                                      Mdi.pencil,
-                                      color: cs.secondary,
+                                      ],
                                     ),
                                   ),
-                                  IconButton(
-                                    onPressed: () async {
-                                      // await DeleteCustomerDialog.show(
-                                      //   context,
-                                      //   customer,
-                                      // );
-                                      //
-                                      // if (!mounted) return;
-                                      //
-                                      // widget.requiresRefresh?.call(true);
-                                      //
-                                      // ref.invalidate(
-                                      //   customerDetailsProvider(
-                                      //     customer.userId,
-                                      //   ),
-                                      // );
-                                    },
-                                    tooltip:
-                                    'Remove ${venue.name}',
-                                    icon: Icon(
-                                      Mdi.delete,
-                                      color: cs.error,
+                                  DataCell(
+                                    Row(
+                                      children: [
+                                        Text('min: ${venue.minimumCapacity}'),
+                                        SizedBox(width: 8),
+                                        Text('max: ${venue.maximumCapacity}'),
+                                      ],
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () async {
+                                            await EditVenueDialog.show(
+                                              context,
+                                              venue: venue,
+                                            );
+
+                                            if (!mounted) return;
+
+                                            widget.requiresRefresh?.call(true);
+
+                                            ref.invalidate(
+                                              venueDetailsProvider(venue.id),
+                                            );
+                                          },
+                                          tooltip: 'Edit ${venue.name}',
+                                          icon: Icon(
+                                            Mdi.pencil,
+                                            color: cs.secondary,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          onPressed: () async {
+                                            // await DeleteCustomerDialog.show(
+                                            //   context,
+                                            //   customer,
+                                            // );
+                                            //
+                                            // if (!mounted) return;
+                                            //
+                                            // widget.requiresRefresh?.call(true);
+                                            //
+                                            // ref.invalidate(
+                                            //   customerDetailsProvider(
+                                            //     customer.userId,
+                                            //   ),
+                                            // );
+                                          },
+                                          tooltip: 'Remove ${venue.name}',
+                                          icon: Icon(
+                                            Mdi.delete,
+                                            color: cs.error,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
-                              ),
-                            ),
-                          ],
-                        );
-                      }).toList(),
+                              );
+                            }).toList(),
                     ),
                   ),
                 ),
@@ -148,24 +180,22 @@ class _VenueDataTableState extends ConsumerState<VenueDataTable> {
 
   List<DataRow> _buildLoadingRows(ColorScheme cs) {
     return List.generate(
-      widget.venues.pageSize.clamp(1, 5),
-          (_) =>
-          DataRow(
-            cells: List.generate(
-              widget.columns.length,
-                  (_) =>
-                  DataCell(
-                    Skeletonizer(
-                      enabled: true,
-                      effect: ShimmerEffect(
-                        baseColor: cs.surfaceContainerLow,
-                        highlightColor: cs.surface,
-                      ),
-                      child: const Text('Loading placeholder'),
-                    ),
-                  ),
+      widget.venues.pageSize.clamp(1, 6),
+      (_) => DataRow(
+        cells: List.generate(
+          widget.columns.length,
+          (_) => DataCell(
+            Skeletonizer(
+              enabled: true,
+              effect: ShimmerEffect(
+                baseColor: cs.surfaceContainerLow,
+                highlightColor: cs.surface,
+              ),
+              child: const Text('Loading placeholder'),
             ),
           ),
+        ),
+      ),
     );
   }
 
@@ -186,10 +216,7 @@ class _VenueDataTableState extends ConsumerState<VenueDataTable> {
           Expanded(
             child: Text(
               '$start–$end of $totalCount members',
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .bodySmall,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
           IconButton(
@@ -201,10 +228,7 @@ class _VenueDataTableState extends ConsumerState<VenueDataTable> {
           ),
           Text(
             '${totalPages == 0 ? 0 : page} / $totalPages',
-            style: Theme
-                .of(context)
-                .textTheme
-                .bodySmall,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           IconButton(
             tooltip: 'Next page',
@@ -225,31 +249,27 @@ class _VenueDataTableState extends ConsumerState<VenueDataTable> {
     required ColorScheme cs,
   }) {
     return value.when(
-      loading: () =>
-          DataRow(
-            cells: List.generate(
-              cellCount,
-                  (_) =>
-                  DataCell(
-                    Skeletonizer(
-                      enabled: true,
-                      effect: ShimmerEffect(
-                        baseColor: cs.surfaceContainerLow,
-                        highlightColor: cs.surface,
-                      ),
-                      child: const Text('Loading placeholder'),
-                    ),
-                  ),
+      loading: () => DataRow(
+        cells: List.generate(
+          cellCount,
+          (_) => DataCell(
+            Skeletonizer(
+              enabled: true,
+              effect: ShimmerEffect(
+                baseColor: cs.surfaceContainerLow,
+                highlightColor: cs.surface,
+              ),
+              child: const Text('Loading placeholder'),
             ),
           ),
-      error: (error, stackTrace) =>
-          DataRow(
-            cells: List.generate(
-              cellCount,
-                  (index) =>
-                  DataCell(Text(index == 0 ? 'Failed to load' : '-')),
-            ),
-          ),
+        ),
+      ),
+      error: (error, stackTrace) => DataRow(
+        cells: List.generate(
+          cellCount,
+          (index) => DataCell(Text(index == 0 ? 'Failed to load' : '-')),
+        ),
+      ),
       data: (data) => DataRow(cells: buildCells(data)),
     );
   }
