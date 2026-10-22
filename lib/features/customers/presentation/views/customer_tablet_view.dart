@@ -15,10 +15,10 @@ class CustomerTabletView extends ConsumerStatefulWidget {
   const CustomerTabletView({super.key});
 
   @override
-  ConsumerState<CustomerTabletView> createState() => _CustomerMobileViewState();
+  ConsumerState<CustomerTabletView> createState() => _CustomerTabletViewState();
 }
 
-class _CustomerMobileViewState extends ConsumerState<CustomerTabletView> {
+class _CustomerTabletViewState extends ConsumerState<CustomerTabletView> {
   bool isLoading = true;
   PagedResponse<MemberResponse> customers = PagedResponse(
     items: [],
@@ -70,13 +70,11 @@ class _CustomerMobileViewState extends ConsumerState<CustomerTabletView> {
     final wide = MediaQuery.of(context).size.width >= _wideBreakpoint;
 
     return Scaffold(
-      drawer: wide
-          ? null
-          : Drawer(
-              width: 240,
-              backgroundColor: cs.surface,
-              child: SideNav(activePath: '/forms'),
-            ),
+      drawer:Drawer(
+        width: 240,
+        backgroundColor: cs.surface,
+        child: SideNav(activePath: '/forms'),
+      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Column(

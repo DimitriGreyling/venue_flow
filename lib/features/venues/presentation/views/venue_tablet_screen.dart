@@ -5,11 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
 import 'package:venue_flow_app/features/venues/data/venues_controller.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_id_response.dart';
-import 'package:venue_flow_app/features/venues/presentation/dialogs/add_venue_dialog.dart';
 import 'package:venue_flow_app/features/venues/presentation/venue_data_table.dart';
 import '../../../../core/domain/paged_response.dart';
 import '../../../../core/theme/theme_x.dart';
 import '../../../../core/widgets/side_nav.dart';
+import '../dialogs/add_venue_dialog.dart';
 
 class VenueTabletScreen extends ConsumerStatefulWidget {
   const VenueTabletScreen({super.key});
@@ -70,13 +70,11 @@ class _VenueTabletScreenState extends ConsumerState<VenueTabletScreen> {
     final wide = MediaQuery.of(context).size.width >= _wideBreakpoint;
 
     return Scaffold(
-      drawer: wide
-          ? null
-          : Drawer(
-              width: 240,
-              backgroundColor: cs.surface,
-              child: SideNav(activePath: '/forms'),
-            ),
+      drawer: Drawer(
+        width: 240,
+        backgroundColor: cs.surface,
+        child: SideNav(activePath: '/venues'),
+      ),
       body: SafeArea(
         child: Center(
           child: LayoutBuilder(

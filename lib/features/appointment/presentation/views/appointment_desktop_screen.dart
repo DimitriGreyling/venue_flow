@@ -45,13 +45,11 @@ class _AppointmentDesktopScreenState
     final appointmentsAsync = ref.watch(appointmentIdsProvider(_month));
 
     return Scaffold(
-      drawer: wide
-          ? null
-          : Drawer(
-              width: 240,
-              backgroundColor: cs.surface,
-              child: SideNav(activePath: '/appointments'),
-            ),
+      drawer: Drawer(
+        width: 240,
+        backgroundColor: cs.surface,
+        child: SideNav(activePath: '/appointments'),
+      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Column(

@@ -75,7 +75,7 @@ class _VenueMobileScreenState extends ConsumerState<VenueMobileScreen> {
           : Drawer(
               width: 240,
               backgroundColor: cs.surface,
-              child: SideNav(activePath: '/forms'),
+              child: SideNav(activePath: '/venues'),
             ),
       body: SafeArea(
         child: Center(

@@ -71,13 +71,11 @@ class _CustomerDesktopViewState extends ConsumerState<CustomerDesktopView> {
     final wide = MediaQuery.of(context).size.width >= _wideBreakpoint;
 
     return Scaffold(
-      drawer: wide
-          ? null
-          : Drawer(
-              width: 240,
-              backgroundColor: cs.surface,
-              child: SideNav(activePath: '/forms'),
-            ),
+      drawer: Drawer(
+        width: 240,
+        backgroundColor: cs.surface,
+        child: SideNav(activePath: '/forms'),
+      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Column(

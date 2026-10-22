@@ -45,9 +45,7 @@ class _AppointmentTabletScreenState
     final appointmentsAsync = ref.watch(appointmentIdsProvider(_month));
 
     return Scaffold(
-      drawer: wide
-          ? null
-          : Drawer(
+      drawer:Drawer(
         width: 240,
         backgroundColor: cs.surface,
         child: SideNav(activePath: '/appointments'),
