@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:venue_flow_app/core/domain/paged_response.dart';
+import 'package:venue_flow_app/features/venues/domain/create_venue_request.dart';
 import 'package:venue_flow_app/features/venues/domain/update_venue_request.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_id_response.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_search_response.dart';
@@ -84,6 +85,24 @@ class VenueRepository {
     final data = response.data;
     return VenueResponse.fromJson(data as Map<String, dynamic>);
   }
+
+  ///
+  /// Add a new Venue
+  ///
+  Future<VenueResponse> addVenue({required CreateVenueRequest request}) async {
+    final response = await _dio.post('/venues', data: request.toJson());
+
+    final data = response.data;
+    return VenueResponse.fromJson(data as Map<String, dynamic>);
+  }
+
+  ///
+  /// Remove a Venue
+  ///
+  Future<void> removeVenue({required String venueId}) async {
+   await _dio.delete('/venues/$venueId');
+  }
+
 }
 
 @riverpod

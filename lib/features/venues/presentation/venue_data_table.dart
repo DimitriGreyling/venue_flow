@@ -6,6 +6,7 @@ import 'package:venue_flow_app/core/widgets/dialog/details_popup.dart';
 import 'package:venue_flow_app/features/venues/data/venues_controller.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_id_response.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_response.dart';
+import 'package:venue_flow_app/features/venues/presentation/dialogs/delete_venue_dialog.dart';
 import 'package:venue_flow_app/features/venues/presentation/dialogs/edit_venue_dialog.dart';
 import '../../../core/domain/paged_response.dart';
 
@@ -138,20 +139,18 @@ class _VenueDataTableState extends ConsumerState<VenueDataTable> {
                                         ),
                                         IconButton(
                                           onPressed: () async {
-                                            // await DeleteCustomerDialog.show(
-                                            //   context,
-                                            //   customer,
-                                            // );
-                                            //
-                                            // if (!mounted) return;
-                                            //
-                                            // widget.requiresRefresh?.call(true);
-                                            //
-                                            // ref.invalidate(
-                                            //   customerDetailsProvider(
-                                            //     customer.userId,
-                                            //   ),
-                                            // );
+                                            await DeleteVenueDialog.show(
+                                              context,
+                                              venue,
+                                            );
+
+                                            if (!mounted) return;
+
+                                            widget.requiresRefresh?.call(true);
+
+                                            ref.invalidate(
+                                              venueDetailsProvider(venue.id),
+                                            );
                                           },
                                           tooltip: 'Remove ${venue.name}',
                                           icon: Icon(

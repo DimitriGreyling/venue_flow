@@ -4,6 +4,7 @@ import 'package:venue_flow_app/features/venues/domain/venue_response.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_search_response.dart';
 
 import '../../../core/domain/paged_response.dart';
+import '../domain/create_venue_request.dart';
 import 'venue_repository.dart';
 import '../domain/venue.dart';
 
@@ -47,5 +48,21 @@ class VenuesController extends _$VenuesController {
   Future<VenueResponse> getVenueDetailsById({required String venueId}) async {
     final repository = ref.watch(venueRepositoryProvider);
     return repository.getVenueDetailsById(venueId: venueId);
+  }
+
+  ///
+  /// Add a new Venue
+  ///
+  Future<VenueResponse> addVenue({required CreateVenueRequest request}) async {
+    final repository = ref.watch(venueRepositoryProvider);
+    return repository.addVenue(request: request);
+  }
+
+  ///
+  /// Remove a Venue
+  ///
+  Future<void> removeVenue({required String venueId}) async {
+    final repository = ref.watch(venueRepositoryProvider);
+    await repository.removeVenue(venueId: venueId);
   }
 }
