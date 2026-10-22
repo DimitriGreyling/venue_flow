@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/theme_x.dart';
-import '../../auth/presentation/auth_session.dart';
+import '../../auth/data/auth_session.dart';
 
 const _maxWidth = 1440.0;
 

@@ -1,8 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:venue_flow_app/core/domain/paged_response.dart';
+import 'package:venue_flow_app/features/venues/domain/venue_id_response.dart';
 import 'package:venue_flow_app/features/venues/domain/venue_search_response.dart';
 import '../../../core/network/dio_client.dart';
 import '../domain/venue.dart';
+import '../domain/venue_response.dart';
 
 part 'venue_repository.g.dart';
 
@@ -35,6 +38,35 @@ class VenueRepository {
           (item) => VenueSearchResponse.fromJson(item as Map<String, dynamic>),
         )
         .toList();
+  }
+
+  ///
+  /// Get Venues for an organization
+  ///
+  Future<PagedResponse<VenueIdResponse>> getVenuesForOrganization({
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    final response = await _dio.get(
+      '/venues/venues',
+      queryParameters: {'page': page, 'pageSize': pageSize},
+    );
+
+    final data = response.data as Map<String, dynamic>;
+    return PagedResponse<VenueIdResponse>.fromJson(
+      data,
+      (item) => VenueIdResponse.fromJson(item as Map<String, dynamic>),
+    );
+  }
+
+  ///
+  /// Get Venues details by id
+  ///
+  Future<VenueResponse> getVenueDetailsById({required String venueId}) async {
+    final response = await _dio.get('/venues/$venueId');
+
+    final data = response.data;
+    return VenueResponse.fromJson(data as Map<String, dynamic>);
   }
 }
 

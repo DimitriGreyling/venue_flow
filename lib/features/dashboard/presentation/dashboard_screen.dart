@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/side_nav.dart';
-import '../../auth/presentation/auth_session.dart';
+import '../../auth/data/auth_session.dart';
 import 'dashboard_providers.dart';
 
 // ───────────────────────── PALETTE (from the HTML design) ─────────────────────────

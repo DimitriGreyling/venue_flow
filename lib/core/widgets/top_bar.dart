@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/auth/presentation/auth_session.dart';
+import '../../features/auth/data/auth_session.dart';
 import '../theme/theme_x.dart';
 
 class TopBar extends ConsumerWidget {

@@ -2,8 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/core/widgets/responsive.dart';
-import 'package:venue_flow_app/features/customers/presentation/views/customer_desktop_view.dart';
-import 'package:venue_flow_app/features/customers/presentation/views/customer_mobile_view.dart';
+import 'package:venue_flow_app/features/customers/presentation/views/customer_desktop_view.dart'
+    deferred as customer_desktop_view;
+import 'package:venue_flow_app/features/customers/presentation/views/customer_mobile_view.dart'
+    deferred as customer_mobile_view;
+import 'package:venue_flow_app/features/customers/presentation/views/customer_tablet_view.dart'
+    deferred as customer_tablet_view;
 
 class CustomerScreen extends ConsumerStatefulWidget {
   const CustomerScreen({super.key});
@@ -21,9 +25,12 @@ class _CustomerScreenState extends ConsumerState<CustomerScreen> {
   @override
   Widget build(BuildContext context) {
     return Responsive(
-      mobile: CustomerMobileView(),
-      tablet: CustomerMobileView(),
-      desktop: CustomerDesktopView(),
+      loadMobile: customer_mobile_view.loadLibrary,
+      loadTablet: customer_tablet_view.loadLibrary,
+      loadDesktop: customer_desktop_view.loadLibrary,
+      mobile: (_) => customer_mobile_view.CustomerMobileView(),
+      tablet: (_) => customer_tablet_view.CustomerTabletView(),
+      desktop: (_) => customer_desktop_view.CustomerDesktopView(),
     );
   }
 }
