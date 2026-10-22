@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/storage/token_storage.dart';
-import '../data/auth_repository.dart';
+import 'auth_repository.dart';
 import '../domain/login_request.dart';
 
 part 'auth_controller.g.dart';

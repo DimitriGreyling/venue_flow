@@ -3,13 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/appointment/presentation/appointment_screen.dart';
-import '../../features/auth/presentation/auth_session.dart';
+import '../../features/appointment_configuration/presentation/appointment_configuration_screen.dart';
+import '../../features/auth/data/auth_session.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/customers/presentation/customer_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/form/presentation/form_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
-import '../../features/venues/presentation/venue_list_screen.dart';
+import '../../features/venues/presentation/venue_screen.dart';
 import '../error/error_service.dart';
 
 part 'app_router.g.dart';
@@ -41,7 +42,7 @@ GoRouter router(Ref ref) {
       GoRoute(path: '/', redirect: (_, __) => '/home'),
       GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
-      GoRoute(path: '/venues', builder: (_, __) => const VenueListScreen()),
+      GoRoute(path: '/venues', builder: (_, __) => const VenueScreen()),
       GoRoute(path: '/dashboard', builder: (_, __) => const DashboardScreen()),
       GoRoute(path: '/forms', builder: (_, __) => const FormScreen()),
       GoRoute(
@@ -49,6 +50,10 @@ GoRouter router(Ref ref) {
         builder: (_, __) => const AppointmentScreen(),
       ),
       GoRoute(path: '/customers', builder: (_, __) => const CustomerScreen()),
+      GoRoute(
+        path: '/appointment-configuration',
+        builder: (_, __) => const AppointmentConfigurationScreen(),
+      ),
     ],
     redirect: (_, state) {
       final auth = ref.read(authSessionProvider);

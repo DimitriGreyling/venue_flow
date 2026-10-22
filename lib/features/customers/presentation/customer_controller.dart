@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:venue_flow_app/core/domain/paged_response.dart';
-import 'package:venue_flow_app/features/customers/data/member_response.dart';
+import 'package:venue_flow_app/features/customers/domain/member_response.dart';
 import 'package:venue_flow_app/features/customers/domain/register_customer.dart';
 import 'package:venue_flow_app/features/customers/domain/update_customer.dart';
 import '../data/customer_repository.dart';

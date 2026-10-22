@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 
 import '../config/nav_footer.dart';
 import '../config/nav_item.dart';
@@ -7,18 +8,23 @@ import '../theme/theme_x.dart';
 import 'nav_tile.dart';
 
 const _navItems = [
-  NavItem(Icons.dashboard_outlined, 'Dashboard', '/dashboard'),
-  NavItem(Icons.location_on_outlined, 'Venues', '/venues'),
-  NavItem(Icons.event_outlined, 'Events'),
-  NavItem(Icons.confirmation_number_outlined, 'Bookings'),
-  NavItem(Icons.group_outlined, 'Customers','/customers'),
-  NavItem(Icons.badge_outlined, 'Staff'),
-  NavItem(Icons.construction_outlined, 'Equipment'),
-  NavItem(Icons.receipt_outlined, 'Invoices'),
-  NavItem(Icons.description_outlined, 'Forms', '/forms'),
-  NavItem(Icons.calendar_month_outlined, 'Calendar','/appointments'),
-  NavItem(Icons.notifications_outlined, 'Notifications'),
-  NavItem(Icons.settings_outlined, 'Settings'),
+  NavItem(Mdi.monitorDashboard, 'Dashboard', '/dashboard'),
+  NavItem(Mdi.floorPlan, 'Venues', '/venues'),
+  NavItem(Mdi.partyPopper, 'Events'),
+  NavItem(Mdi.ticketConfirmationOutline, 'Bookings'),
+  NavItem(Mdi.accountGroupOutline, 'Customers', '/customers'),
+  NavItem(Mdi.badgeAccountOutline, 'Staff'),
+  NavItem(Mdi.accountHardHatOutline, 'Equipment'),
+  NavItem(Mdi.receiptOutline, 'Invoices'),
+  NavItem(Mdi.fileAccountOutline, 'Forms', '/forms'),
+  NavItem(Mdi.calendarAccountOutline, 'Calendar', '/appointments'),
+  NavItem(Mdi.noteOutline, 'Notifications'),
+  NavItem(Mdi.accountSettingsOutline, 'Settings'),
+  NavItem(
+    Mdi.bookSettingsOutline,
+    'Appointment Config',
+    '/appointment-configuration',
+  ),
 ];
 
 class SideNav extends StatelessWidget {
@@ -32,10 +38,12 @@ class SideNav extends StatelessWidget {
     final sem = context.semantic;
 
     return Container(
-      width: 240,
-      decoration:  BoxDecoration(
+      width: MediaQuery.of(context).size.width * 0.25,
+      decoration: BoxDecoration(
         color: cs.surface,
-        border: Border(right: BorderSide(color: sem.textMuted.withValues(alpha: 0.1))),
+        border: Border(
+          right: BorderSide(color: sem.textMuted.withValues(alpha: 0.1)),
+        ),
       ),
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Column(

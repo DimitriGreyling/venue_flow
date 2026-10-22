@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../features/auth/presentation/auth_session.dart';
+import '../../features/auth/data/auth_session.dart';
 import '../config/env.dart';
 import '../error/app_exception.dart';
 import '../error/error_service.dart';

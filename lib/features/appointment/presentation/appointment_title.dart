@@ -103,7 +103,6 @@ class _AppointmentTitleState extends ConsumerState<AppointmentTitle> {
                   children: [
                     Text(
                       '$time\n${_formatLabel(appointment.type.name)}',
-                      style: TextStyle(fontWeight: FontWeight.w500),
                     ),
 
                     const SizedBox(width: 8),

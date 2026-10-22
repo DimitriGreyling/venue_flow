@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/error/error_observer.dart';
 import 'core/error/error_service.dart';
-import 'features/auth/presentation/auth_session.dart';
+import 'features/auth/data/auth_session.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -6,7 +6,7 @@ import '../../../../core/domain/paged_response.dart';
 import '../../../../core/theme/theme_x.dart';
 import '../../../../core/widgets/side_nav.dart';
 import '../../../../core/widgets/top_bar.dart';
-import '../../data/member_response.dart';
+import '../../domain/member_response.dart';
 import '../customer_controller.dart';
 import '../customer_data_table.dart';
 import '../dialogs/add_customer_dialog.dart';

@@ -5,7 +5,7 @@ import 'package:venue_flow_app/features/customers/domain/register_customer.dart'
 import 'package:venue_flow_app/features/customers/presentation/customer_controller.dart';
 import '../../../../core/theme/theme_x.dart';
 import '../../../../core/widgets/customer_auto_complete.dart';
-import '../../data/member_response.dart';
+import '../../domain/member_response.dart';
 import '../../domain/customer.dart';
 import '../../domain/link_customer_to_org.dart';
 
