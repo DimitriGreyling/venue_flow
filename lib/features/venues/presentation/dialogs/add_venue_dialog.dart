@@ -121,10 +121,28 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
     return null;
   }
 
+  String? _phoneValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Contact phone is required';
+    }
+
+    // Remove spaces, hyphens and brackets.
+    final phone = value.replaceAll(RegExp(r'[\s\-()]'), '');
+
+    // South African mobile or landline format.
+    final phoneRegex = RegExp(r'^(?:(?:\+27|0027)|0)(?:[1-8]\d{8})$');
+
+    if (!phoneRegex.hasMatch(phone)) {
+      return 'Enter a valid South African phone number';
+    }
+
+    return null;
+  }
+
   String? _emailValidator(String? value) {
     // Contact email is optional, but must be valid when provided.
     if (value == null || value.trim().isEmpty) {
-      return null;
+      return 'Email is required';
     }
 
     final email = value.trim();
@@ -140,7 +158,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
   String? _capacityValidator(String? value, String fieldName) {
     // Capacity is optional.
     if (value == null || value.trim().isEmpty) {
-      return null;
+      return '$fieldName is required';
     }
 
     final capacity = int.tryParse(value.trim());
@@ -277,7 +295,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeInOut,
                       alignment: Alignment.topCenter,
-                      child: selectedVenueDetailsView(),
+                      child: selectedVenueDetailsView(cs: cs, sem: sem),
                     ),
                   ),
                 ),
@@ -323,7 +341,10 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
     );
   }
 
-  Widget selectedVenueDetailsView() {
+  Widget selectedVenueDetailsView({
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -338,22 +359,10 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
               tabAlignment: TabAlignment.start,
               isScrollable: true,
               tabs: const [
-                Tab(
-                  icon: Icon(Icons.store_outlined),
-                  text: 'General',
-                ),
-                Tab(
-                  icon: Icon(Icons.contact_phone_outlined),
-                  text: 'Contact',
-                ),
-                Tab(
-                  icon: Icon(Icons.location_on_outlined),
-                  text: 'Address',
-                ),
-                Tab(
-                  icon: Icon(Icons.groups_outlined),
-                  text: 'Capacity',
-                ),
+                Tab(icon: Icon(Icons.store_outlined), text: 'General'),
+                Tab(icon: Icon(Icons.contact_phone_outlined), text: 'Contact'),
+                Tab(icon: Icon(Icons.location_on_outlined), text: 'Address'),
+                Tab(icon: Icon(Icons.groups_outlined), text: 'Capacity'),
               ],
             ),
           ),
@@ -373,7 +382,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
                 index: _tabController.index,
                 children: [
                   _buildGeneralTab(),
-                  _buildContactTab(),
+                  _buildContactTab(cs: cs, sem: sem),
                   _buildAddressTab(),
                   _buildCapacityTab(),
                 ],
@@ -392,6 +401,13 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
         padding: const EdgeInsets.all(8),
         child: Column(
           children: [
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [Text('Please enter the venue’s details below')],
+              ),
+            ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -400,7 +416,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
                     enabled: !_isSaving,
                     controller: _venueNameController,
                     decoration: const InputDecoration(
-                      labelText: 'Venue Name',
+                      labelText: 'Venue Name *',
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) =>
@@ -411,7 +427,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
                 Expanded(
                   child: DropdownButtonFormField<VenueType>(
                     decoration: const InputDecoration(
-                      labelText: 'Venue Type',
+                      labelText: 'Venue Type *',
                       border: OutlineInputBorder(),
                     ),
                     items: VenueType.values
@@ -465,13 +481,23 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
     );
   }
 
-  Widget _buildContactTab() {
+  Widget _buildContactTab({
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+  }) {
     return Form(
       key: _contactFormKey,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(8),
         child: Column(
           children: [
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [Text('Please enter the contact’s details below')],
+              ),
+            ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -479,22 +505,41 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
                   child: TextFormField(
                     enabled: !_isSaving,
                     controller: _contactNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Contact Name',
+                    decoration: InputDecoration(
+                      labelText: 'Contact Name  *',
+                      hintText: 'Jane Doe',
+                      hintStyle: TextStyle(
+                        color: sem.textMuted,
+                        fontStyle: FontStyle.italic,
+                      ),
                       border: OutlineInputBorder(),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Contact name is required';
+                      }
+
+                      return null;
+                    },
                   ),
                 ),
                 const SizedBox(width: 16),
+
                 Expanded(
                   child: TextFormField(
                     enabled: !_isSaving,
                     controller: _contactPhoneController,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Contact Phone',
+                    decoration: InputDecoration(
+                      labelText: 'Contact Phone *',
+                      hintText: '082 123 4567',
                       border: OutlineInputBorder(),
+                      hintStyle: TextStyle(
+                        color: sem.textMuted,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
+                    validator: _phoneValidator,
                   ),
                 ),
               ],
@@ -506,8 +551,13 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
               enabled: !_isSaving,
               controller: _contactEmailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Contact Email',
+              decoration: InputDecoration(
+                labelText: 'Contact Email *',
+                hintText: 'acme@corp.com',
+                hintStyle: TextStyle(
+                  color: sem.textMuted,
+                  fontStyle: FontStyle.italic,
+                ),
                 border: OutlineInputBorder(),
               ),
               validator: _emailValidator,
@@ -525,11 +575,19 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
         padding: const EdgeInsets.all(8),
         child: Column(
           children: [
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [Text('Please enter the venue’s address details below')],
+              ),
+            ),
+
             TextFormField(
               enabled: !_isSaving,
               controller: _addressLine1Controller,
               decoration: const InputDecoration(
-                labelText: 'Address Line 1',
+                labelText: 'Address Line 1 *',
                 border: OutlineInputBorder(),
               ),
               validator: (value) => _requiredValidator(value, 'Address line 1'),
@@ -552,7 +610,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
               enabled: !_isSaving,
               controller: _suburbController,
               decoration: const InputDecoration(
-                labelText: 'Suburb',
+                labelText: 'Suburb *',
                 border: OutlineInputBorder(),
               ),
               validator: (value) => _requiredValidator(value, 'Suburb'),
@@ -568,7 +626,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
                     enabled: !_isSaving,
                     controller: _cityController,
                     decoration: const InputDecoration(
-                      labelText: 'City',
+                      labelText: 'City *',
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) => _requiredValidator(value, 'City'),
@@ -580,7 +638,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
                     enabled: !_isSaving,
                     controller: _provinceController,
                     decoration: const InputDecoration(
-                      labelText: 'Province',
+                      labelText: 'Province *',
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) => _requiredValidator(value, 'Province'),
@@ -599,7 +657,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
                     enabled: !_isSaving,
                     controller: _postalCodeController,
                     decoration: const InputDecoration(
-                      labelText: 'Postal Code',
+                      labelText: 'Postal Code *',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -610,7 +668,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
                     enabled: !_isSaving,
                     controller: _countryController,
                     decoration: const InputDecoration(
-                      labelText: 'Country',
+                      labelText: 'Country *',
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) => _requiredValidator(value, 'Country'),
@@ -631,6 +689,13 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
         padding: const EdgeInsets.all(8),
         child: Column(
           children: [
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [Text('Please enter the venue’s capacity details below')],
+              ),
+            ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -640,7 +705,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
                     controller: _minimumCapacityController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
-                      labelText: 'Minimum Capacity',
+                      labelText: 'Minimum Capacity *',
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) =>
@@ -658,7 +723,7 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
                     controller: _maximumCapacityController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
-                      labelText: 'Maximum Capacity',
+                      labelText: 'Maximum Capacity *',
                       border: OutlineInputBorder(),
                     ),
                     validator: _maximumCapacityValidator,
