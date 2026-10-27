@@ -59,6 +59,7 @@ class _VenueTabletScreenState extends ConsumerState<VenueTabletScreen> {
   Future<void> _refresh() async {
     print('Triggered refresh');
     ref.invalidate(venuesControllerProvider);
+    ref.invalidate(venueDetailsProvider);
     await _fetchVenues();
   }
 

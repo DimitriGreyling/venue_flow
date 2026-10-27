@@ -59,6 +59,7 @@ class _VenueMobileScreenState extends ConsumerState<VenueMobileScreen> {
   Future<void> _refresh() async {
     print('Triggered refresh');
     ref.invalidate(venuesControllerProvider);
+    ref.invalidate(venueDetailsProvider);
     await _fetchVenues();
   }
 
