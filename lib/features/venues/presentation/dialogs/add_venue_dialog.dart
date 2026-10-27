@@ -24,11 +24,20 @@ class AddVenueDialog extends ConsumerStatefulWidget {
 
 class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
     with TickerProviderStateMixin {
-  final _formKey = GlobalKey<FormState>();
+  // One form key per tab.
+  final _generalFormKey = GlobalKey<FormState>();
+  final _contactFormKey = GlobalKey<FormState>();
+  final _addressFormKey = GlobalKey<FormState>();
+  final _capacityFormKey = GlobalKey<FormState>();
 
+  late final TabController _tabController;
+
+  // General
   final _venueNameController = TextEditingController();
   final _venueDescriptionController = TextEditingController();
   final _venueTypeController = TextEditingController();
+
+  // Address
   final _addressLine1Controller = TextEditingController();
   final _addressLine2Controller = TextEditingController();
   final _suburbController = TextEditingController();
@@ -36,8 +45,12 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
   final _provinceController = TextEditingController();
   final _postalCodeController = TextEditingController();
   final _countryController = TextEditingController();
+
+  // Capacity
   final _minimumCapacityController = TextEditingController();
   final _maximumCapacityController = TextEditingController();
+
+  // Contact
   final _contactNameController = TextEditingController();
   final _contactEmailController = TextEditingController();
   final _contactPhoneController = TextEditingController();
@@ -47,6 +60,8 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
   @override
   void initState() {
     super.initState();
+
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -69,6 +84,120 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
     super.dispose();
   }
 
+  /// Validates every tab, including tabs that the user has not opened.
+  ///
+  /// Returns true only if all four forms are valid.
+  bool _validateAllTabs() {
+    final formKeys = <GlobalKey<FormState>>[
+      _generalFormKey,
+      _contactFormKey,
+      _addressFormKey,
+      _capacityFormKey,
+    ];
+
+    int? firstInvalidTab;
+
+    for (var i = 0; i < formKeys.length; i++) {
+      final formState = formKeys[i].currentState;
+
+      if (formState == null || !formState.validate()) {
+        firstInvalidTab ??= i;
+      }
+    }
+
+    if (firstInvalidTab != null) {
+      _tabController.animateTo(firstInvalidTab);
+      return false;
+    }
+
+    return true;
+  }
+
+  String? _requiredValidator(String? value, String fieldName) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName is required';
+    }
+
+    return null;
+  }
+
+  String? _phoneValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Contact phone is required';
+    }
+
+    // Remove spaces, hyphens and brackets.
+    final phone = value.replaceAll(RegExp(r'[\s\-()]'), '');
+
+    // South African mobile or landline format.
+    final phoneRegex = RegExp(r'^(?:(?:\+27|0027)|0)(?:[1-8]\d{8})$');
+
+    if (!phoneRegex.hasMatch(phone)) {
+      return 'Enter a valid South African phone number';
+    }
+
+    return null;
+  }
+
+  String? _emailValidator(String? value) {
+    // Contact email is optional, but must be valid when provided.
+    if (value == null || value.trim().isEmpty) {
+      return 'Email is required';
+    }
+
+    final email = value.trim();
+    final emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
+    if (!emailPattern.hasMatch(email)) {
+      return 'Enter a valid email address';
+    }
+
+    return null;
+  }
+
+  String? _capacityValidator(String? value, String fieldName) {
+    // Capacity is optional.
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName is required';
+    }
+
+    final capacity = int.tryParse(value.trim());
+
+    if (capacity == null) {
+      return '$fieldName must be a whole number';
+    }
+
+    if (capacity < 0) {
+      return '$fieldName cannot be negative';
+    }
+
+    return null;
+  }
+
+  String? _maximumCapacityValidator(String? value) {
+    final basicError = _capacityValidator(value, 'Maximum capacity');
+
+    if (basicError != null) {
+      return basicError;
+    }
+
+    final minimumText = _minimumCapacityController.text.trim();
+    final maximumText = value?.trim() ?? '';
+
+    if (minimumText.isEmpty || maximumText.isEmpty) {
+      return null;
+    }
+
+    final minimum = int.tryParse(minimumText);
+    final maximum = int.tryParse(maximumText);
+
+    if (minimum != null && maximum != null && maximum < minimum) {
+      return 'Maximum must be at least the minimum';
+    }
+
+    return null;
+  }
+
   Future<void> _save({
     required ColorScheme cs,
     required AppSemanticColors sem,
@@ -76,16 +205,14 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
     try {
       if (_isSaving) return;
 
+      // Validate before starting the save operation.
+      if (!_validateAllTabs()) {
+        return;
+      }
+
       setState(() {
         _isSaving = true;
       });
-
-      if (!_formKey.currentState!.validate()) {
-        setState(() {
-          _isSaving = false;
-        });
-        return;
-      }
 
       final repo = ref.watch(venueRepositoryProvider);
 
@@ -164,20 +291,11 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
 
                 Flexible(
                   child: SingleChildScrollView(
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Animate the height change when the fields appear.
-                          AnimatedSize(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                            alignment: Alignment.topCenter,
-                            child: selectedVenueDetailsView(),
-                          ),
-                        ],
-                      ),
+                    child: AnimatedSize(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,
+                      alignment: Alignment.topCenter,
+                      child: selectedVenueDetailsView(cs: cs, sem: sem),
                     ),
                   ),
                 ),
@@ -223,281 +341,398 @@ class _EditVenueDialogState extends ConsumerState<AddVenueDialog>
     );
   }
 
-  Widget selectedVenueDetailsView() {
-    return DefaultTabController(
-      length: 4,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 16),
+  Widget selectedVenueDetailsView({
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
 
-          // Tabs
-          IgnorePointer(
-            ignoring: _isSaving,
-            child: Opacity(
-              opacity: _isSaving ? 0.5 : 1.0,
-              child: const TabBar(
-                tabAlignment: TabAlignment.start,
-                isScrollable: true,
-                tabs: [
-                  Tab(icon: Icon(Icons.store_outlined), text: 'General'),
-                  Tab(
-                    icon: Icon(Icons.contact_phone_outlined),
-                    text: 'Contact',
-                  ),
-                  Tab(icon: Icon(Icons.location_on_outlined), text: 'Address'),
-                  Tab(icon: Icon(Icons.groups_outlined), text: 'Capacity'),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.5,
-            child: TabBarView(
-              children: [
-                _buildGeneralTab(),
-                _buildContactTab(),
-                _buildAddressTab(),
-                _buildCapacityTab(),
+        IgnorePointer(
+          ignoring: _isSaving,
+          child: Opacity(
+            opacity: _isSaving ? 0.5 : 1,
+            child: TabBar(
+              controller: _tabController,
+              tabAlignment: TabAlignment.start,
+              isScrollable: true,
+              tabs: const [
+                Tab(icon: Icon(Icons.store_outlined), text: 'General'),
+                Tab(icon: Icon(Icons.contact_phone_outlined), text: 'Contact'),
+                Tab(icon: Icon(Icons.location_on_outlined), text: 'Address'),
+                Tab(icon: Icon(Icons.groups_outlined), text: 'Capacity'),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+
+        const SizedBox(height: 16),
+
+        SizedBox(
+          height: MediaQuery.sizeOf(context).height * 0.5,
+
+          // IndexedStack keeps every form mounted. This is important because
+          // _validateAllTabs() must validate forms on inactive tabs as well.
+          child: AnimatedBuilder(
+            animation: _tabController,
+            builder: (context, child) {
+              return IndexedStack(
+                index: _tabController.index,
+                children: [
+                  _buildGeneralTab(),
+                  _buildContactTab(cs: cs, sem: sem),
+                  _buildAddressTab(),
+                  _buildCapacityTab(),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildGeneralTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  enabled: !_isSaving,
-                  controller: _venueNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Venue Name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+    return Form(
+      key: _generalFormKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [Text('Please enter the venue’s details below')],
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: DropdownButtonFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Venue Type',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: VenueType.values
-                      .map(
-                        (e) => DropdownMenuItem(
-                          value: e,
-                          child: Text(e.toString()),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (venuType) {
-                    _venueTypeController.text = venuType.toString();
-                  },
-                  initialValue: _venueTypeController.text.isNotEmpty
-                      ? VenueType.values.firstWhere(
-                          (e) => e.toString() == _venueTypeController.text,
-                        )
-                      : null,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            enabled: !_isSaving,
-            controller: _venueDescriptionController,
-            maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: 'Venue Description',
-              border: OutlineInputBorder(),
-              alignLabelWithHint: true,
             ),
-          ),
-        ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    enabled: !_isSaving,
+                    controller: _venueNameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Venue Name *',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) =>
+                        _requiredValidator(value, 'Venue name'),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: DropdownButtonFormField<VenueType>(
+                    decoration: const InputDecoration(
+                      labelText: 'Venue Type *',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: VenueType.values
+                        .map(
+                          (type) => DropdownMenuItem<VenueType>(
+                            value: type,
+                            child: Text(type.toString()),
+                          ),
+                        )
+                        .toList(),
+                    initialValue: _venueTypeController.text.isNotEmpty
+                        ? VenueType.values.cast<VenueType?>().firstWhere(
+                            (type) =>
+                                type.toString() == _venueTypeController.text,
+                            orElse: () => null,
+                          )
+                        : null,
+                    onChanged: _isSaving
+                        ? null
+                        : (venueType) {
+                            _venueTypeController.text =
+                                venueType?.toString() ?? '';
+                          },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Venue type is required';
+                      }
+
+                      return null;
+                    },
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            TextFormField(
+              enabled: !_isSaving,
+              controller: _venueDescriptionController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Venue Description',
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildContactTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  enabled: !_isSaving,
-                  controller: _contactNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Contact Name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+  Widget _buildContactTab({
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+  }) {
+    return Form(
+      key: _contactFormKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [Text('Please enter the contact’s details below')],
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextFormField(
-                  enabled: !_isSaving,
-                  controller: _contactPhoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Contact Phone',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            enabled: !_isSaving,
-            controller: _contactEmailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              labelText: 'Contact Email',
-              border: OutlineInputBorder(),
             ),
-          ),
-        ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    enabled: !_isSaving,
+                    controller: _contactNameController,
+                    decoration: InputDecoration(
+                      labelText: 'Contact Name  *',
+                      hintText: 'Jane Doe',
+                      hintStyle: TextStyle(
+                        color: sem.textMuted,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Contact name is required';
+                      }
+
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+
+                Expanded(
+                  child: TextFormField(
+                    enabled: !_isSaving,
+                    controller: _contactPhoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      labelText: 'Contact Phone *',
+                      hintText: '082 123 4567',
+                      border: OutlineInputBorder(),
+                      hintStyle: TextStyle(
+                        color: sem.textMuted,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                    validator: _phoneValidator,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            TextFormField(
+              enabled: !_isSaving,
+              controller: _contactEmailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: 'Contact Email *',
+                hintText: 'acme@corp.com',
+                hintStyle: TextStyle(
+                  color: sem.textMuted,
+                  fontStyle: FontStyle.italic,
+                ),
+                border: OutlineInputBorder(),
+              ),
+              validator: _emailValidator,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildAddressTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          TextFormField(
-            enabled: !_isSaving,
-            controller: _addressLine1Controller,
-            decoration: const InputDecoration(
-              labelText: 'Address Line 1',
-              border: OutlineInputBorder(),
+    return Form(
+      key: _addressFormKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [Text('Please enter the venue’s address details below')],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          TextFormField(
-            enabled: !_isSaving,
-            controller: _addressLine2Controller,
-            decoration: const InputDecoration(
-              labelText: 'Address Line 2',
-              border: OutlineInputBorder(),
+
+            TextFormField(
+              enabled: !_isSaving,
+              controller: _addressLine1Controller,
+              decoration: const InputDecoration(
+                labelText: 'Address Line 1 *',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) => _requiredValidator(value, 'Address line 1'),
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  enabled: !_isSaving,
-                  controller: _cityController,
-                  decoration: const InputDecoration(
-                    labelText: 'City',
-                    border: OutlineInputBorder(),
+
+            const SizedBox(height: 16),
+
+            TextFormField(
+              enabled: !_isSaving,
+              controller: _addressLine2Controller,
+              decoration: const InputDecoration(
+                labelText: 'Address Line 2',
+                border: OutlineInputBorder(),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            TextFormField(
+              enabled: !_isSaving,
+              controller: _suburbController,
+              decoration: const InputDecoration(
+                labelText: 'Suburb *',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) => _requiredValidator(value, 'Suburb'),
+            ),
+
+            const SizedBox(height: 16),
+
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    enabled: !_isSaving,
+                    controller: _cityController,
+                    decoration: const InputDecoration(
+                      labelText: 'City *',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) => _requiredValidator(value, 'City'),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextFormField(
-                  enabled: !_isSaving,
-                  controller: _provinceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Province',
-                    border: OutlineInputBorder(),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextFormField(
+                    enabled: !_isSaving,
+                    controller: _provinceController,
+                    decoration: const InputDecoration(
+                      labelText: 'Province *',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) => _requiredValidator(value, 'Province'),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  enabled: !_isSaving,
-                  controller: _postalCodeController,
-                  decoration: const InputDecoration(
-                    labelText: 'Postal Code',
-                    border: OutlineInputBorder(),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    enabled: !_isSaving,
+                    controller: _postalCodeController,
+                    decoration: const InputDecoration(
+                      labelText: 'Postal Code *',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextFormField(
-                  enabled: !_isSaving,
-                  controller: _countryController,
-                  decoration: const InputDecoration(
-                    labelText: 'Country',
-                    border: OutlineInputBorder(),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextFormField(
+                    enabled: !_isSaving,
+                    controller: _countryController,
+                    decoration: const InputDecoration(
+                      labelText: 'Country *',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) => _requiredValidator(value, 'Country'),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextFormField(
-                  enabled: !_isSaving,
-                  controller: _suburbController,
-                  decoration: const InputDecoration(
-                    labelText: 'Suburb',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildCapacityTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  enabled: !_isSaving,
-                  controller: _minimumCapacityController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Minimum Capacity',
-                    border: OutlineInputBorder(),
+    return Form(
+      key: _capacityFormKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [Text('Please enter the venue’s capacity details below')],
+              ),
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    enabled: !_isSaving,
+                    controller: _minimumCapacityController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Minimum Capacity *',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) =>
+                        _capacityValidator(value, 'Minimum capacity'),
+                    onChanged: (_) {
+                      // Revalidate maximum capacity when minimum changes.
+                      _capacityFormKey.currentState?.validate();
+                    },
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: TextFormField(
-                  enabled: !_isSaving,
-                  controller: _maximumCapacityController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Maximum Capacity',
-                    border: OutlineInputBorder(),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextFormField(
+                    enabled: !_isSaving,
+                    controller: _maximumCapacityController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Maximum Capacity *',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: _maximumCapacityValidator,
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -66,3 +66,12 @@ class VenuesController extends _$VenuesController {
     await repository.removeVenue(venueId: venueId);
   }
 }
+
+@riverpod
+class VenueDetails extends _$VenueDetails {
+  @override
+  Future<VenueResponse> build(String venueId) async {
+    final repository = ref.watch(venueRepositoryProvider);
+    return repository.getVenueDetailsById(venueId: venueId);
+  }
+}
