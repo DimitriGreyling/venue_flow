@@ -10,6 +10,7 @@ import '../../features/customers/presentation/customer_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/form/presentation/form_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/invoice/presentation/invoice_screen.dart';
 import '../../features/venues/presentation/venue_screen.dart';
 import '../error/error_service.dart';
 
@@ -45,6 +46,7 @@ GoRouter router(Ref ref) {
       GoRoute(path: '/venues', builder: (_, __) => const VenueScreen()),
       GoRoute(path: '/dashboard', builder: (_, __) => const DashboardScreen()),
       GoRoute(path: '/forms', builder: (_, __) => const FormScreen()),
+      GoRoute(path: '/invoices', builder: (_, __) => const InvoiceScreen()),
       GoRoute(
         path: '/appointments',
         builder: (_, __) => const AppointmentScreen(),
