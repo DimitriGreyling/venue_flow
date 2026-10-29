@@ -40,4 +40,4 @@ final class IsAuthenticatedProvider
   }
 }
 
-String _$isAuthenticatedHash() => r'c0ea0ae0b74cb195299239a430170821fe462b9e';
+String _$isAuthenticatedHash() => r'ffe3216af858055264038ebcd4e62a9f1d4b08b7';
