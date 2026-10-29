@@ -57,10 +57,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       drawer: wide
           ? null
           : Drawer(
-        width: 240,
-        backgroundColor: cs.surface,
-        child: SideNav(activePath: '/forms'),
-      ),
+              width: 240,
+              backgroundColor: cs.surface,
+              child: SideNav(activePath: '/forms'),
+            ),
       floatingActionButton: PopupMenuButton<FormToolbarOptions>(
         tooltip: 'Toolbar',
         offset: const Offset(-50, -50),
@@ -119,11 +119,11 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                 constraints: BoxConstraints(
                                   maxWidth: 1440,
                                   maxHeight:
-                                  MediaQuery.sizeOf(context).height * 0.89,
+                                      MediaQuery.sizeOf(context).height * 0.89,
                                 ),
                                 child: Row(
                                   crossAxisAlignment:
-                                  CrossAxisAlignment.stretch,
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     Expanded(
                                       child: Container(
@@ -131,10 +131,21 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                         padding: const EdgeInsets.all(16),
                                         child: Column(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                              MainAxisAlignment.center,
                                           children: [
-                                            const Text('Block 2'),
-                                            const SizedBox(height: 16),
+                                            Expanded(
+                                              child: Container(
+                                                width: MediaQuery.sizeOf(context).width,
+                                                child: Card(
+                                                  child: Text(
+                                                    'Details Form Area',
+                                                    style: TextStyle(
+                                                      color: cs.onSurface,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            ),
                                           ],
                                         ),
                                       ),

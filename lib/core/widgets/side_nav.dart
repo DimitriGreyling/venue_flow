@@ -15,7 +15,7 @@ const _navItems = [
   NavItem(Mdi.accountGroupOutline, 'Customers', '/customers'),
   NavItem(Mdi.badgeAccountOutline, 'Staff'),
   NavItem(Mdi.accountHardHatOutline, 'Equipment'),
-  NavItem(Mdi.receiptOutline, 'Invoices'),
+  NavItem(Mdi.receiptOutline, 'Invoices','/invoices'),
   NavItem(Mdi.fileAccountOutline, 'Forms', '/forms'),
   NavItem(Mdi.calendarAccountOutline, 'Calendar', '/appointments'),
   NavItem(Mdi.noteOutline, 'Notifications'),
