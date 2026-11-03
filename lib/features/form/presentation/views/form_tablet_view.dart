@@ -703,7 +703,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                 color: cs.onPrimaryContainer,
                               ),
                             ),
-                            onTap: () => _addField(FormFieldType.Text),
+                            onTap: () => _addField(field.fieldType ?? FormFieldType.Text),
                           ),
                           Divider(
                             color: cs.onPrimaryContainer.withValues(alpha: 0.5),
