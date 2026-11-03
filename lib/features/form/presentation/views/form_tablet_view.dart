@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +11,7 @@ import 'package:venue_flow_app/core/widgets/side_nav.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
 
 import 'package:venue_flow_app/features/form/domain/create_form_request.dart';
+import 'package:venue_flow_app/features/form/domain/form_field_data.dart';
 import 'package:venue_flow_app/features/form/domain/form_field_schema.dart';
 import 'package:venue_flow_app/features/form/domain/form_page_schema.dart';
 import 'package:venue_flow_app/features/form/domain/form_schema.dart';
@@ -35,13 +35,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     name: 'Form Name',
     description: '',
     schema: const FormSchema(
-      pages: [
-        FormPageSchema(
-          id: 'page-1',
-          title: 'Page 1',
-          orderNumber: 0,
-        ),
-      ],
+      pages: [FormPageSchema(id: 'page-1', title: 'Page 1', orderNumber: 0)],
     ),
   );
 
@@ -60,13 +54,51 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   bool _showFloatingSettingsBar = false;
   bool _isExpanded = false;
 
+  List<FormFieldData> _formFields = [
+    FormFieldData(
+      fieldType: FormFieldType.Text,
+      leadingIcon: Icons.text_fields,
+      title: 'Text Field',
+      // onTap: (value) {},
+      subtitle: 'Single-line text input',
+      trailingIcon: Icons.add,
+      trailingTooltip: 'Add text field',
+    ),
+    FormFieldData(
+      fieldType: FormFieldType.TextArea,
+      leadingIcon: Icons.text_fields,
+      title: 'Text Area Field',
+      // onTap: (value) {},
+      subtitle: 'Multi-line text input',
+      trailingIcon: Icons.add,
+      trailingTooltip: 'Add text area field',
+    ),
+    FormFieldData(
+      fieldType: FormFieldType.DatePicker,
+      leadingIcon: Icons.date_range,
+      title: 'Date Picker Field',
+      // onTap: (value) {},
+      subtitle: 'Select a date',
+      trailingIcon: Icons.add,
+      trailingTooltip: 'Add date picker field',
+    ),
+    FormFieldData(
+      fieldType: FormFieldType.IntField,
+      leadingIcon: Icons.numbers,
+      title: 'Int Field',
+      // onTap: (value) {},
+      subtitle: 'Enter an integer',
+      trailingIcon: Icons.add,
+      trailingTooltip: 'Add number field',
+    ),
+  ];
+
   @override
   void dispose() {
     super.dispose();
   }
 
-  FormSchema get _schema =>
-      _createFormRequest.schema ?? const FormSchema();
+  FormSchema get _schema => _createFormRequest.schema ?? const FormSchema();
 
   List<FormPageSchema> get _pages => _schema.pages;
 
@@ -87,9 +119,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   }
 
   void _updateSchema(FormSchema schema) {
-    _updateRequest(
-      _createFormRequest.copyWith(schema: schema),
-    );
+    _updateRequest(_createFormRequest.copyWith(schema: schema));
   }
 
   void _selectPage(String pageId) {
@@ -107,11 +137,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       orderNumber: _pages.length,
     );
 
-    _updateSchema(
-      _schema.copyWith(
-        pages: [..._pages, newPage],
-      ),
-    );
+    _updateSchema(_schema.copyWith(pages: [..._pages, newPage]));
 
     setState(() {
       _selectedPageId = newPage.id;
@@ -149,9 +175,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
         remainingPages[i].copyWith(orderNumber: i),
     ];
 
-    _updateSchema(
-      _schema.copyWith(pages: reorderedPages),
-    );
+    _updateSchema(_schema.copyWith(pages: reorderedPages));
 
     setState(() {
       _selectedPageId = reorderedPages.first.id;
@@ -174,9 +198,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
         pages: [
           for (final item in _pages)
             if (item.id == page.id)
-              item.copyWith(
-                fields: [...item.fields, field],
-              )
+              item.copyWith(fields: [...item.fields, field])
             else
               item,
         ],
@@ -236,16 +258,12 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       onFormNameChanged: (value) {
         if (value == null || value.trim().isEmpty) return;
 
-        _updateRequest(
-          _createFormRequest.copyWith(name: value.trim()),
-        );
+        _updateRequest(_createFormRequest.copyWith(name: value.trim()));
       },
       onFormDescriptionChanged: (value) {
         if (value == null) return;
 
-        _updateRequest(
-          _createFormRequest.copyWith(description: value),
-        );
+        _updateRequest(_createFormRequest.copyWith(description: value));
       },
     );
   }
@@ -264,9 +282,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
           content: TextField(
             controller: controller,
             autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Page title',
-            ),
+            decoration: const InputDecoration(labelText: 'Page title'),
             onSubmitted: (value) {
               Navigator.of(dialogContext).pop(value);
             },
@@ -316,10 +332,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       drawer: wide
           ? null
           : Drawer(
-        width: 240,
-        backgroundColor: cs.surface,
-        child: SideNav(activePath: '/forms'),
-      ),
+              width: 240,
+              backgroundColor: cs.surface,
+              child: SideNav(activePath: '/forms'),
+            ),
       floatingActionButton: PopupMenuButton<FormToolbarOptions>(
         tooltip: 'Toolbar',
         offset: const Offset(-50, -50),
@@ -379,22 +395,22 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                   child: Container(
                                     constraints: BoxConstraints(
                                       minHeight:
-                                      MediaQuery.sizeOf(context).height *
+                                          MediaQuery.sizeOf(context).height *
                                           0.75,
                                     ),
                                     padding: const EdgeInsets.all(24),
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
                                             Expanded(
                                               child: Text(
                                                 _createFormRequest.name,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .titleLarge,
+                                                style: Theme.of(
+                                                  context,
+                                                ).textTheme.titleLarge,
                                               ),
                                             ),
                                             IconButton(
@@ -406,11 +422,11 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          _createFormRequest.description
-                                              ?.isNotEmpty ==
-                                              true
-                                              ? _createFormRequest
-                                              .description!
+                                          _createFormRequest
+                                                      .description
+                                                      ?.isNotEmpty ==
+                                                  true
+                                              ? _createFormRequest.description!
                                               : 'Add a description for your form.',
                                           maxLines: _isExpanded ? null : 2,
                                           overflow: _isExpanded
@@ -500,16 +516,11 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     );
   }
 
-  Widget _buildPageEditor(
-      ColorScheme cs,
-      AppSemanticColors sem,
-      ) {
+  Widget _buildPageEditor(ColorScheme cs, AppSemanticColors sem) {
     final page = _selectedPage;
 
     if (page == null) {
-      return const Center(
-        child: Text('Select or create a page.'),
-      );
+      return const Center(child: Text('Select or create a page.'));
     }
 
     return Form(
@@ -539,9 +550,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
               decoration: BoxDecoration(
                 color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: cs.outlineVariant,
-                ),
+                border: Border.all(color: cs.outlineVariant),
               ),
               child: Column(
                 children: [
@@ -571,19 +580,14 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                   children: [
                     Expanded(
                       child: FormFieldWidget(
-                        key: ValueKey(
-                          '${page.id}-${field.orderNumber}',
-                        ),
+                        key: ValueKey('${page.id}-${field.orderNumber}'),
                         formFieldSchema: field,
                       ),
                     ),
                     IconButton(
                       tooltip: 'Remove field',
                       onPressed: () => _deleteField(field.orderNumber),
-                      icon: Icon(
-                        Icons.delete_outline,
-                        color: cs.error,
-                      ),
+                      icon: Icon(Icons.delete_outline, color: cs.error),
                     ),
                   ],
                 ),
@@ -593,14 +597,12 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     );
   }
 
-  Widget _buildFieldsFloatingBar(
-      ColorScheme cs,
-      BoxConstraints constraints,
-      ) {
+
+  Widget _buildFieldsFloatingBar(ColorScheme cs, BoxConstraints constraints) {
     final screenSize = MediaQuery.sizeOf(context);
 
     final width = (screenSize.width * 0.32).clamp(250.0, 380.0);
-    final height = 260.0;
+    final height = (screenSize.height * 0.80).clamp(250.0, 380.0);
 
     return Positioned(
       top: _floatingFieldsTop.clamp(
@@ -614,10 +616,15 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       child: GestureDetector(
         onPanUpdate: (details) {
           setState(() {
-            _floatingFieldsTop = (_floatingFieldsTop + details.delta.dy)
-                .clamp(0.0, (constraints.maxHeight - height).clamp(0.0, double.infinity));
-            _floatingFieldsLeft = (_floatingFieldsLeft + details.delta.dx)
-                .clamp(0.0, (constraints.maxWidth - width).clamp(0.0, double.infinity));
+            _floatingFieldsTop = (_floatingFieldsTop + details.delta.dy).clamp(
+              0.0,
+              (constraints.maxHeight - height).clamp(0.0, double.infinity),
+            );
+
+            _floatingFieldsLeft = (_floatingFieldsLeft + details.delta.dx).clamp(
+              0.0,
+              (constraints.maxWidth - width).clamp(0.0, double.infinity),
+            );
           });
         },
         child: SizedBox(
@@ -661,14 +668,49 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                       ),
                     ],
                   ),
+
                   const Divider(),
-                  ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.text_fields),
-                    title: const Text('Text field'),
-                    subtitle: const Text('Single-line text input'),
-                    trailing: const Icon(Icons.add),
-                    onTap: () => _addField(FormFieldType.Text),
+
+                  // Scrollable fields section
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: _formFields.expand((field) => [
+                          ListTile(
+                            dense: true,
+                            leading: Icon(
+                              field.leadingIcon,
+                              color: cs.onPrimaryContainer,
+                            ),
+                            title: Text(
+                              field.title ?? '',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: cs.onPrimaryContainer,
+                              ),
+                            ),
+                            subtitle: Text(
+                              field.subtitle ?? '',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: cs.onPrimaryContainer,
+                              ),
+                            ),
+                            trailing: Tooltip(
+                              message: field.trailingTooltip ?? '',
+                              child: Icon(
+                                field.trailingIcon,
+                                color: cs.onPrimaryContainer,
+                              ),
+                            ),
+                            onTap: () => _addField(FormFieldType.Text),
+                          ),
+                          Divider(
+                            color: cs.onPrimaryContainer.withValues(alpha: 0.5),
+                          ),
+                        ]).toList(),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -679,10 +721,8 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     );
   }
 
-  Widget _buildSettingsFloatingBar(
-      ColorScheme cs,
-      BoxConstraints constraints,
-      ) {
+
+  Widget _buildSettingsFloatingBar(ColorScheme cs, BoxConstraints constraints) {
     final screenSize = MediaQuery.sizeOf(context);
 
     final width = (screenSize.width * 0.32).clamp(250.0, 380.0);
@@ -701,9 +741,15 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
         onPanUpdate: (details) {
           setState(() {
             _floatingSettingsTop = (_floatingSettingsTop + details.delta.dy)
-                .clamp(0.0, (constraints.maxHeight - height).clamp(0.0, double.infinity));
+                .clamp(
+                  0.0,
+                  (constraints.maxHeight - height).clamp(0.0, double.infinity),
+                );
             _floatingSettingsLeft = (_floatingSettingsLeft + details.delta.dx)
-                .clamp(0.0, (constraints.maxWidth - width).clamp(0.0, double.infinity));
+                .clamp(
+                  0.0,
+                  (constraints.maxWidth - width).clamp(0.0, double.infinity),
+                );
           });
         },
         child: SizedBox(
@@ -719,10 +765,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        Icons.drag_indicator,
-                        color: cs.onPrimaryContainer,
-                      ),
+                      Icon(Icons.drag_indicator, color: cs.onPrimaryContainer),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -740,10 +783,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                             _showFloatingSettingsBar = false;
                           });
                         },
-                        icon: Icon(
-                          Icons.close,
-                          color: cs.onPrimaryContainer,
-                        ),
+                        icon: Icon(Icons.close, color: cs.onPrimaryContainer),
                       ),
                     ],
                   ),
