@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormFieldSchema {
 
- String get title; FormFieldType get fieldType; String? get value; String? get hintText; int get orderNumber; bool? get isRequired; FieldValidationRules? get validationRules;
+ String get id; String get title; FormFieldType get fieldType; String? get value; String? get hintText; int get orderNumber; bool? get isRequired; FieldValidationRules? get validationRules;
 /// Create a copy of FormFieldSchema
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $FormFieldSchemaCopyWith<FormFieldSchema> get copyWith => _$FormFieldSchemaCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as FormFieldSchema;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormFieldSchema&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.fieldType, _this.fieldType) || other.fieldType == _this.fieldType)&&(identical(other.value, _this.value) || other.value == _this.value)&&(identical(other.hintText, _this.hintText) || other.hintText == _this.hintText)&&(identical(other.orderNumber, _this.orderNumber) || other.orderNumber == _this.orderNumber)&&(identical(other.isRequired, _this.isRequired) || other.isRequired == _this.isRequired)&&(identical(other.validationRules, _this.validationRules) || other.validationRules == _this.validationRules));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormFieldSchema&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.fieldType, _this.fieldType) || other.fieldType == _this.fieldType)&&(identical(other.value, _this.value) || other.value == _this.value)&&(identical(other.hintText, _this.hintText) || other.hintText == _this.hintText)&&(identical(other.orderNumber, _this.orderNumber) || other.orderNumber == _this.orderNumber)&&(identical(other.isRequired, _this.isRequired) || other.isRequired == _this.isRequired)&&(identical(other.validationRules, _this.validationRules) || other.validationRules == _this.validationRules));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as FormFieldSchema;
-  return Object.hash(runtimeType,_this.title,_this.fieldType,_this.value,_this.hintText,_this.orderNumber,_this.isRequired,_this.validationRules);
+  return Object.hash(runtimeType,_this.id,_this.title,_this.fieldType,_this.value,_this.hintText,_this.orderNumber,_this.isRequired,_this.validationRules);
 }
 
 @override
 String toString() {
   final _this = this as FormFieldSchema;
-  return 'FormFieldSchema(title: ${_this.title}, fieldType: ${_this.fieldType}, value: ${_this.value}, hintText: ${_this.hintText}, orderNumber: ${_this.orderNumber}, isRequired: ${_this.isRequired}, validationRules: ${_this.validationRules})';
+  return 'FormFieldSchema(id: ${_this.id}, title: ${_this.title}, fieldType: ${_this.fieldType}, value: ${_this.value}, hintText: ${_this.hintText}, orderNumber: ${_this.orderNumber}, isRequired: ${_this.isRequired}, validationRules: ${_this.validationRules})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $FormFieldSchemaCopyWith<$Res>  {
   factory $FormFieldSchemaCopyWith(FormFieldSchema value, $Res Function(FormFieldSchema) _then) = _$FormFieldSchemaCopyWithImpl;
 @useResult
 $Res call({
- String title, FormFieldType fieldType, String? value, String? hintText, int orderNumber, bool? isRequired, FieldValidationRules? validationRules
+ String id, String title, FormFieldType fieldType, String? value, String? hintText, int orderNumber, bool? isRequired, FieldValidationRules? validationRules
 });
 
 
@@ -71,9 +71,10 @@ class _$FormFieldSchemaCopyWithImpl<$Res>
 
 /// Create a copy of FormFieldSchema
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? title = null,Object? fieldType = null,Object? value = freezed,Object? hintText = freezed,Object? orderNumber = null,Object? isRequired = freezed,Object? validationRules = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? fieldType = null,Object? value = freezed,Object? hintText = freezed,Object? orderNumber = null,Object? isRequired = freezed,Object? validationRules = freezed,}) {
   return _then(FormFieldSchema(
-title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,fieldType: null == fieldType ? _self.fieldType : fieldType // ignore: cast_nullable_to_non_nullable
 as FormFieldType,value: freezed == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as String?,hintText: freezed == hintText ? _self.hintText : hintText // ignore: cast_nullable_to_non_nullable
@@ -177,10 +178,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title,  FormFieldType fieldType,  String? value,  String? hintText,  int orderNumber,  bool? isRequired,  FieldValidationRules? validationRules)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  FormFieldType fieldType,  String? value,  String? hintText,  int orderNumber,  bool? isRequired,  FieldValidationRules? validationRules)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormFieldSchema() when $default != null:
-return $default(_that.title,_that.fieldType,_that.value,_that.hintText,_that.orderNumber,_that.isRequired,_that.validationRules);case _:
+return $default(_that.id,_that.title,_that.fieldType,_that.value,_that.hintText,_that.orderNumber,_that.isRequired,_that.validationRules);case _:
   return orElse();
 
 }
@@ -198,10 +199,10 @@ return $default(_that.title,_that.fieldType,_that.value,_that.hintText,_that.ord
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title,  FormFieldType fieldType,  String? value,  String? hintText,  int orderNumber,  bool? isRequired,  FieldValidationRules? validationRules)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  FormFieldType fieldType,  String? value,  String? hintText,  int orderNumber,  bool? isRequired,  FieldValidationRules? validationRules)  $default,) {final _that = this;
 switch (_that) {
 case _FormFieldSchema():
-return $default(_that.title,_that.fieldType,_that.value,_that.hintText,_that.orderNumber,_that.isRequired,_that.validationRules);case _:
+return $default(_that.id,_that.title,_that.fieldType,_that.value,_that.hintText,_that.orderNumber,_that.isRequired,_that.validationRules);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -218,10 +219,10 @@ return $default(_that.title,_that.fieldType,_that.value,_that.hintText,_that.ord
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title,  FormFieldType fieldType,  String? value,  String? hintText,  int orderNumber,  bool? isRequired,  FieldValidationRules? validationRules)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  FormFieldType fieldType,  String? value,  String? hintText,  int orderNumber,  bool? isRequired,  FieldValidationRules? validationRules)?  $default,) {final _that = this;
 switch (_that) {
 case _FormFieldSchema() when $default != null:
-return $default(_that.title,_that.fieldType,_that.value,_that.hintText,_that.orderNumber,_that.isRequired,_that.validationRules);case _:
+return $default(_that.id,_that.title,_that.fieldType,_that.value,_that.hintText,_that.orderNumber,_that.isRequired,_that.validationRules);case _:
   return null;
 
 }
@@ -233,9 +234,10 @@ return $default(_that.title,_that.fieldType,_that.value,_that.hintText,_that.ord
 @JsonSerializable()
 
 class _FormFieldSchema implements FormFieldSchema {
-  const _FormFieldSchema({required this.title, required this.fieldType, this.value, this.hintText, required this.orderNumber, this.isRequired, this.validationRules});
+  const _FormFieldSchema({required this.id, required this.title, required this.fieldType, this.value, this.hintText, required this.orderNumber, this.isRequired, this.validationRules});
   factory _FormFieldSchema.fromJson(Map<String, dynamic> json) => _$FormFieldSchemaFromJson(json);
 
+@override final  String id;
 @override final  String title;
 @override final  FormFieldType fieldType;
 @override final  String? value;
@@ -257,18 +259,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormFieldSchema&&(identical(other.title, title) || other.title == title)&&(identical(other.fieldType, fieldType) || other.fieldType == fieldType)&&(identical(other.value, value) || other.value == value)&&(identical(other.hintText, hintText) || other.hintText == hintText)&&(identical(other.orderNumber, orderNumber) || other.orderNumber == orderNumber)&&(identical(other.isRequired, isRequired) || other.isRequired == isRequired)&&(identical(other.validationRules, validationRules) || other.validationRules == validationRules));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormFieldSchema&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.fieldType, fieldType) || other.fieldType == fieldType)&&(identical(other.value, value) || other.value == value)&&(identical(other.hintText, hintText) || other.hintText == hintText)&&(identical(other.orderNumber, orderNumber) || other.orderNumber == orderNumber)&&(identical(other.isRequired, isRequired) || other.isRequired == isRequired)&&(identical(other.validationRules, validationRules) || other.validationRules == validationRules));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,title,fieldType,value,hintText,orderNumber,isRequired,validationRules);
+    return Object.hash(runtimeType,id,title,fieldType,value,hintText,orderNumber,isRequired,validationRules);
 }
 
 @override
 String toString() {
-    return 'FormFieldSchema(title: $title, fieldType: $fieldType, value: $value, hintText: $hintText, orderNumber: $orderNumber, isRequired: $isRequired, validationRules: $validationRules)';
+    return 'FormFieldSchema(id: $id, title: $title, fieldType: $fieldType, value: $value, hintText: $hintText, orderNumber: $orderNumber, isRequired: $isRequired, validationRules: $validationRules)';
 }
 
 
@@ -279,7 +281,7 @@ abstract mixin class _$FormFieldSchemaCopyWith<$Res> implements $FormFieldSchema
   factory _$FormFieldSchemaCopyWith(_FormFieldSchema value, $Res Function(_FormFieldSchema) _then) = __$FormFieldSchemaCopyWithImpl;
 @override @useResult
 $Res call({
- String title, FormFieldType fieldType, String? value, String? hintText, int orderNumber, bool? isRequired, FieldValidationRules? validationRules
+ String id, String title, FormFieldType fieldType, String? value, String? hintText, int orderNumber, bool? isRequired, FieldValidationRules? validationRules
 });
 
 
@@ -296,9 +298,10 @@ class __$FormFieldSchemaCopyWithImpl<$Res>
 
 /// Create a copy of FormFieldSchema
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? title = null,Object? fieldType = null,Object? value = freezed,Object? hintText = freezed,Object? orderNumber = null,Object? isRequired = freezed,Object? validationRules = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? fieldType = null,Object? value = freezed,Object? hintText = freezed,Object? orderNumber = null,Object? isRequired = freezed,Object? validationRules = freezed,}) {
   return _then(_FormFieldSchema(
-title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,fieldType: null == fieldType ? _self.fieldType : fieldType // ignore: cast_nullable_to_non_nullable
 as FormFieldType,value: freezed == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as String?,hintText: freezed == hintText ? _self.hintText : hintText // ignore: cast_nullable_to_non_nullable

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/core/enums/form_field_type.dart';
 import 'package:venue_flow_app/core/theme/app_theme.dart';
@@ -58,6 +59,12 @@ class _FormFieldWidgetState extends ConsumerState<FormFieldWidget> {
     switch (widget.formFieldSchema.fieldType) {
       case FormFieldType.Text:
         return _buildTextField(cs: cs, sem: sem);
+      case FormFieldType.IntField:
+        return _buildIntField(cs: cs, sem: sem);
+      case FormFieldType.DatePicker:
+        return _buildDateField(cs: cs, sem: sem);
+      case FormFieldType.TextArea:
+        return _buildTextAreaField(cs: cs, sem: sem);
       default:
         throw new UnimplementedError(
           'FormFieldType ${widget.formFieldSchema.fieldType} is not implemented yet',
@@ -65,11 +72,93 @@ class _FormFieldWidgetState extends ConsumerState<FormFieldWidget> {
     }
   }
 
+  Widget _buildDateField({
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+  }) {
+    return TextFormField(
+      enabled: !widget.isLoading,
+      controller: _editingController,
+      readOnly: true,
+      decoration: _buildInputDecoration(
+        label: widget.formFieldSchema.title ?? '',
+        cs: cs,
+        hintText: widget.formFieldSchema.hintText ?? 'Select a date',
+        prefixIcon: Icons.calendar_today_rounded,
+      ),
+      validator: _validateField,
+      onTap: () async {
+        final now = DateTime.now();
+
+        final selectedDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime.tryParse(_editingController.text) ?? now,
+          firstDate: DateTime(1900),
+          lastDate: DateTime(2100),
+          builder: (context, child) {
+            return Theme(
+              data: Theme.of(context).copyWith(colorScheme: cs),
+              child: child!,
+            );
+          },
+        );
+
+        if (selectedDate != null) {
+          setState(() {
+            _editingController.text =
+                '${selectedDate.year.toString().padLeft(4, '0')}-'
+                '${selectedDate.month.toString().padLeft(2, '0')}-'
+                '${selectedDate.day.toString().padLeft(2, '0')}';
+          });
+        }
+      },
+    );
+  }
+
+  Widget _buildIntField({
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+  }) {
+    return TextFormField(
+      enabled: !widget.isLoading,
+      controller: _editingController,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      decoration: _buildInputDecoration(
+        label: widget.formFieldSchema.title ?? '',
+        cs: cs,
+        hintText: widget.formFieldSchema.hintText,
+        prefixIcon: Icons.numbers,
+      ),
+      validator: _validateField,
+    );
+  }
+
   Widget _buildTextField({
     required ColorScheme cs,
     required AppSemanticColors sem,
   }) {
     return TextFormField(
+      enabled: !widget.isLoading,
+      controller: _editingController,
+      keyboardType: TextInputType.emailAddress,
+      decoration: _buildInputDecoration(
+        label: widget.formFieldSchema.title ?? '',
+        cs: cs,
+        hintText: widget.formFieldSchema.hintText,
+        prefixIcon: Icons.mail_outline_rounded,
+      ),
+      validator: _validateField,
+    );
+  }
+
+  Widget _buildTextAreaField({
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+  }) {
+    return TextFormField(
+      maxLines: 3,
+      minLines: 2,
       enabled: !widget.isLoading,
       controller: _editingController,
       keyboardType: TextInputType.emailAddress,
