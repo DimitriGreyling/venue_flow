@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,8 +16,8 @@ import 'package:venue_flow_app/features/form/domain/form_field_data.dart';
 import 'package:venue_flow_app/features/form/domain/form_field_schema.dart';
 import 'package:venue_flow_app/features/form/domain/form_page_schema.dart';
 import 'package:venue_flow_app/features/form/domain/form_schema.dart';
-import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_field_dialog.dart';
 
+import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_field_dialog.dart';
 import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name_dialog.dart';
 import 'package:venue_flow_app/features/form/presentation/widgets/form_field_widget.dart';
 
@@ -36,7 +37,13 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     name: 'Form Name',
     description: '',
     schema: const FormSchema(
-      pages: [FormPageSchema(id: 'page-1', title: 'Page 1', orderNumber: 0)],
+      pages: [
+        FormPageSchema(
+          id: 'page-1',
+          title: 'Page 1',
+          orderNumber: 0,
+        ),
+      ],
     ),
   );
 
@@ -63,7 +70,6 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       fieldType: FormFieldType.Text,
       leadingIcon: Icons.text_fields,
       title: 'Text Field',
-      // onTap: (value) {},
       subtitle: 'Single-line text input',
       trailingIcon: Icons.add,
       trailingTooltip: 'Add text field',
@@ -72,7 +78,6 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       fieldType: FormFieldType.TextArea,
       leadingIcon: Icons.text_fields,
       title: 'Text Area Field',
-      // onTap: (value) {},
       subtitle: 'Multi-line text input',
       trailingIcon: Icons.add,
       trailingTooltip: 'Add text area field',
@@ -81,7 +86,6 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       fieldType: FormFieldType.DatePicker,
       leadingIcon: Icons.date_range,
       title: 'Date Picker Field',
-      // onTap: (value) {},
       subtitle: 'Select a date',
       trailingIcon: Icons.add,
       trailingTooltip: 'Add date picker field',
@@ -90,7 +94,6 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       fieldType: FormFieldType.IntField,
       leadingIcon: Icons.numbers,
       title: 'Int Field',
-      // onTap: (value) {},
       subtitle: 'Enter an integer',
       trailingIcon: Icons.add,
       trailingTooltip: 'Add number field',
@@ -98,13 +101,33 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+
+    _initializeFieldIds();
+  }
+
+  @override
   void dispose() {
     super.dispose();
   }
 
-  FormSchema get _schema => _createFormRequest.schema ?? const FormSchema();
+  // ---------------------------------------------------------------------------
+  // SCHEMA HELPERS
+  // ---------------------------------------------------------------------------
 
-  List<FormPageSchema> get _pages => _schema.pages;
+  FormSchema get _schema =>
+      _createFormRequest.schema ?? const FormSchema();
+
+  List<FormPageSchema> get _pages {
+    final pages = [..._schema.pages];
+
+    pages.sort(
+          (a, b) => a.orderNumber.compareTo(b.orderNumber),
+    );
+
+    return pages;
+  }
 
   FormPageSchema? get _selectedPage {
     for (final page in _pages) {
@@ -116,6 +139,36 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     return null;
   }
 
+  List<FormFieldSchema> _sortedFields(FormPageSchema page) {
+    final fields = [...page.fields];
+
+    fields.sort(
+          (a, b) => a.orderNumber.compareTo(b.orderNumber),
+    );
+
+    return fields;
+  }
+
+  void _initializeFieldIds() {
+    final schema = _schema;
+
+    final updatedPages = [
+      for (final page in schema.pages)
+        page.copyWith(
+          fields: [
+            for (final field in page.fields)
+              field.copyWith(
+                id: field.id.isEmpty ? _uuid.v4() : field.id,
+              ),
+          ],
+        ),
+    ];
+
+    _createFormRequest = _createFormRequest.copyWith(
+      schema: schema.copyWith(pages: updatedPages),
+    );
+  }
+
   void _updateRequest(CreateFormRequest request) {
     setState(() {
       _createFormRequest = request;
@@ -123,14 +176,22 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   }
 
   void _updateSchema(FormSchema schema) {
-    _updateRequest(_createFormRequest.copyWith(schema: schema));
+    _updateRequest(
+      _createFormRequest.copyWith(schema: schema),
+    );
   }
+
+  // ---------------------------------------------------------------------------
+  // PAGE MANAGEMENT
+  // ---------------------------------------------------------------------------
 
   void _selectPage(String pageId) {
     if (pageId == _selectedPageId) return;
 
     setState(() {
       _selectedPageId = pageId;
+      _selectedFieldForEdit = null;
+      _selectedOrderNumber = null;
     });
   }
 
@@ -141,7 +202,11 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       orderNumber: _pages.length,
     );
 
-    _updateSchema(_schema.copyWith(pages: [..._pages, newPage]));
+    _updateSchema(
+      _schema.copyWith(
+        pages: [..._pages, newPage],
+      ),
+    );
 
     setState(() {
       _selectedPageId = newPage.id;
@@ -179,162 +244,15 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
         remainingPages[i].copyWith(orderNumber: i),
     ];
 
-    _updateSchema(_schema.copyWith(pages: reorderedPages));
+    _updateSchema(
+      _schema.copyWith(pages: reorderedPages),
+    );
 
     setState(() {
       _selectedPageId = reorderedPages.first.id;
+      _selectedFieldForEdit = null;
+      _selectedOrderNumber = null;
     });
-  }
-
-  void _addField(FormFieldType fieldType) {
-    final page = _selectedPage;
-    if (page == null) return;
-
-    final field = FormFieldSchema(
-      fieldType: fieldType,
-      title: _defaultFieldTitle(fieldType),
-      hintText: _defaultFieldHint(fieldType),
-      orderNumber: page.fields.length,
-    );
-
-    _updateSchema(
-      _schema.copyWith(
-        pages: [
-          for (final item in _pages)
-            if (item.id == page.id)
-              item.copyWith(fields: [...item.fields, field])
-            else
-              item,
-        ],
-      ),
-    );
-  }
-
-  String _defaultFieldTitle(FormFieldType type) {
-    switch (type) {
-      case FormFieldType.Text:
-        return 'Text field';
-      default:
-        return 'New field';
-    }
-  }
-
-  String _defaultFieldHint(FormFieldType type) {
-    switch (type) {
-      case FormFieldType.Text:
-        return 'Enter your answer';
-      default:
-        return '';
-    }
-  }
-
-  ///
-  /// Open Edit dialog to edit the users form field details
-  ///
-  Future<void> _openEditField(int orderNumber) async {
-    final page = _selectedPage;
-    if (page == null) return;
-
-    setState(() {
-      _selectedOrderNumber = orderNumber;
-      _selectedFieldForEdit = page.fields.firstWhere(
-        (field) => field.orderNumber == orderNumber,
-      );
-      // _showFloatingSettingsBar = !_showFloatingSettingsBar;
-    });
-
-    await EditFormFieldDialog.show(
-      context,
-      formFieldSchema: _selectedFieldForEdit,
-      onFormFieldSchemaChanged: (value) {
-        _selectedFieldForEdit = value;
-        _updateField(orderNumber);
-      },
-    );
-  }
-
-  ///
-  /// Update call to update the users edit form field with latest details
-  ///
-  void _updateField(int orderNumber) {
-    final page = _selectedPage;
-    if (page == null) return;
-
-    //Update field data in schema
-    final foundField = _selectedFieldForEdit;
-
-    setState(() {
-      _updateSchema(
-        _schema.copyWith(
-          pages: [
-            for (final item in _pages)
-              if (item.id == page.id)
-                item.copyWith(
-                  fields: [
-                    for (final field in item.fields)
-                      if (field.orderNumber == orderNumber &&
-                          foundField != null)
-                        foundField.copyWith(
-                          title:
-                              _selectedFieldForEdit?.title ?? foundField.title,
-                          hintText:
-                              _selectedFieldForEdit?.hintText ??
-                              foundField.hintText,
-                        )
-                      else
-                        field,
-                  ],
-                )
-              else
-                item,
-          ],
-        ),
-      );
-    });
-  }
-
-  void _deleteField(int orderNumber) {
-    final page = _selectedPage;
-    if (page == null) return;
-
-    final remainingFields = page.fields
-        .where((field) => field.orderNumber != orderNumber)
-        .toList();
-
-    final reorderedFields = [
-      for (var i = 0; i < remainingFields.length; i++)
-        remainingFields[i].copyWith(orderNumber: i),
-    ];
-
-    _updateSchema(
-      _schema.copyWith(
-        pages: [
-          for (final item in _pages)
-            if (item.id == page.id)
-              item.copyWith(fields: reorderedFields)
-            else
-              item,
-        ],
-      ),
-    );
-  }
-
-  Future<void> _editFormDetails() async {
-    await EditFormNameDialog.show(
-      context,
-      formName: _createFormRequest.name,
-      formDescription: _createFormRequest.description ?? '',
-      onFormNameChanged: (value) {
-        if (value == null || value.trim().isEmpty) return;
-
-        _updateRequest(_createFormRequest.copyWith(name: value.trim()));
-      },
-      onFormDescriptionChanged: (value) {
-        if (value == null) return;
-
-        _updateRequest(_createFormRequest.copyWith(description: value));
-      },
-    );
   }
 
   Future<void> _showRenamePageDialog() async {
@@ -351,7 +269,9 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
           content: TextField(
             controller: controller,
             autofocus: true,
-            decoration: const InputDecoration(labelText: 'Page title'),
+            decoration: const InputDecoration(
+              labelText: 'Page title',
+            ),
             onSubmitted: (value) {
               Navigator.of(dialogContext).pop(value);
             },
@@ -379,6 +299,234 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // FIELD MANAGEMENT
+  // ---------------------------------------------------------------------------
+
+  void _addField(FormFieldType fieldType) {
+    final page = _selectedPage;
+    if (page == null) return;
+
+    final fields = _sortedFields(page);
+
+    final newField = FormFieldSchema(
+      id: _uuid.v4(),
+      fieldType: fieldType,
+      title: _defaultFieldTitle(fieldType),
+      hintText: _defaultFieldHint(fieldType),
+      orderNumber: fields.length,
+    );
+
+    _updateSchema(
+      _schema.copyWith(
+        pages: [
+          for (final item in _pages)
+            if (item.id == page.id)
+              item.copyWith(
+                fields: [...fields, newField],
+              )
+            else
+              item,
+        ],
+      ),
+    );
+  }
+
+  String _defaultFieldTitle(FormFieldType type) {
+    switch (type) {
+      case FormFieldType.Text:
+        return 'Text field';
+
+      case FormFieldType.TextArea:
+        return 'Text area';
+
+      case FormFieldType.DatePicker:
+        return 'Date picker';
+
+      case FormFieldType.IntField:
+        return 'Number field';
+
+      default:
+        return 'New field';
+    }
+  }
+
+  String _defaultFieldHint(FormFieldType type) {
+    switch (type) {
+      case FormFieldType.Text:
+        return 'Enter your answer';
+
+      case FormFieldType.TextArea:
+        return 'Enter your answer';
+
+      case FormFieldType.DatePicker:
+        return 'Select a date';
+
+      case FormFieldType.IntField:
+        return 'Enter a number';
+
+      default:
+        return '';
+    }
+  }
+
+  /// Reorders fields on the currently selected page.
+  void _reorderFields(int oldIndex, int newIndex) {
+    final page = _selectedPage;
+    if (page == null) return;
+
+    final fields = _sortedFields(page);
+
+    if (oldIndex < 0 || oldIndex >= fields.length) return;
+
+    // ReorderableListView provides the destination index
+    // before removal when moving down.
+    if (newIndex > oldIndex) {
+      newIndex--;
+    }
+
+    if (newIndex < 0 || newIndex >= fields.length) return;
+
+    // Remove the selected field.
+    final movedField = fields.removeAt(oldIndex);
+
+    // Insert it at the new position.
+    fields.insert(newIndex, movedField);
+
+    // Update all order numbers.
+    final reorderedFields = [
+      for (var i = 0; i < fields.length; i++)
+        fields[i].copyWith(orderNumber: i),
+    ];
+
+    // Update the schema.
+    _updateSchema(
+      _schema.copyWith(
+        pages: [
+          for (final item in _pages)
+            if (item.id == page.id)
+              item.copyWith(fields: reorderedFields)
+            else
+              item,
+        ],
+      ),
+    );
+  }
+
+  void _deleteField(int orderNumber) {
+    final page = _selectedPage;
+    if (page == null) return;
+
+    final remainingFields = _sortedFields(page)
+        .where((field) => field.orderNumber != orderNumber)
+        .toList();
+
+    final reorderedFields = [
+      for (var i = 0; i < remainingFields.length; i++)
+        remainingFields[i].copyWith(orderNumber: i),
+    ];
+
+    _updateSchema(
+      _schema.copyWith(
+        pages: [
+          for (final item in _pages)
+            if (item.id == page.id)
+              item.copyWith(fields: reorderedFields)
+            else
+              item,
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // FIELD EDITING
+  // ---------------------------------------------------------------------------
+
+  Future<void> _openEditField(int orderNumber) async {
+    final page = _selectedPage;
+    if (page == null) return;
+
+    final field = page.fields.firstWhere(
+          (field) => field.orderNumber == orderNumber,
+    );
+
+    setState(() {
+      _selectedOrderNumber = orderNumber;
+      _selectedFieldForEdit = field;
+    });
+
+    await EditFormFieldDialog.show(
+      context,
+      formFieldSchema: field,
+      onFormFieldSchemaChanged: (value) {
+        if (value == null) return;
+
+        _selectedFieldForEdit = value;
+        _updateField(orderNumber);
+      },
+    );
+  }
+
+  void _updateField(int orderNumber) {
+    final page = _selectedPage;
+    final updatedField = _selectedFieldForEdit;
+
+    if (page == null || updatedField == null) return;
+
+    final updatedFields = [
+      for (final field in page.fields)
+        if (field.id == updatedField.id)
+          updatedField.copyWith(
+            orderNumber: field.orderNumber,
+          )
+        else
+          field,
+    ];
+
+    _updateSchema(
+      _schema.copyWith(
+        pages: [
+          for (final item in _pages)
+            if (item.id == page.id)
+              item.copyWith(fields: updatedFields)
+            else
+              item,
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // FORM DETAILS
+  // ---------------------------------------------------------------------------
+
+  Future<void> _editFormDetails() async {
+    await EditFormNameDialog.show(
+      context,
+      formName: _createFormRequest.name,
+      formDescription: _createFormRequest.description ?? '',
+      onFormNameChanged: (value) {
+        if (value == null || value.trim().isEmpty) return;
+
+        _updateRequest(
+          _createFormRequest.copyWith(name: value.trim()),
+        );
+      },
+      onFormDescriptionChanged: (value) {
+        if (value == null) return;
+
+        _updateRequest(
+          _createFormRequest.copyWith(description: value),
+        );
+      },
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // MAIN BUILD
+  // ---------------------------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -392,8 +540,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     if (!_isPositionsInitialized) {
       _floatingFieldsTop = statusBarHeight + 65;
       _floatingFieldsLeft = 20;
+
       _floatingSettingsTop = statusBarHeight + 65;
       _floatingSettingsLeft = 20;
+
       _isPositionsInitialized = true;
     }
 
@@ -401,10 +551,11 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       drawer: wide
           ? null
           : Drawer(
-              width: 240,
-              backgroundColor: cs.surface,
-              child: SideNav(activePath: '/forms'),
-            ),
+        width: 240,
+        backgroundColor: cs.surface,
+        child: SideNav(activePath: '/forms'),
+      ),
+
       floatingActionButton: PopupMenuButton<FormToolbarOptions>(
         tooltip: 'Toolbar',
         offset: const Offset(-50, -50),
@@ -422,6 +573,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
             case FormToolbarOptions.FormFields:
               setState(() {
                 _showFloatingFieldsBar = !_showFloatingFieldsBar;
+
                 if (_showFloatingFieldsBar) {
                   _showFloatingSettingsBar = false;
                 }
@@ -442,6 +594,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
           ),
         ],
       ),
+
       body: LayoutBuilder(
         builder: (context, constraints) {
           return Stack(
@@ -452,6 +605,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                     child: Column(
                       children: [
                         TopBar(wide: wide),
+
                         Expanded(
                           child: SingleChildScrollView(
                             padding: EdgeInsets.all(wide ? 24 : 16),
@@ -464,22 +618,23 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                   child: Container(
                                     constraints: BoxConstraints(
                                       minHeight:
-                                          MediaQuery.sizeOf(context).height *
+                                      MediaQuery.sizeOf(context).height *
                                           0.75,
                                     ),
                                     padding: const EdgeInsets.all(24),
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
+                                        // Form name
                                         Row(
                                           children: [
                                             Expanded(
                                               child: Text(
                                                 _createFormRequest.name,
-                                                style: Theme.of(
-                                                  context,
-                                                ).textTheme.titleLarge,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleLarge,
                                               ),
                                             ),
                                             IconButton(
@@ -489,19 +644,24 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                             ),
                                           ],
                                         ),
+
                                         const SizedBox(height: 8),
+
+                                        // Form description
                                         Text(
                                           _createFormRequest
-                                                      .description
-                                                      ?.isNotEmpty ==
-                                                  true
-                                              ? _createFormRequest.description!
+                                              .description
+                                              ?.isNotEmpty ==
+                                              true
+                                              ? _createFormRequest
+                                              .description!
                                               : 'Add a description for your form.',
                                           maxLines: _isExpanded ? null : 2,
                                           overflow: _isExpanded
                                               ? TextOverflow.visible
                                               : TextOverflow.ellipsis,
                                         ),
+
                                         Align(
                                           alignment: Alignment.centerRight,
                                           child: TextButton(
@@ -517,9 +677,13 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                             ),
                                           ),
                                         ),
+
                                         const Divider(height: 24),
+
                                         _buildPageSelector(cs),
+
                                         const SizedBox(height: 20),
+
                                         _buildPageEditor(cs, sem),
                                       ],
                                     ),
@@ -534,8 +698,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                   ),
                 ],
               ),
+
               if (_showFloatingFieldsBar)
                 _buildFieldsFloatingBar(cs, constraints),
+
               if (_showFloatingSettingsBar)
                 _buildSettingsFloatingBar(cs, constraints),
             ],
@@ -544,6 +710,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       ),
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // PAGE SELECTOR
+  // ---------------------------------------------------------------------------
 
   Widget _buildPageSelector(ColorScheme cs) {
     return Row(
@@ -566,16 +736,19 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
             ),
           ),
         ),
+
         IconButton(
           tooltip: 'Add page',
           onPressed: _addPage,
           icon: const Icon(Icons.add),
         ),
+
         IconButton(
           tooltip: 'Rename page',
           onPressed: _showRenamePageDialog,
           icon: const Icon(Icons.edit_outlined),
         ),
+
         IconButton(
           tooltip: 'Delete selected page',
           onPressed: _pages.length > 1 ? _deleteSelectedPage : null,
@@ -585,12 +758,20 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // PAGE EDITOR WITH DRAG AND DROP
+  // ---------------------------------------------------------------------------
+
   Widget _buildPageEditor(ColorScheme cs, AppSemanticColors sem) {
     final page = _selectedPage;
 
     if (page == null) {
-      return const Center(child: Text('Select or create a page.'));
+      return const Center(
+        child: Text('Select or create a page.'),
+      );
     }
+
+    final fields = _sortedFields(page);
 
     return Form(
       key: _formKey,
@@ -606,101 +787,157 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                 ),
               ),
               Text(
-                '${page.fields.length} fields',
+                '${fields.length} fields',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ),
+
           const SizedBox(height: 16),
-          if (page.fields.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: cs.outlineVariant),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.dynamic_form,
-                    size: 36,
-                    color: cs.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 12),
-                  const Text('This page has no fields yet.'),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Open the Form Fields toolbar to add a field.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            )
+
+          if (fields.isEmpty)
+            _buildEmptyFieldsState(cs)
           else
-            for (final field in page.fields)
-              Padding(
-                key: ValueKey('${page.id}-${field.orderNumber}'),
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: FormFieldWidget(
-                        key: ValueKey('${page.id}-${field.orderNumber}'),
-                        formFieldSchema: field,
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              buildDefaultDragHandles: false,
+              itemCount: fields.length,
+              onReorder: _reorderFields,
+
+              itemBuilder: (context, index) {
+                final field = fields[index];
+
+                return Padding(
+                  key: ValueKey(field.id),
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Drag handle
+                      ReorderableDragStartListener(
+                        index: index,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 12,
+                          ),
+                          child: Tooltip(
+                            message: 'Drag to reorder',
+                            child: Icon(
+                              Icons.drag_indicator,
+                              color: cs.onSurfaceVariant,
+                              size: 24,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      tooltip: 'Edit field',
-                      onPressed: () => _openEditField(field.orderNumber),
-                      icon: Icon(Icons.edit, color: cs.primary),
-                    ),
-                    IconButton(
-                      tooltip: 'Remove field',
-                      onPressed: () => _deleteField(field.orderNumber),
-                      icon: Icon(Icons.delete_outline, color: cs.error),
-                    ),
-                  ],
-                ),
-              ),
+
+                      // Form field
+                      Expanded(
+                        child: FormFieldWidget(
+                          key: ValueKey('${field.id}-widget'),
+                          formFieldSchema: field,
+                        ),
+                      ),
+
+                      // Edit
+                      IconButton(
+                        tooltip: 'Edit field',
+                        onPressed: () {
+                          _openEditField(field.orderNumber);
+                        },
+                        icon: Icon(
+                          Icons.edit,
+                          color: cs.primary,
+                        ),
+                      ),
+
+                      // Delete
+                      IconButton(
+                        tooltip: 'Remove field',
+                        onPressed: () {
+                          _deleteField(field.orderNumber);
+                        },
+                        icon: Icon(
+                          Icons.delete_outline,
+                          color: cs.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildFieldsFloatingBar(ColorScheme cs, BoxConstraints constraints) {
+  Widget _buildEmptyFieldsState(ColorScheme cs) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.dynamic_form,
+            size: 36,
+            color: cs.onSurfaceVariant,
+          ),
+          const SizedBox(height: 12),
+          const Text('This page has no fields yet.'),
+          const SizedBox(height: 4),
+          Text(
+            'Open the Form Fields toolbar to add a field.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // FLOATING FORM FIELDS TOOLBAR
+  // ---------------------------------------------------------------------------
+
+  Widget _buildFieldsFloatingBar(
+      ColorScheme cs,
+      BoxConstraints constraints,
+      ) {
     final screenSize = MediaQuery.sizeOf(context);
 
     final width = (screenSize.width * 0.32).clamp(250.0, 380.0);
+
     final height = (screenSize.height * 0.80).clamp(250.0, 380.0);
 
+    final maxTop = (constraints.maxHeight - height)
+        .clamp(0.0, double.infinity);
+
+    final maxLeft = (constraints.maxWidth - width)
+        .clamp(0.0, double.infinity);
+
     return Positioned(
-      top: _floatingFieldsTop.clamp(
-        0.0,
-        (constraints.maxHeight - height).clamp(0.0, double.infinity),
-      ),
-      left: _floatingFieldsLeft.clamp(
-        0.0,
-        (constraints.maxWidth - width).clamp(0.0, double.infinity),
-      ),
+      top: _floatingFieldsTop.clamp(0.0, maxTop),
+      left: _floatingFieldsLeft.clamp(0.0, maxLeft),
+
       child: GestureDetector(
         onPanUpdate: (details) {
           setState(() {
-            _floatingFieldsTop = (_floatingFieldsTop + details.delta.dy).clamp(
-              0.0,
-              (constraints.maxHeight - height).clamp(0.0, double.infinity),
-            );
+            _floatingFieldsTop = (_floatingFieldsTop + details.delta.dy)
+                .clamp(0.0, maxTop);
 
             _floatingFieldsLeft = (_floatingFieldsLeft + details.delta.dx)
-                .clamp(
-                  0.0,
-                  (constraints.maxWidth - width).clamp(0.0, double.infinity),
-                );
+                .clamp(0.0, maxLeft);
           });
         },
+
         child: SizedBox(
           width: width,
           height: height,
@@ -714,8 +951,12 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.drag_indicator, color: cs.onPrimaryContainer),
+                      Icon(
+                        Icons.drag_indicator,
+                        color: cs.onPrimaryContainer,
+                      ),
                       const SizedBox(width: 8),
+
                       Expanded(
                         child: Text(
                           'Form Fields',
@@ -725,6 +966,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                           ),
                         ),
                       ),
+
                       IconButton(
                         tooltip: 'Close',
                         onPressed: () {
@@ -732,59 +974,68 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                             _showFloatingFieldsBar = false;
                           });
                         },
-                        icon: Icon(Icons.close, color: cs.onPrimaryContainer),
+                        icon: Icon(
+                          Icons.close,
+                          color: cs.onPrimaryContainer,
+                        ),
                       ),
                     ],
                   ),
 
                   const Divider(),
 
-                  // Scrollable fields section
+                  // Scrollable field selection
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
-                        children: _formFields
-                            .expand(
-                              (field) => [
-                                ListTile(
-                                  dense: true,
-                                  leading: Icon(
-                                    field.leadingIcon,
-                                    color: cs.onPrimaryContainer,
-                                  ),
-                                  title: Text(
-                                    field.title ?? '',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: cs.onPrimaryContainer,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    field.subtitle ?? '',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: cs.onPrimaryContainer,
-                                    ),
-                                  ),
-                                  trailing: Tooltip(
-                                    message: field.trailingTooltip ?? '',
-                                    child: Icon(
-                                      field.trailingIcon,
-                                      color: cs.onPrimaryContainer,
-                                    ),
-                                  ),
-                                  onTap: () => _addField(
-                                    field.fieldType ?? FormFieldType.Text,
-                                  ),
+                        children: _formFields.expand((field) {
+                          return [
+                            ListTile(
+                              dense: true,
+
+                              leading: Icon(
+                                field.leadingIcon,
+                                color: cs.onPrimaryContainer,
+                              ),
+
+                              title: Text(
+                                field.title ?? '',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: cs.onPrimaryContainer,
                                 ),
-                                Divider(
-                                  color: cs.onPrimaryContainer.withValues(
-                                    alpha: 0.5,
-                                  ),
+                              ),
+
+                              subtitle: Text(
+                                field.subtitle ?? '',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: cs.onPrimaryContainer,
                                 ),
-                              ],
-                            )
-                            .toList(),
+                              ),
+
+                              trailing: Tooltip(
+                                message: field.trailingTooltip ?? '',
+                                child: Icon(
+                                  field.trailingIcon,
+                                  color: cs.onPrimaryContainer,
+                                ),
+                              ),
+
+                              onTap: () {
+                                _addField(
+                                  field.fieldType ?? FormFieldType.Text,
+                                );
+                              },
+                            ),
+
+                            Divider(
+                              color: cs.onPrimaryContainer.withValues(
+                                alpha: 0.5,
+                              ),
+                            ),
+                          ];
+                        }).toList(),
                       ),
                     ),
                   ),
@@ -797,36 +1048,41 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     );
   }
 
-  Widget _buildSettingsFloatingBar(ColorScheme cs, BoxConstraints constraints) {
+  // ---------------------------------------------------------------------------
+  // FLOATING PAGE SETTINGS TOOLBAR
+  // ---------------------------------------------------------------------------
+
+  Widget _buildSettingsFloatingBar(
+      ColorScheme cs,
+      BoxConstraints constraints,
+      ) {
     final screenSize = MediaQuery.sizeOf(context);
 
     final width = (screenSize.width * 0.32).clamp(250.0, 380.0);
+
     const height = 260.0;
 
+    final maxTop = (constraints.maxHeight - height)
+        .clamp(0.0, double.infinity);
+
+    final maxLeft = (constraints.maxWidth - width)
+        .clamp(0.0, double.infinity);
+
     return Positioned(
-      top: _floatingSettingsTop.clamp(
-        0.0,
-        (constraints.maxHeight - height).clamp(0.0, double.infinity),
-      ),
-      right: _floatingSettingsLeft.clamp(
-        0.0,
-        (constraints.maxWidth - width).clamp(0.0, double.infinity),
-      ),
+      top: _floatingSettingsTop.clamp(0.0, maxTop),
+      right: _floatingSettingsLeft.clamp(0.0, maxLeft),
+
       child: GestureDetector(
         onPanUpdate: (details) {
           setState(() {
             _floatingSettingsTop = (_floatingSettingsTop + details.delta.dy)
-                .clamp(
-                  0.0,
-                  (constraints.maxHeight - height).clamp(0.0, double.infinity),
-                );
+                .clamp(0.0, maxTop);
+
             _floatingSettingsLeft = (_floatingSettingsLeft + details.delta.dx)
-                .clamp(
-                  0.0,
-                  (constraints.maxWidth - width).clamp(0.0, double.infinity),
-                );
+                .clamp(0.0, maxLeft);
           });
         },
+
         child: SizedBox(
           width: width,
           height: height,
@@ -840,8 +1096,12 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.drag_indicator, color: cs.onTertiaryContainer),
+                      Icon(
+                        Icons.drag_indicator,
+                        color: cs.onTertiaryContainer,
+                      ),
                       const SizedBox(width: 8),
+
                       Expanded(
                         child: Text(
                           'Page Settings',
@@ -851,6 +1111,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                           ),
                         ),
                       ),
+
                       IconButton(
                         tooltip: 'Close',
                         onPressed: () {
@@ -858,15 +1119,19 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                             _showFloatingSettingsBar = false;
                           });
                         },
-                        icon: Icon(Icons.close, color: cs.onPrimaryContainer),
+                        icon: Icon(
+                          Icons.close,
+                          color: cs.onTertiaryContainer,
+                        ),
                       ),
                     ],
                   ),
+
                   const Divider(),
+
                   TextFormField(
-                    controller: TextEditingController(
-                      text: _selectedFieldForEdit?.title ?? '',
-                    ),
+                    key: ValueKey(_selectedFieldForEdit?.id),
+                    initialValue: _selectedFieldForEdit?.title ?? '',
                     keyboardType: TextInputType.text,
                     decoration: _buildInputDecoration(
                       label: 'Field Title',
@@ -875,16 +1140,22 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                       prefixIcon: Icons.title,
                     ),
                     onChanged: (value) {
-                      _selectedFieldForEdit = _selectedFieldForEdit?.copyWith(
-                        title: value,
-                      );
+                      _selectedFieldForEdit =
+                          _selectedFieldForEdit?.copyWith(
+                            title: value,
+                          );
                     },
                   ),
+
+                  const SizedBox(height: 12),
+
                   ElevatedButton(
-                    onPressed: () {
-                      _updateField(_selectedOrderNumber ?? 0);
+                    onPressed: _selectedOrderNumber == null
+                        ? null
+                        : () {
+                      _updateField(_selectedOrderNumber!);
                     },
-                    child: Text('Save'),
+                    child: const Text('Save'),
                   ),
                 ],
               ),
@@ -894,6 +1165,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       ),
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // INPUT DECORATION
+  // ---------------------------------------------------------------------------
 
   InputDecoration _buildInputDecoration({
     required ColorScheme cs,
@@ -917,22 +1192,35 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       suffixIcon: suffixIcon,
       filled: true,
       fillColor: cs.inversePrimary.withValues(alpha: 0.05),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 16,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.1)),
+        borderSide: BorderSide(
+          color: cs.onSurface.withValues(alpha: 0.1),
+        ),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.1)),
+        borderSide: BorderSide(
+          color: cs.onSurface.withValues(alpha: 0.1),
+        ),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.primary, width: 2),
+        borderSide: BorderSide(
+          color: cs.primary,
+          width: 2,
+        ),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: cs.error, width: 2),
+        borderSide: BorderSide(
+          color: cs.error,
+          width: 2,
+        ),
       ),
     );
   }

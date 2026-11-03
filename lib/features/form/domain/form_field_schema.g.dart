@@ -8,6 +8,7 @@ part of 'form_field_schema.dart';
 
 _FormFieldSchema _$FormFieldSchemaFromJson(Map<String, dynamic> json) =>
     _FormFieldSchema(
+      id: json['id'] as String,
       title: json['title'] as String,
       fieldType: $enumDecode(_$FormFieldTypeEnumMap, json['fieldType']),
       value: json['value'] as String?,
@@ -23,6 +24,7 @@ _FormFieldSchema _$FormFieldSchemaFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$FormFieldSchemaToJson(_FormFieldSchema instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'title': instance.title,
       'fieldType': _$FormFieldTypeEnumMap[instance.fieldType]!,
       'value': instance.value,

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:uuid/uuid.dart';
 import 'package:venue_flow_app/core/enums/form_field_type.dart';
 import 'package:venue_flow_app/features/form/domain/field_validation_rules.dart';
 
@@ -12,6 +13,7 @@ part 'form_field_schema.g.dart';
 @freezed
 abstract class FormFieldSchema with _$FormFieldSchema {
   const factory FormFieldSchema({
+    required String id,
     required String title,
     required FormFieldType fieldType,
     String? value,
