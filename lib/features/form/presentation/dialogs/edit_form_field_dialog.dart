@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:venue_flow_app/features/form/domain/form_field_schema.dart';
+import '../../../../core/enums/form_field_type.dart';
 import '../../../../core/theme/theme_x.dart' show ThemeX;
 
 ///
@@ -41,6 +42,9 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
   final _formNameFormKey = GlobalKey<FormState>();
 
   final TextEditingController _formFieldTitle = TextEditingController();
+  final TextEditingController _formFieldHintText = TextEditingController();
+  final TextEditingController _formFieldType = TextEditingController();
+
   bool _isSaving = false;
 
   @override
@@ -48,11 +52,15 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
     super.initState();
 
     _formFieldTitle.text = widget.formFieldSchema.title ?? '';
+    _formFieldHintText.text = widget.formFieldSchema.hintText ?? '';
+    _formFieldType.text = widget.formFieldSchema.fieldType.name;
   }
 
   @override
   void dispose() {
     _formFieldTitle.dispose();
+    _formFieldHintText.dispose();
+    _formFieldType.dispose();
     _formNameFormKey.currentState?.dispose();
     super.dispose();
   }
@@ -66,7 +74,10 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
       });
 
       widget.onFormFieldSchemaChanged?.call(
-        widget.formFieldSchema.copyWith(title: _formFieldTitle.text),
+        widget.formFieldSchema.copyWith(
+          title: _formFieldTitle.text,
+          hintText: _formFieldHintText.text,
+        ),
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -116,7 +127,7 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text('Edit Form Name', style: textTheme.titleLarge),
+                    Text('Edit Form Hint Text', style: textTheme.titleLarge),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -126,6 +137,19 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
                       key: _formNameFormKey,
                       child: Column(
                         children: [
+                          DropdownMenu(
+                            dropdownMenuEntries: FormFieldType.values
+                                .map(
+                                  (type) => DropdownMenuEntry(
+                                    value: type.name,
+                                    label: type.name,
+                                  ),
+                                )
+                                .toList(),
+                            label: Text('Form Field Type'),
+                            controller: _formFieldType,
+                          ),
+                          const SizedBox(height: 16),
                           TextFormField(
                             controller: _formFieldTitle,
                             decoration: const InputDecoration(
@@ -135,6 +159,20 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter a form name';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _formFieldHintText,
+                            decoration: const InputDecoration(
+                              labelText: 'Form Hint Text',
+                              border: OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a form hint text';
                               }
                               return null;
                             },
