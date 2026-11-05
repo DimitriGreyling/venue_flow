@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:venue_flow_app/features/form/presentation/form_table_screen.dart';
 
 import '../../features/appointment/presentation/appointment_screen.dart';
 import '../../features/appointment_configuration/presentation/appointment_configuration_screen.dart';
@@ -45,7 +46,7 @@ GoRouter router(Ref ref) {
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/venues', builder: (_, __) => const VenueScreen()),
       GoRoute(path: '/dashboard', builder: (_, __) => const DashboardScreen()),
-      GoRoute(path: '/forms', builder: (_, __) => const FormScreen()),
+      GoRoute(path: '/forms', builder: (_, __) => const FormTableScreen()),
       GoRoute(path: '/invoices', builder: (_, __) => const InvoiceScreen()),
       GoRoute(
         path: '/appointments',
