@@ -139,33 +139,81 @@ else
 fi
 
 
+# ---- Build ----
 
-# Build
+echo "Resolving Flutter dependencies..."
 "${FLUTTER_BIN}" pub get
 
 # Create the compilation flag argument if a URL is provided
-DART_DEFINE_ARGS=""
+DART_DEFINE_ARGS=()
+
 if [ -n "${api_base_url}" ]; then
   echo "Injecting API_BASE_URL into compilation bundle..."
-  DART_DEFINE_ARGS="--dart-define=API_BASE_URL=${api_base_url}"
+  DART_DEFINE_ARGS+=("--dart-define=API_BASE_URL=${api_base_url}")
 else
   echo "WARNING: API_BASE_URL is not set in Cloudflare environments. Using Dart code default fallback value."
 fi
 
+# Generate Freezed and JSON serialization files
 echo "Generating Freezed and JSON serialization files..."
 
-flutter pub run build_runner build --delete-conflicting-outputs
+"${DART_BIN}" run build_runner build --delete-conflicting-outputs
 
+# Build Flutter web
 echo "Building Flutter web..."
 
-WEB_BUILD_HELP="$(${FLUTTER_BIN} build web -h 2>&1 || true)"
+WEB_BUILD_HELP="$("${FLUTTER_BIN}" build web -h 2>&1 || true)"
+
 if echo "${WEB_BUILD_HELP}" | grep -q -- "--web-renderer"; then
   echo "Building web with explicit renderer flag..."
-  "${FLUTTER_BIN}" build web --release --web-renderer canvaskit ${DART_DEFINE_ARGS}
+
+  "${FLUTTER_BIN}" build web \
+    --release \
+    --web-renderer canvaskit \
+    "${DART_DEFINE_ARGS[@]}"
 else
-  echo "Building web with default renderer (current Flutter CLI does not support --web-renderer)..."
-  "${FLUTTER_BIN}" build web --release ${DART_DEFINE_ARGS}
+  echo "Building web with default renderer..."
+
+  "${FLUTTER_BIN}" build web \
+    --release \
+    "${DART_DEFINE_ARGS[@]}"
 fi
+
+# Optional: Cloudflare Pages SPA routing
+# mkdir -p "${ROOT_DIR}/build/web"
+# cat > "${ROOT_DIR}/build/web/_redirects" <<'EOF'
+# /*    /index.html   200
+# EOF
+
+echo "Build complete. Output:"
+ls -la "${ROOT_DIR}/build/web" | head -n 60
+
+# Build
+#"${FLUTTER_BIN}" pub get
+#
+## Create the compilation flag argument if a URL is provided
+#DART_DEFINE_ARGS=""
+#if [ -n "${api_base_url}" ]; then
+#  echo "Injecting API_BASE_URL into compilation bundle..."
+#  DART_DEFINE_ARGS="--dart-define=API_BASE_URL=${api_base_url}"
+#else
+#  echo "WARNING: API_BASE_URL is not set in Cloudflare environments. Using Dart code default fallback value."
+#fi
+#
+#echo "Generating Freezed and JSON serialization files..."
+#
+#flutter pub run build_runner build --delete-conflicting-outputs
+#
+#echo "Building Flutter web..."
+#
+#WEB_BUILD_HELP="$(${FLUTTER_BIN} build web -h 2>&1 || true)"
+#if echo "${WEB_BUILD_HELP}" | grep -q -- "--web-renderer"; then
+#  echo "Building web with explicit renderer flag..."
+#  "${FLUTTER_BIN}" build web --release --web-renderer canvaskit ${DART_DEFINE_ARGS}
+#else
+#  echo "Building web with default renderer (current Flutter CLI does not support --web-renderer)..."
+#  "${FLUTTER_BIN}" build web --release ${DART_DEFINE_ARGS}
+#fi
 
 #WEB_BUILD_HELP="$(${FLUTTER_BIN} build web -h 2>&1 || true)"
 #if echo "${WEB_BUILD_HELP}" | grep -q -- "--web-renderer"; then
