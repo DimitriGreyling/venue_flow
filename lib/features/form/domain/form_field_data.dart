@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:venue_flow_app/core/enums/form_field_type.dart';
-import '../../../core/converters/icon_data_convert.dart';
+import '../../../core/domain/icon_feature.dart';
 
 part 'form_field_data.freezed.dart';
 
@@ -13,10 +13,10 @@ part 'form_field_data.g.dart';
 @freezed
 abstract class FormFieldData with _$FormFieldData {
   const factory FormFieldData({
-    int? leadingIcon,
+    IconFeature? leadingIcon,
     String? title,
     String? subtitle,
-    int? trailingIcon,
+    IconFeature? trailingIcon,
     String? trailingTooltip,
     FormFieldType? fieldType,
     // @JsonKey(includeFromJson: false, includeToJson: false)

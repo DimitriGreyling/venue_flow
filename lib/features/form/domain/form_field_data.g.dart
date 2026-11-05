@@ -8,10 +8,14 @@ part of 'form_field_data.dart';
 
 _FormFieldData _$FormFieldDataFromJson(Map<String, dynamic> json) =>
     _FormFieldData(
-      leadingIcon: (json['leadingIcon'] as num?)?.toInt(),
+      leadingIcon: json['leadingIcon'] == null
+          ? null
+          : IconFeature.fromJson(json['leadingIcon'] as Map<String, dynamic>),
       title: json['title'] as String?,
       subtitle: json['subtitle'] as String?,
-      trailingIcon: (json['trailingIcon'] as num?)?.toInt(),
+      trailingIcon: json['trailingIcon'] == null
+          ? null
+          : IconFeature.fromJson(json['trailingIcon'] as Map<String, dynamic>),
       trailingTooltip: json['trailingTooltip'] as String?,
       fieldType: $enumDecodeNullable(_$FormFieldTypeEnumMap, json['fieldType']),
     );

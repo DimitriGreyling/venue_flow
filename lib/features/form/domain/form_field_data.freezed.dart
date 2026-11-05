@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormFieldData {
 
- int? get leadingIcon; String? get title; String? get subtitle; int? get trailingIcon; String? get trailingTooltip; FormFieldType? get fieldType;
+ IconFeature? get leadingIcon; String? get title; String? get subtitle; IconFeature? get trailingIcon; String? get trailingTooltip; FormFieldType? get fieldType;
 /// Create a copy of FormFieldData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,11 +54,11 @@ abstract mixin class $FormFieldDataCopyWith<$Res>  {
   factory $FormFieldDataCopyWith(FormFieldData value, $Res Function(FormFieldData) _then) = _$FormFieldDataCopyWithImpl;
 @useResult
 $Res call({
- int? leadingIcon, String? title, String? subtitle, int? trailingIcon, String? trailingTooltip, FormFieldType? fieldType
+ IconFeature? leadingIcon, String? title, String? subtitle, IconFeature? trailingIcon, String? trailingTooltip, FormFieldType? fieldType
 });
 
 
-
+$IconFeatureCopyWith<$Res>? get leadingIcon;$IconFeatureCopyWith<$Res>? get trailingIcon;
 
 }
 /// @nodoc
@@ -74,15 +74,39 @@ class _$FormFieldDataCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? leadingIcon = freezed,Object? title = freezed,Object? subtitle = freezed,Object? trailingIcon = freezed,Object? trailingTooltip = freezed,Object? fieldType = freezed,}) {
   return _then(FormFieldData(
 leadingIcon: freezed == leadingIcon ? _self.leadingIcon : leadingIcon // ignore: cast_nullable_to_non_nullable
-as int?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as IconFeature?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,subtitle: freezed == subtitle ? _self.subtitle : subtitle // ignore: cast_nullable_to_non_nullable
 as String?,trailingIcon: freezed == trailingIcon ? _self.trailingIcon : trailingIcon // ignore: cast_nullable_to_non_nullable
-as int?,trailingTooltip: freezed == trailingTooltip ? _self.trailingTooltip : trailingTooltip // ignore: cast_nullable_to_non_nullable
+as IconFeature?,trailingTooltip: freezed == trailingTooltip ? _self.trailingTooltip : trailingTooltip // ignore: cast_nullable_to_non_nullable
 as String?,fieldType: freezed == fieldType ? _self.fieldType : fieldType // ignore: cast_nullable_to_non_nullable
 as FormFieldType?,
   ));
 }
+/// Create a copy of FormFieldData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$IconFeatureCopyWith<$Res>? get leadingIcon {
+    if (_self.leadingIcon == null) {
+    return null;
+  }
 
+  return $IconFeatureCopyWith<$Res>(_self.leadingIcon!, (value) {
+    return _then(_self.copyWith(leadingIcon: value));
+  });
+}/// Create a copy of FormFieldData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$IconFeatureCopyWith<$Res>? get trailingIcon {
+    if (_self.trailingIcon == null) {
+    return null;
+  }
+
+  return $IconFeatureCopyWith<$Res>(_self.trailingIcon!, (value) {
+    return _then(_self.copyWith(trailingIcon: value));
+  });
+}
 }
 
 
@@ -164,7 +188,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? leadingIcon,  String? title,  String? subtitle,  int? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( IconFeature? leadingIcon,  String? title,  String? subtitle,  IconFeature? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormFieldData() when $default != null:
 return $default(_that.leadingIcon,_that.title,_that.subtitle,_that.trailingIcon,_that.trailingTooltip,_that.fieldType);case _:
@@ -185,7 +209,7 @@ return $default(_that.leadingIcon,_that.title,_that.subtitle,_that.trailingIcon,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? leadingIcon,  String? title,  String? subtitle,  int? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( IconFeature? leadingIcon,  String? title,  String? subtitle,  IconFeature? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)  $default,) {final _that = this;
 switch (_that) {
 case _FormFieldData():
 return $default(_that.leadingIcon,_that.title,_that.subtitle,_that.trailingIcon,_that.trailingTooltip,_that.fieldType);case _:
@@ -205,7 +229,7 @@ return $default(_that.leadingIcon,_that.title,_that.subtitle,_that.trailingIcon,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? leadingIcon,  String? title,  String? subtitle,  int? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( IconFeature? leadingIcon,  String? title,  String? subtitle,  IconFeature? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)?  $default,) {final _that = this;
 switch (_that) {
 case _FormFieldData() when $default != null:
 return $default(_that.leadingIcon,_that.title,_that.subtitle,_that.trailingIcon,_that.trailingTooltip,_that.fieldType);case _:
@@ -223,10 +247,10 @@ class _FormFieldData implements FormFieldData {
   const _FormFieldData({this.leadingIcon, this.title, this.subtitle, this.trailingIcon, this.trailingTooltip, this.fieldType});
   factory _FormFieldData.fromJson(Map<String, dynamic> json) => _$FormFieldDataFromJson(json);
 
-@override final  int? leadingIcon;
+@override final  IconFeature? leadingIcon;
 @override final  String? title;
 @override final  String? subtitle;
-@override final  int? trailingIcon;
+@override final  IconFeature? trailingIcon;
 @override final  String? trailingTooltip;
 @override final  FormFieldType? fieldType;
 
@@ -265,11 +289,11 @@ abstract mixin class _$FormFieldDataCopyWith<$Res> implements $FormFieldDataCopy
   factory _$FormFieldDataCopyWith(_FormFieldData value, $Res Function(_FormFieldData) _then) = __$FormFieldDataCopyWithImpl;
 @override @useResult
 $Res call({
- int? leadingIcon, String? title, String? subtitle, int? trailingIcon, String? trailingTooltip, FormFieldType? fieldType
+ IconFeature? leadingIcon, String? title, String? subtitle, IconFeature? trailingIcon, String? trailingTooltip, FormFieldType? fieldType
 });
 
 
-
+@override $IconFeatureCopyWith<$Res>? get leadingIcon;@override $IconFeatureCopyWith<$Res>? get trailingIcon;
 
 }
 /// @nodoc
@@ -285,16 +309,40 @@ class __$FormFieldDataCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? leadingIcon = freezed,Object? title = freezed,Object? subtitle = freezed,Object? trailingIcon = freezed,Object? trailingTooltip = freezed,Object? fieldType = freezed,}) {
   return _then(_FormFieldData(
 leadingIcon: freezed == leadingIcon ? _self.leadingIcon : leadingIcon // ignore: cast_nullable_to_non_nullable
-as int?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as IconFeature?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,subtitle: freezed == subtitle ? _self.subtitle : subtitle // ignore: cast_nullable_to_non_nullable
 as String?,trailingIcon: freezed == trailingIcon ? _self.trailingIcon : trailingIcon // ignore: cast_nullable_to_non_nullable
-as int?,trailingTooltip: freezed == trailingTooltip ? _self.trailingTooltip : trailingTooltip // ignore: cast_nullable_to_non_nullable
+as IconFeature?,trailingTooltip: freezed == trailingTooltip ? _self.trailingTooltip : trailingTooltip // ignore: cast_nullable_to_non_nullable
 as String?,fieldType: freezed == fieldType ? _self.fieldType : fieldType // ignore: cast_nullable_to_non_nullable
 as FormFieldType?,
   ));
 }
 
+/// Create a copy of FormFieldData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$IconFeatureCopyWith<$Res>? get leadingIcon {
+    if (_self.leadingIcon == null) {
+    return null;
+  }
 
+  return $IconFeatureCopyWith<$Res>(_self.leadingIcon!, (value) {
+    return _then(_self.copyWith(leadingIcon: value));
+  });
+}/// Create a copy of FormFieldData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$IconFeatureCopyWith<$Res>? get trailingIcon {
+    if (_self.trailingIcon == null) {
+    return null;
+  }
+
+  return $IconFeatureCopyWith<$Res>(_self.trailingIcon!, (value) {
+    return _then(_self.copyWith(trailingIcon: value));
+  });
+}
 }
 
 // dart format on
