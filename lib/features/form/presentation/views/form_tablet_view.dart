@@ -68,34 +68,34 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   List<FormFieldData> _formFields = [
     FormFieldData(
       fieldType: FormFieldType.Text,
-      leadingIcon: Icons.text_fields.,
+      leadingIcon: Icons.text_fields.codePoint,
       title: 'Text Field',
       subtitle: 'Single-line text input',
-      trailingIcon: Icons.add,
+      trailingIcon: Icons.add.codePoint,
       trailingTooltip: 'Add text field',
     ),
     FormFieldData(
       fieldType: FormFieldType.TextArea,
-      leadingIcon: Icons.text_fields,
+      leadingIcon: Icons.text_fields.codePoint,
       title: 'Text Area Field',
       subtitle: 'Multi-line text input',
-      trailingIcon: Icons.add,
+      trailingIcon: Icons.add.codePoint,
       trailingTooltip: 'Add text area field',
     ),
     FormFieldData(
       fieldType: FormFieldType.DatePicker,
-      leadingIcon: Icons.date_range,
+      leadingIcon: Icons.date_range.codePoint,
       title: 'Date Picker Field',
       subtitle: 'Select a date',
-      trailingIcon: Icons.add,
+      trailingIcon: Icons.add.codePoint,
       trailingTooltip: 'Add date picker field',
     ),
     FormFieldData(
       fieldType: FormFieldType.IntField,
-      leadingIcon: Icons.numbers,
+      leadingIcon: Icons.numbers.codePoint,
       title: 'Int Field',
       subtitle: 'Enter an integer',
-      trailingIcon: Icons.add,
+      trailingIcon: Icons.add.codePoint,
       trailingTooltip: 'Add number field',
     ),
   ];
@@ -994,7 +994,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                               dense: true,
 
                               leading: Icon(
-                                field.leadingIcon,
+                                IconData(
+                                  field.leadingIcon ?? 0,
+                                  fontFamily: 'MaterialIcons',
+                                ),
                                 color: cs.onPrimaryContainer,
                               ),
 
@@ -1017,7 +1020,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                               trailing: Tooltip(
                                 message: field.trailingTooltip ?? '',
                                 child: Icon(
-                                  field.trailingIcon,
+                                  IconData(
+                                    field.trailingIcon ?? 0,
+                                    fontFamily: 'MaterialIcons',
+                                  ),
                                   color: cs.onPrimaryContainer,
                                 ),
                               ),
