@@ -154,7 +154,7 @@ fi
 
 echo "Generating Freezed and JSON serialization files..."
 
-dart run build_runner build --delete-conflicting-outputs
+flutter pub run build_runner build --delete-conflicting-outputs
 
 echo "Building Flutter web..."
 
