@@ -988,16 +988,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                             ListTile(
                               dense: true,
 
-                              leading:
-                              // Icon(
-                              //   IconData(
-                              //     field.leadingIcon?.codePoint ?? 0,
-                              //     fontFamily: field.leadingIcon?.fontFamily,
-                              //   ),
-                              //   color: cs.onPrimaryContainer,
-                              // ),
-                              Text(
-                                String.fromCharCode(field.leadingIcon?.codePoint ?? 0),
+                              leading: Text(
+                                String.fromCharCode(
+                                  field.leadingIcon?.codePoint ?? 0,
+                                ),
                                 style: TextStyle(
                                   fontFamily: field.leadingIcon?.fontFamily,
                                   color: cs.onPrimaryContainer,
@@ -1022,16 +1016,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
                               trailing: Tooltip(
                                 message: field.trailingTooltip ?? '',
-                                child:
-                                // Icon(
-                                //   IconData(
-                                //     field.trailingIcon?.codePoint ?? 0,
-                                //     fontFamily: field.trailingIcon?.fontFamily,
-                                //   ),
-                                //   color: cs.onPrimaryContainer,
-                                // ),
-                                Text(
-                                  String.fromCharCode(field.trailingIcon?.codePoint ?? 0),
+                                child: Text(
+                                  String.fromCharCode(
+                                    field.trailingIcon?.codePoint ?? 0,
+                                  ),
                                   style: TextStyle(
                                     fontFamily: field.trailingIcon?.fontFamily,
                                     color: cs.onPrimaryContainer,
