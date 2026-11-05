@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FormFieldData {
 
-@IconDataConverter() IconData? get leadingIcon; String? get title; String? get subtitle;@IconDataConverter() IconData? get trailingIcon; String? get trailingTooltip; FormFieldType? get fieldType;
+ String? get leadingIcon; String? get title; String? get subtitle; String? get trailingIcon; String? get trailingTooltip; FormFieldType? get fieldType;
 /// Create a copy of FormFieldData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $FormFieldDataCopyWith<$Res>  {
   factory $FormFieldDataCopyWith(FormFieldData value, $Res Function(FormFieldData) _then) = _$FormFieldDataCopyWithImpl;
 @useResult
 $Res call({
-@IconDataConverter() IconData? leadingIcon, String? title, String? subtitle,@IconDataConverter() IconData? trailingIcon, String? trailingTooltip, FormFieldType? fieldType
+ String? leadingIcon, String? title, String? subtitle, String? trailingIcon, String? trailingTooltip, FormFieldType? fieldType
 });
 
 
@@ -74,10 +74,10 @@ class _$FormFieldDataCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? leadingIcon = freezed,Object? title = freezed,Object? subtitle = freezed,Object? trailingIcon = freezed,Object? trailingTooltip = freezed,Object? fieldType = freezed,}) {
   return _then(FormFieldData(
 leadingIcon: freezed == leadingIcon ? _self.leadingIcon : leadingIcon // ignore: cast_nullable_to_non_nullable
-as IconData?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,subtitle: freezed == subtitle ? _self.subtitle : subtitle // ignore: cast_nullable_to_non_nullable
 as String?,trailingIcon: freezed == trailingIcon ? _self.trailingIcon : trailingIcon // ignore: cast_nullable_to_non_nullable
-as IconData?,trailingTooltip: freezed == trailingTooltip ? _self.trailingTooltip : trailingTooltip // ignore: cast_nullable_to_non_nullable
+as String?,trailingTooltip: freezed == trailingTooltip ? _self.trailingTooltip : trailingTooltip // ignore: cast_nullable_to_non_nullable
 as String?,fieldType: freezed == fieldType ? _self.fieldType : fieldType // ignore: cast_nullable_to_non_nullable
 as FormFieldType?,
   ));
@@ -164,7 +164,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@IconDataConverter()  IconData? leadingIcon,  String? title,  String? subtitle, @IconDataConverter()  IconData? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? leadingIcon,  String? title,  String? subtitle,  String? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FormFieldData() when $default != null:
 return $default(_that.leadingIcon,_that.title,_that.subtitle,_that.trailingIcon,_that.trailingTooltip,_that.fieldType);case _:
@@ -185,7 +185,7 @@ return $default(_that.leadingIcon,_that.title,_that.subtitle,_that.trailingIcon,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@IconDataConverter()  IconData? leadingIcon,  String? title,  String? subtitle, @IconDataConverter()  IconData? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? leadingIcon,  String? title,  String? subtitle,  String? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)  $default,) {final _that = this;
 switch (_that) {
 case _FormFieldData():
 return $default(_that.leadingIcon,_that.title,_that.subtitle,_that.trailingIcon,_that.trailingTooltip,_that.fieldType);case _:
@@ -205,7 +205,7 @@ return $default(_that.leadingIcon,_that.title,_that.subtitle,_that.trailingIcon,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@IconDataConverter()  IconData? leadingIcon,  String? title,  String? subtitle, @IconDataConverter()  IconData? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? leadingIcon,  String? title,  String? subtitle,  String? trailingIcon,  String? trailingTooltip,  FormFieldType? fieldType)?  $default,) {final _that = this;
 switch (_that) {
 case _FormFieldData() when $default != null:
 return $default(_that.leadingIcon,_that.title,_that.subtitle,_that.trailingIcon,_that.trailingTooltip,_that.fieldType);case _:
@@ -220,13 +220,13 @@ return $default(_that.leadingIcon,_that.title,_that.subtitle,_that.trailingIcon,
 @JsonSerializable()
 
 class _FormFieldData implements FormFieldData {
-  const _FormFieldData({@IconDataConverter() this.leadingIcon, this.title, this.subtitle, @IconDataConverter() this.trailingIcon, this.trailingTooltip, this.fieldType});
+  const _FormFieldData({this.leadingIcon, this.title, this.subtitle, this.trailingIcon, this.trailingTooltip, this.fieldType});
   factory _FormFieldData.fromJson(Map<String, dynamic> json) => _$FormFieldDataFromJson(json);
 
-@override@IconDataConverter() final  IconData? leadingIcon;
+@override final  String? leadingIcon;
 @override final  String? title;
 @override final  String? subtitle;
-@override@IconDataConverter() final  IconData? trailingIcon;
+@override final  String? trailingIcon;
 @override final  String? trailingTooltip;
 @override final  FormFieldType? fieldType;
 
@@ -265,7 +265,7 @@ abstract mixin class _$FormFieldDataCopyWith<$Res> implements $FormFieldDataCopy
   factory _$FormFieldDataCopyWith(_FormFieldData value, $Res Function(_FormFieldData) _then) = __$FormFieldDataCopyWithImpl;
 @override @useResult
 $Res call({
-@IconDataConverter() IconData? leadingIcon, String? title, String? subtitle,@IconDataConverter() IconData? trailingIcon, String? trailingTooltip, FormFieldType? fieldType
+ String? leadingIcon, String? title, String? subtitle, String? trailingIcon, String? trailingTooltip, FormFieldType? fieldType
 });
 
 
@@ -285,10 +285,10 @@ class __$FormFieldDataCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? leadingIcon = freezed,Object? title = freezed,Object? subtitle = freezed,Object? trailingIcon = freezed,Object? trailingTooltip = freezed,Object? fieldType = freezed,}) {
   return _then(_FormFieldData(
 leadingIcon: freezed == leadingIcon ? _self.leadingIcon : leadingIcon // ignore: cast_nullable_to_non_nullable
-as IconData?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,subtitle: freezed == subtitle ? _self.subtitle : subtitle // ignore: cast_nullable_to_non_nullable
 as String?,trailingIcon: freezed == trailingIcon ? _self.trailingIcon : trailingIcon // ignore: cast_nullable_to_non_nullable
-as IconData?,trailingTooltip: freezed == trailingTooltip ? _self.trailingTooltip : trailingTooltip // ignore: cast_nullable_to_non_nullable
+as String?,trailingTooltip: freezed == trailingTooltip ? _self.trailingTooltip : trailingTooltip // ignore: cast_nullable_to_non_nullable
 as String?,fieldType: freezed == fieldType ? _self.fieldType : fieldType // ignore: cast_nullable_to_non_nullable
 as FormFieldType?,
   ));

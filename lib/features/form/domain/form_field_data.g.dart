@@ -8,24 +8,20 @@ part of 'form_field_data.dart';
 
 _FormFieldData _$FormFieldDataFromJson(Map<String, dynamic> json) =>
     _FormFieldData(
-      leadingIcon: const IconDataConverter().fromJson(
-        json['leadingIcon'] as Map<String, dynamic>?,
-      ),
+      leadingIcon: json['leadingIcon'] as String?,
       title: json['title'] as String?,
       subtitle: json['subtitle'] as String?,
-      trailingIcon: const IconDataConverter().fromJson(
-        json['trailingIcon'] as Map<String, dynamic>?,
-      ),
+      trailingIcon: json['trailingIcon'] as String?,
       trailingTooltip: json['trailingTooltip'] as String?,
       fieldType: $enumDecodeNullable(_$FormFieldTypeEnumMap, json['fieldType']),
     );
 
 Map<String, dynamic> _$FormFieldDataToJson(_FormFieldData instance) =>
     <String, dynamic>{
-      'leadingIcon': const IconDataConverter().toJson(instance.leadingIcon),
+      'leadingIcon': instance.leadingIcon,
       'title': instance.title,
       'subtitle': instance.subtitle,
-      'trailingIcon': const IconDataConverter().toJson(instance.trailingIcon),
+      'trailingIcon': instance.trailingIcon,
       'trailingTooltip': instance.trailingTooltip,
       'fieldType': _$FormFieldTypeEnumMap[instance.fieldType],
     };
