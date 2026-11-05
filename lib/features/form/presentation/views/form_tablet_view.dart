@@ -25,6 +25,8 @@ import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_fiel
 import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name_dialog.dart';
 import 'package:venue_flow_app/features/form/presentation/widgets/form_field_widget.dart';
 
+import '../../data/form_controller.dart';
+
 class FormTabletView extends ConsumerStatefulWidget {
   const FormTabletView({super.key});
 
@@ -36,8 +38,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   final Uuid _uuid = const Uuid();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  static const String _draftStorageKey =
-      'venue_flow_form_builder_draft_v1';
+  static const String _draftStorageKey = 'venue_flow_form_builder_draft_v1';
 
   Timer? _draftSaveTimer;
 
@@ -169,22 +170,17 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
       if (savedDraft != null) {
         final Map<String, dynamic> data =
-        jsonDecode(savedDraft) as Map<String, dynamic>;
+            jsonDecode(savedDraft) as Map<String, dynamic>;
 
-        final requestJson = Map<String, dynamic>.from(
-          data['request'] as Map,
-        );
+        final requestJson = Map<String, dynamic>.from(data['request'] as Map);
 
-        final restoredRequest =
-        CreateFormRequest.fromJson(requestJson);
+        final restoredRequest = CreateFormRequest.fromJson(requestJson);
 
         final pages = restoredRequest.schema?.pages ?? [];
 
         final savedPageId = data['selectedPageId'] as String?;
 
-        final selectedPageExists = pages.any(
-              (page) => page.id == savedPageId,
-        );
+        final selectedPageExists = pages.any((page) => page.id == savedPageId);
 
         if (mounted) {
           setState(() {
@@ -220,10 +216,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
     _draftSaveTimer?.cancel();
 
-    _draftSaveTimer = Timer(
-      const Duration(milliseconds: 50),
-        _saveDraft,
-    );
+    _draftSaveTimer = Timer(const Duration(milliseconds: 50), _saveDraft);
   }
 
   Future<void> _saveDraft() async {
@@ -237,10 +230,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
         'selectedPageId': _selectedPageId,
       };
 
-      await prefs.setString(
-        _draftStorageKey,
-        jsonEncode(draft),
-      );
+      await prefs.setString(_draftStorageKey, jsonEncode(draft));
 
       debugPrint('Form draft autosaved.');
     } catch (e, stackTrace) {
@@ -253,6 +243,31 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.remove(_draftStorageKey);
+  }
+
+  Future<void> _createForm() async {
+    final formController = ref.read(formControllerProvider.notifier);
+
+    try {
+      await formController.createForm(request: _createFormRequest);
+
+      // Clear the draft after successful creation.
+      await _clearDraft();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Form created successfully!')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to create form: $e');
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Failed to create form.')));
+      }
+    }
   }
 
   @override
@@ -605,7 +620,6 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       context,
       formFieldSchema: field,
       onFormFieldSchemaChanged: (value) {
-
         if (value == null) return;
 
         _selectedFieldForEdit = value;
@@ -663,6 +677,26 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     );
   }
 
+  ///
+  /// Reset form to base once method is executed , also cleared shared preferences
+  ///
+  void _resetForm() {
+    setState(() {
+      _createFormRequest = CreateFormRequest(
+        name: 'Form Name',
+        description: '',
+        schema: const FormSchema(
+          pages: [
+            FormPageSchema(id: 'page-1', title: 'Page 1', orderNumber: 0),
+          ],
+        ),
+      );
+
+      // Clear shared preferences
+      _clearDraft();
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // MAIN BUILD
   // ---------------------------------------------------------------------------
@@ -708,7 +742,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
           fixedSize: const Size(56, 56),
           shape: const CircleBorder(),
         ),
-        onSelected: (value) {
+        onSelected: (value) async {
           switch (value) {
             case FormToolbarOptions.FormFields:
               setState(() {
@@ -718,6 +752,46 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                   _showFloatingSettingsBar = false;
                 }
               });
+              break;
+            case FormToolbarOptions.Reset:
+              await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Reset Form'),
+                  icon: Icon(Icons.refresh),
+                  content: Text('Are you sure you want to reset the form?'),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: cs.onError),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: cs.error,
+                        textStyle: TextStyle(color: cs.onError),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _resetForm();
+                        // Add your reset logic here
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Reset', style: TextStyle(color: cs.onError)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: cs.primary,
+                        textStyle: TextStyle(color: cs.onPrimary),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+              break;
+            case FormToolbarOptions.Save:
+              await _createForm();
               break;
           }
         },
@@ -729,6 +803,26 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                 Icon(Mdi.formSelect, color: sem.textMuted),
                 const SizedBox(width: 8),
                 const Text('Form Fields'),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: FormToolbarOptions.Reset,
+            child: Row(
+              children: [
+                Icon(Mdi.restart, color: sem.textMuted),
+                const SizedBox(width: 8),
+                const Text('Reset'),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: FormToolbarOptions.Save,
+            child: Row(
+              children: [
+                Icon(Mdi.contentSave, color: sem.textMuted),
+                const SizedBox(width: 8),
+                const Text('Save'),
               ],
             ),
           ),

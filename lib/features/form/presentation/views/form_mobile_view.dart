@@ -79,6 +79,10 @@ class _FormMobileViewState extends ConsumerState<FormMobileView> {
               setState(() {
                 _showFloatingFieldsBar = !(_showFloatingFieldsBar);
               });
+            case FormToolbarOptions.Reset:
+              return;
+            case FormToolbarOptions.Save:
+              return;
               break;
           }
         },
