@@ -152,6 +152,12 @@ else
   echo "WARNING: API_BASE_URL is not set in Cloudflare environments. Using Dart code default fallback value."
 fi
 
+echo "Generating Freezed and JSON serialization files..."
+
+dart run build_runner build --delete-conflicting-outputs
+
+echo "Building Flutter web..."
+
 WEB_BUILD_HELP="$(${FLUTTER_BIN} build web -h 2>&1 || true)"
 if echo "${WEB_BUILD_HELP}" | grep -q -- "--web-renderer"; then
   echo "Building web with explicit renderer flag..."
