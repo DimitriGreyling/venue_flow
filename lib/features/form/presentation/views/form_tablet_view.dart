@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:venue_flow_app/core/domain/icon_feature.dart';
 
@@ -21,6 +25,8 @@ import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_fiel
 import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name_dialog.dart';
 import 'package:venue_flow_app/features/form/presentation/widgets/form_field_widget.dart';
 
+import '../../data/form_controller.dart';
+
 class FormTabletView extends ConsumerStatefulWidget {
   const FormTabletView({super.key});
 
@@ -32,6 +38,11 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   final Uuid _uuid = const Uuid();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  static const String _draftStorageKey = 'venue_flow_form_builder_draft_v1';
+
+  Timer? _draftSaveTimer;
+
+  bool _isRestoringDraft = false;
 
   CreateFormRequest _createFormRequest = CreateFormRequest(
     name: 'Form Name',
@@ -146,11 +157,122 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   void initState() {
     super.initState();
 
-    _initializeFieldIds();
+    _restoreDraft();
+  }
+
+  Future<void> _restoreDraft() async {
+    _isRestoringDraft = true;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final savedDraft = prefs.getString(_draftStorageKey);
+
+      if (savedDraft != null) {
+        final Map<String, dynamic> data =
+            jsonDecode(savedDraft) as Map<String, dynamic>;
+
+        final requestJson = Map<String, dynamic>.from(data['request'] as Map);
+
+        final restoredRequest = CreateFormRequest.fromJson(requestJson);
+
+        final pages = restoredRequest.schema?.pages ?? [];
+
+        final savedPageId = data['selectedPageId'] as String?;
+
+        final selectedPageExists = pages.any((page) => page.id == savedPageId);
+
+        if (mounted) {
+          setState(() {
+            _createFormRequest = restoredRequest;
+
+            if (selectedPageExists) {
+              _selectedPageId = savedPageId!;
+            } else if (pages.isNotEmpty) {
+              _selectedPageId = pages.first.id;
+            }
+          });
+        }
+      }
+
+      _initializeFieldIds();
+
+      _isRestoringDraft = false;
+
+      // Save the restored state, including any newly generated IDs.
+      _scheduleDraftSave();
+    } catch (e, stackTrace) {
+      debugPrint('Failed to restore form draft: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      _isRestoringDraft = false;
+
+      _initializeFieldIds();
+    }
+  }
+
+  void _scheduleDraftSave() {
+    if (_isRestoringDraft) return;
+
+    _draftSaveTimer?.cancel();
+
+    _draftSaveTimer = Timer(const Duration(milliseconds: 50), _saveDraft);
+  }
+
+  Future<void> _saveDraft() async {
+    if (_isRestoringDraft) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final draft = {
+        'request': _createFormRequest.toJson(),
+        'selectedPageId': _selectedPageId,
+      };
+
+      await prefs.setString(_draftStorageKey, jsonEncode(draft));
+
+      debugPrint('Form draft autosaved.');
+    } catch (e, stackTrace) {
+      debugPrint('Failed to save form draft: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<void> _clearDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove(_draftStorageKey);
+  }
+
+  Future<void> _createForm() async {
+    final formController = ref.read(formControllerProvider.notifier);
+
+    try {
+      await formController.createForm(request: _createFormRequest);
+
+      // Clear the draft after successful creation.
+      await _clearDraft();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Form created successfully!')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to create form: $e');
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Failed to create form.')));
+      }
+    }
   }
 
   @override
   void dispose() {
+    _draftSaveTimer?.cancel();
     super.dispose();
   }
 
@@ -208,6 +330,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     setState(() {
       _createFormRequest = request;
     });
+    _scheduleDraftSave();
   }
 
   void _updateSchema(FormSchema schema) {
@@ -218,6 +341,16 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   // PAGE MANAGEMENT
   // ---------------------------------------------------------------------------
 
+  // void _selectPage(String pageId) {
+  //   if (pageId == _selectedPageId) return;
+  //
+  //   setState(() {
+  //     _selectedPageId = pageId;
+  //     _selectedFieldForEdit = null;
+  //     _selectedOrderNumber = null;
+  //   });
+  // }
+
   void _selectPage(String pageId) {
     if (pageId == _selectedPageId) return;
 
@@ -226,6 +359,8 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       _selectedFieldForEdit = null;
       _selectedOrderNumber = null;
     });
+
+    _scheduleDraftSave();
   }
 
   void _addPage() {
@@ -240,6 +375,8 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     setState(() {
       _selectedPageId = newPage.id;
     });
+
+    _scheduleDraftSave();
   }
 
   void _renameSelectedPage(String title) {
@@ -540,6 +677,26 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     );
   }
 
+  ///
+  /// Reset form to base once method is executed , also cleared shared preferences
+  ///
+  void _resetForm() {
+    setState(() {
+      _createFormRequest = CreateFormRequest(
+        name: 'Form Name',
+        description: '',
+        schema: const FormSchema(
+          pages: [
+            FormPageSchema(id: 'page-1', title: 'Page 1', orderNumber: 0),
+          ],
+        ),
+      );
+
+      // Clear shared preferences
+      _clearDraft();
+    });
+  }
+
   // ---------------------------------------------------------------------------
   // MAIN BUILD
   // ---------------------------------------------------------------------------
@@ -585,7 +742,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
           fixedSize: const Size(56, 56),
           shape: const CircleBorder(),
         ),
-        onSelected: (value) {
+        onSelected: (value) async {
           switch (value) {
             case FormToolbarOptions.FormFields:
               setState(() {
@@ -595,6 +752,46 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                   _showFloatingSettingsBar = false;
                 }
               });
+              break;
+            case FormToolbarOptions.Reset:
+              await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Reset Form'),
+                  icon: Icon(Icons.refresh),
+                  content: Text('Are you sure you want to reset the form?'),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: cs.onError),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: cs.error,
+                        textStyle: TextStyle(color: cs.onError),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _resetForm();
+                        // Add your reset logic here
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Reset', style: TextStyle(color: cs.onError)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: cs.primary,
+                        textStyle: TextStyle(color: cs.onPrimary),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+              break;
+            case FormToolbarOptions.Save:
+              await _createForm();
               break;
           }
         },
@@ -607,6 +804,40 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                 const SizedBox(width: 8),
                 const Text('Form Fields'),
               ],
+            ),
+          ),
+          PopupMenuItem(
+            value: FormToolbarOptions.Reset,
+            child: Container(
+              // color: cs.error,
+              width: double.infinity,
+              // 3. Make it stretch horizontally
+              height: kMinInteractiveDimension,
+              // 4. Matches standard menu item height
+              child: Row(
+                children: [
+                  Icon(Mdi.restart, color: cs.error),
+                  const SizedBox(width: 8),
+                  Text('Reset', style: TextStyle(color: cs.error)),
+                ],
+              ),
+            ),
+          ),
+          PopupMenuItem(
+            value: FormToolbarOptions.Save,
+            child: Container(
+              // color: cs.primary,
+              width: double.infinity,
+              // 3. Make it stretch horizontally
+              height: kMinInteractiveDimension,
+              // 4. Matches standard menu item height
+              child: Row(
+                children: [
+                  Icon(Mdi.contentSave, color: cs.primary),
+                  const SizedBox(width: 8),
+                  Text('Save', style: TextStyle(color: cs.primary)),
+                ],
+              ),
             ),
           ),
         ],
@@ -988,16 +1219,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                             ListTile(
                               dense: true,
 
-                              leading:
-                              // Icon(
-                              //   IconData(
-                              //     field.leadingIcon?.codePoint ?? 0,
-                              //     fontFamily: field.leadingIcon?.fontFamily,
-                              //   ),
-                              //   color: cs.onPrimaryContainer,
-                              // ),
-                              Text(
-                                String.fromCharCode(field.leadingIcon?.codePoint ?? 0),
+                              leading: Text(
+                                String.fromCharCode(
+                                  field.leadingIcon?.codePoint ?? 0,
+                                ),
                                 style: TextStyle(
                                   fontFamily: field.leadingIcon?.fontFamily,
                                   color: cs.onPrimaryContainer,
@@ -1022,16 +1247,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
                               trailing: Tooltip(
                                 message: field.trailingTooltip ?? '',
-                                child:
-                                // Icon(
-                                //   IconData(
-                                //     field.trailingIcon?.codePoint ?? 0,
-                                //     fontFamily: field.trailingIcon?.fontFamily,
-                                //   ),
-                                //   color: cs.onPrimaryContainer,
-                                // ),
-                                Text(
-                                  String.fromCharCode(field.trailingIcon?.codePoint ?? 0),
+                                child: Text(
+                                  String.fromCharCode(
+                                    field.trailingIcon?.codePoint ?? 0,
+                                  ),
                                   style: TextStyle(
                                     fontFamily: field.trailingIcon?.fontFamily,
                                     color: cs.onPrimaryContainer,

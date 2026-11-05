@@ -1,54 +1,722 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/enums/tool_bar_options.dart';
-import '../../../../core/theme/theme_x.dart';
-import '../../../../core/widgets/side_nav.dart';
-import '../../../../core/widgets/top_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
+import 'package:venue_flow_app/core/domain/icon_feature.dart';
+
+import 'package:venue_flow_app/core/enums/form_field_type.dart';
+import 'package:venue_flow_app/core/enums/tool_bar_options.dart';
+import 'package:venue_flow_app/core/theme/app_theme.dart';
+import 'package:venue_flow_app/core/theme/theme_x.dart';
+import 'package:venue_flow_app/core/widgets/side_nav.dart';
+import 'package:venue_flow_app/core/widgets/top_bar.dart';
+
+import 'package:venue_flow_app/features/form/domain/create_form_request.dart';
+import 'package:venue_flow_app/features/form/domain/form_field_data.dart';
+import 'package:venue_flow_app/features/form/domain/form_field_schema.dart';
+import 'package:venue_flow_app/features/form/domain/form_page_schema.dart';
+import 'package:venue_flow_app/features/form/domain/form_schema.dart';
+
+import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_field_dialog.dart';
+import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name_dialog.dart';
+import 'package:venue_flow_app/features/form/presentation/widgets/form_field_widget.dart';
+
+import '../../data/form_controller.dart';
 
 class FormDesktopView extends ConsumerStatefulWidget {
   const FormDesktopView({super.key});
 
   @override
-  ConsumerState<FormDesktopView> createState() => _FormMobileViewState();
+  ConsumerState<FormDesktopView> createState() => _FormDesktopViewState();
 }
 
-class _FormMobileViewState extends ConsumerState<FormDesktopView> {
-  // Tracks the X and Y screen coordinates for fields bar
-  double _floatingFieldsTop = 120.0;
-  double _floatingFieldsLeft = 20.0;
+class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
+  final Uuid _uuid = const Uuid();
 
-  // Tracks the X and Y screen coordinates for settings bar
-  double _floatingSettingsTop = 120.0;
-  double _floatingSettingsLeft = 20.0;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  static const String _draftStorageKey = 'venue_flow_form_builder_draft_v1';
 
-  // Track if positioning needs a safe initial layout configuration check
+  Timer? _draftSaveTimer;
+
+  bool _isRestoringDraft = false;
+
+  CreateFormRequest _createFormRequest = CreateFormRequest(
+    name: 'Form Name',
+    description: '',
+    schema: const FormSchema(
+      pages: [FormPageSchema(id: 'page-1', title: 'Page 1', orderNumber: 0)],
+    ),
+  );
+
+  String _selectedPageId = 'page-1';
+
+  // Floating fields toolbar position.
+  double _floatingFieldsTop = 120;
+  double _floatingFieldsLeft = 20;
+
+  // Floating settings toolbar position.
+  double _floatingSettingsTop = 120;
+  double _floatingSettingsLeft = 20;
+
   bool _isPositionsInitialized = false;
-
-  // Track the visibility state of the floating bars
   bool _showFloatingFieldsBar = false;
   bool _showFloatingSettingsBar = false;
+  bool _isExpanded = false;
+
+  FormFieldSchema? _selectedFieldForEdit;
+  int? _selectedOrderNumber;
+
+  List<FormFieldData> _formFields = [
+    FormFieldData(
+      fieldType: FormFieldType.Text,
+      leadingIcon: IconFeature(
+        name: 'Text Fields',
+        fontFamily: Icons.text_fields.fontFamily,
+        codePoint: Icons.text_fields.codePoint,
+        icon: 'text_fields',
+        iconType: 'MaterialIcons',
+      ),
+      title: 'Text Field',
+      subtitle: 'Single-line text input',
+      trailingIcon: IconFeature(
+        name: 'Add',
+        codePoint: Icons.add.codePoint,
+        fontFamily: Icons.add.fontFamily,
+        icon: 'add',
+        iconType: 'MaterialIcons',
+      ),
+      trailingTooltip: 'Add text field',
+    ),
+    FormFieldData(
+      fieldType: FormFieldType.TextArea,
+      leadingIcon: IconFeature(
+        name: 'Text Fields',
+        fontFamily: Icons.text_fields.fontFamily,
+        codePoint: Icons.text_fields.codePoint,
+        icon: 'text_fields',
+        iconType: 'MaterialIcons',
+      ),
+      title: 'Text Area Field',
+      subtitle: 'Multi-line text input',
+      trailingIcon: IconFeature(
+        name: 'Add',
+        codePoint: Icons.add.codePoint,
+        fontFamily: Icons.add.fontFamily,
+        icon: 'add',
+        iconType: 'MaterialIcons',
+      ),
+      trailingTooltip: 'Add text area field',
+    ),
+    FormFieldData(
+      fieldType: FormFieldType.DatePicker,
+      leadingIcon: IconFeature(
+        name: 'Date Range',
+        codePoint: Icons.date_range.codePoint,
+        fontFamily: Icons.date_range.fontFamily,
+        icon: 'date_range',
+        iconType: 'MaterialIcons',
+      ),
+      title: 'Date Picker Field',
+      subtitle: 'Select a date',
+      trailingIcon: IconFeature(
+        name: 'Add',
+        codePoint: Icons.add.codePoint,
+        fontFamily: Icons.add.fontFamily,
+        icon: 'add',
+        iconType: 'MaterialIcons',
+      ),
+      trailingTooltip: 'Add date picker field',
+    ),
+    FormFieldData(
+      fieldType: FormFieldType.IntField,
+      leadingIcon: IconFeature(
+        name: 'Numbers',
+        codePoint: Icons.numbers.codePoint,
+        fontFamily: Icons.numbers.fontFamily,
+        icon: 'numbers',
+        iconType: 'MaterialIcons',
+      ),
+      title: 'Int Field',
+      subtitle: 'Enter an integer',
+      trailingIcon: IconFeature(
+        name: 'Add',
+        codePoint: Icons.add.codePoint,
+        fontFamily: Icons.add.fontFamily,
+        icon: 'add',
+        iconType: 'MaterialIcons',
+      ),
+      trailingTooltip: 'Add number field',
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _restoreDraft();
+  }
+
+  Future<void> _restoreDraft() async {
+    _isRestoringDraft = true;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final savedDraft = prefs.getString(_draftStorageKey);
+
+      if (savedDraft != null) {
+        final Map<String, dynamic> data =
+            jsonDecode(savedDraft) as Map<String, dynamic>;
+
+        final requestJson = Map<String, dynamic>.from(data['request'] as Map);
+
+        final restoredRequest = CreateFormRequest.fromJson(requestJson);
+
+        final pages = restoredRequest.schema?.pages ?? [];
+
+        final savedPageId = data['selectedPageId'] as String?;
+
+        final selectedPageExists = pages.any((page) => page.id == savedPageId);
+
+        if (mounted) {
+          setState(() {
+            _createFormRequest = restoredRequest;
+
+            if (selectedPageExists) {
+              _selectedPageId = savedPageId!;
+            } else if (pages.isNotEmpty) {
+              _selectedPageId = pages.first.id;
+            }
+          });
+        }
+      }
+
+      _initializeFieldIds();
+
+      _isRestoringDraft = false;
+
+      // Save the restored state, including any newly generated IDs.
+      _scheduleDraftSave();
+    } catch (e, stackTrace) {
+      debugPrint('Failed to restore form draft: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      _isRestoringDraft = false;
+
+      _initializeFieldIds();
+    }
+  }
+
+  void _scheduleDraftSave() {
+    if (_isRestoringDraft) return;
+
+    _draftSaveTimer?.cancel();
+
+    _draftSaveTimer = Timer(const Duration(milliseconds: 50), _saveDraft);
+  }
+
+  Future<void> _saveDraft() async {
+    if (_isRestoringDraft) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final draft = {
+        'request': _createFormRequest.toJson(),
+        'selectedPageId': _selectedPageId,
+      };
+
+      await prefs.setString(_draftStorageKey, jsonEncode(draft));
+
+      debugPrint('Form draft autosaved.');
+    } catch (e, stackTrace) {
+      debugPrint('Failed to save form draft: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<void> _clearDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove(_draftStorageKey);
+  }
+
+  Future<void> _createForm() async {
+    final formController = ref.read(formControllerProvider.notifier);
+
+    try {
+      await formController.createForm(request: _createFormRequest);
+
+      // Clear the draft after successful creation.
+      await _clearDraft();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Form created successfully!')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to create form: $e');
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Failed to create form.')));
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _draftSaveTimer?.cancel();
+    super.dispose();
+  }
+
+  // ---------------------------------------------------------------------------
+  // SCHEMA HELPERS
+  // ---------------------------------------------------------------------------
+
+  FormSchema get _schema => _createFormRequest.schema ?? const FormSchema();
+
+  List<FormPageSchema> get _pages {
+    final pages = [..._schema.pages];
+
+    pages.sort((a, b) => a.orderNumber.compareTo(b.orderNumber));
+
+    return pages;
+  }
+
+  FormPageSchema? get _selectedPage {
+    for (final page in _pages) {
+      if (page.id == _selectedPageId) {
+        return page;
+      }
+    }
+
+    return null;
+  }
+
+  List<FormFieldSchema> _sortedFields(FormPageSchema page) {
+    final fields = [...page.fields];
+
+    fields.sort((a, b) => a.orderNumber.compareTo(b.orderNumber));
+
+    return fields;
+  }
+
+  void _initializeFieldIds() {
+    final schema = _schema;
+
+    final updatedPages = [
+      for (final page in schema.pages)
+        page.copyWith(
+          fields: [
+            for (final field in page.fields)
+              field.copyWith(id: field.id.isEmpty ? _uuid.v4() : field.id),
+          ],
+        ),
+    ];
+
+    _createFormRequest = _createFormRequest.copyWith(
+      schema: schema.copyWith(pages: updatedPages),
+    );
+  }
+
+  void _updateRequest(CreateFormRequest request) {
+    setState(() {
+      _createFormRequest = request;
+    });
+    _scheduleDraftSave();
+  }
+
+  void _updateSchema(FormSchema schema) {
+    _updateRequest(_createFormRequest.copyWith(schema: schema));
+  }
+
+  // ---------------------------------------------------------------------------
+  // PAGE MANAGEMENT
+  // ---------------------------------------------------------------------------
+
+  // void _selectPage(String pageId) {
+  //   if (pageId == _selectedPageId) return;
+  //
+  //   setState(() {
+  //     _selectedPageId = pageId;
+  //     _selectedFieldForEdit = null;
+  //     _selectedOrderNumber = null;
+  //   });
+  // }
+
+  void _selectPage(String pageId) {
+    if (pageId == _selectedPageId) return;
+
+    setState(() {
+      _selectedPageId = pageId;
+      _selectedFieldForEdit = null;
+      _selectedOrderNumber = null;
+    });
+
+    _scheduleDraftSave();
+  }
+
+  void _addPage() {
+    final newPage = FormPageSchema(
+      id: _uuid.v4(),
+      title: 'Page ${_pages.length + 1}',
+      orderNumber: _pages.length,
+    );
+
+    _updateSchema(_schema.copyWith(pages: [..._pages, newPage]));
+
+    setState(() {
+      _selectedPageId = newPage.id;
+    });
+
+    _scheduleDraftSave();
+  }
+
+  void _renameSelectedPage(String title) {
+    final page = _selectedPage;
+    final trimmedTitle = title.trim();
+
+    if (page == null || trimmedTitle.isEmpty) return;
+
+    _updateSchema(
+      _schema.copyWith(
+        pages: [
+          for (final item in _pages)
+            if (item.id == page.id)
+              item.copyWith(title: trimmedTitle)
+            else
+              item,
+        ],
+      ),
+    );
+  }
+
+  void _deleteSelectedPage() {
+    if (_pages.length <= 1) return;
+
+    final remainingPages = _pages
+        .where((page) => page.id != _selectedPageId)
+        .toList();
+
+    final reorderedPages = [
+      for (var i = 0; i < remainingPages.length; i++)
+        remainingPages[i].copyWith(orderNumber: i),
+    ];
+
+    _updateSchema(_schema.copyWith(pages: reorderedPages));
+
+    setState(() {
+      _selectedPageId = reorderedPages.first.id;
+      _selectedFieldForEdit = null;
+      _selectedOrderNumber = null;
+    });
+  }
+
+  Future<void> _showRenamePageDialog() async {
+    final page = _selectedPage;
+    if (page == null) return;
+
+    final controller = TextEditingController(text: page.title);
+
+    final title = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Rename page'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: const InputDecoration(labelText: 'Page title'),
+            onSubmitted: (value) {
+              Navigator.of(dialogContext).pop(value);
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(controller.text);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+
+    if (title != null) {
+      _renameSelectedPage(title);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // FIELD MANAGEMENT
+  // ---------------------------------------------------------------------------
+
+  void _addField(FormFieldType fieldType) {
+    final page = _selectedPage;
+    if (page == null) return;
+
+    final fields = _sortedFields(page);
+
+    final newField = FormFieldSchema(
+      id: _uuid.v4(),
+      fieldType: fieldType,
+      title: _defaultFieldTitle(fieldType),
+      hintText: _defaultFieldHint(fieldType),
+      orderNumber: fields.length,
+    );
+
+    _updateSchema(
+      _schema.copyWith(
+        pages: [
+          for (final item in _pages)
+            if (item.id == page.id)
+              item.copyWith(fields: [...fields, newField])
+            else
+              item,
+        ],
+      ),
+    );
+  }
+
+  String _defaultFieldTitle(FormFieldType type) {
+    switch (type) {
+      case FormFieldType.Text:
+        return 'Text field';
+
+      case FormFieldType.TextArea:
+        return 'Text area';
+
+      case FormFieldType.DatePicker:
+        return 'Date picker';
+
+      case FormFieldType.IntField:
+        return 'Number field';
+
+      default:
+        return 'New field';
+    }
+  }
+
+  String _defaultFieldHint(FormFieldType type) {
+    switch (type) {
+      case FormFieldType.Text:
+        return 'Enter your answer';
+
+      case FormFieldType.TextArea:
+        return 'Enter your answer';
+
+      case FormFieldType.DatePicker:
+        return 'Select a date';
+
+      case FormFieldType.IntField:
+        return 'Enter a number';
+
+      default:
+        return '';
+    }
+  }
+
+  /// Reorders fields on the currently selected page.
+  void _reorderFields(int oldIndex, int newIndex) {
+    final page = _selectedPage;
+    if (page == null) return;
+
+    final fields = _sortedFields(page);
+
+    if (oldIndex < 0 || oldIndex >= fields.length) return;
+
+    // ReorderableListView provides the destination index
+    // before removal when moving down.
+    if (newIndex > oldIndex) {
+      newIndex--;
+    }
+
+    if (newIndex < 0 || newIndex >= fields.length) return;
+
+    // Remove the selected field.
+    final movedField = fields.removeAt(oldIndex);
+
+    // Insert it at the new position.
+    fields.insert(newIndex, movedField);
+
+    // Update all order numbers.
+    final reorderedFields = [
+      for (var i = 0; i < fields.length; i++)
+        fields[i].copyWith(orderNumber: i),
+    ];
+
+    // Update the schema.
+    _updateSchema(
+      _schema.copyWith(
+        pages: [
+          for (final item in _pages)
+            if (item.id == page.id)
+              item.copyWith(fields: reorderedFields)
+            else
+              item,
+        ],
+      ),
+    );
+  }
+
+  void _deleteField(int orderNumber) {
+    final page = _selectedPage;
+    if (page == null) return;
+
+    final remainingFields = _sortedFields(
+      page,
+    ).where((field) => field.orderNumber != orderNumber).toList();
+
+    final reorderedFields = [
+      for (var i = 0; i < remainingFields.length; i++)
+        remainingFields[i].copyWith(orderNumber: i),
+    ];
+
+    _updateSchema(
+      _schema.copyWith(
+        pages: [
+          for (final item in _pages)
+            if (item.id == page.id)
+              item.copyWith(fields: reorderedFields)
+            else
+              item,
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // FIELD EDITING
+  // ---------------------------------------------------------------------------
+
+  Future<void> _openEditField(int orderNumber) async {
+    final page = _selectedPage;
+    if (page == null) return;
+
+    final field = page.fields.firstWhere(
+      (field) => field.orderNumber == orderNumber,
+    );
+
+    setState(() {
+      _selectedOrderNumber = orderNumber;
+      _selectedFieldForEdit = field;
+    });
+
+    await EditFormFieldDialog.show(
+      context,
+      formFieldSchema: field,
+      onFormFieldSchemaChanged: (value) {
+        if (value == null) return;
+
+        _selectedFieldForEdit = value;
+        _updateField(orderNumber);
+      },
+    );
+  }
+
+  void _updateField(int orderNumber) {
+    final page = _selectedPage;
+    final updatedField = _selectedFieldForEdit;
+
+    if (page == null || updatedField == null) return;
+
+    final updatedFields = [
+      for (final field in page.fields)
+        if (field.id == updatedField.id)
+          updatedField.copyWith(orderNumber: field.orderNumber)
+        else
+          field,
+    ];
+
+    _updateSchema(
+      _schema.copyWith(
+        pages: [
+          for (final item in _pages)
+            if (item.id == page.id)
+              item.copyWith(fields: updatedFields)
+            else
+              item,
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // FORM DETAILS
+  // ---------------------------------------------------------------------------
+
+  Future<void> _editFormDetails() async {
+    await EditFormNameDialog.show(
+      context,
+      formName: _createFormRequest.name,
+      formDescription: _createFormRequest.description ?? '',
+      onFormNameChanged: (value) {
+        if (value == null || value.trim().isEmpty) return;
+
+        _updateRequest(_createFormRequest.copyWith(name: value.trim()));
+      },
+      onFormDescriptionChanged: (value) {
+        if (value == null) return;
+
+        _updateRequest(_createFormRequest.copyWith(description: value));
+      },
+    );
+  }
+
+  ///
+  /// Reset form to base once method is executed , also cleared shared preferences
+  ///
+  void _resetForm() {
+    setState(() {
+      _createFormRequest = CreateFormRequest(
+        name: 'Form Name',
+        description: '',
+        schema: const FormSchema(
+          pages: [
+            FormPageSchema(id: 'page-1', title: 'Page 1', orderNumber: 0),
+          ],
+        ),
+      );
+
+      // Clear shared preferences
+      _clearDraft();
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // MAIN BUILD
+  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final sem = context.semantic;
-    const _wideBreakpoint = 1000.0;
-    final wide = MediaQuery.of(context).size.width >= _wideBreakpoint;
+
+    const wideBreakpoint = 1000.0;
+
+    final wide = MediaQuery.sizeOf(context).width >= wideBreakpoint;
     final statusBarHeight = MediaQuery.paddingOf(context).top;
 
-    // Initialize positions dynamically on first build based on screen dimensions
     if (!_isPositionsInitialized) {
-      // 1. Fields bar starts at Top Left
-      _floatingFieldsTop =
-          statusBarHeight + 65.0; // Pushed down past status bar
-      _floatingFieldsLeft = 20.0; // Pinned to left edge
+      _floatingFieldsTop = statusBarHeight + 65;
+      _floatingFieldsLeft = 20;
 
-      // 2. Settings bar starts at Top Right
-      _floatingSettingsTop = statusBarHeight + 65.0;
-      //Show settings bar on the right side of the screen
-      _floatingSettingsLeft = 20.0;
+      _floatingSettingsTop = statusBarHeight + 65;
+      _floatingSettingsLeft = 20;
 
       _isPositionsInitialized = true;
     }
@@ -57,10 +725,11 @@ class _FormMobileViewState extends ConsumerState<FormDesktopView> {
       drawer: wide
           ? null
           : Drawer(
-        width: 240,
-        backgroundColor: cs.surface,
-        child: SideNav(activePath: '/forms'),
-      ),
+              width: 240,
+              backgroundColor: cs.surface,
+              child: SideNav(activePath: '/forms'),
+            ),
+
       floatingActionButton: PopupMenuButton<FormToolbarOptions>(
         tooltip: 'Toolbar',
         offset: const Offset(-50, -50),
@@ -73,12 +742,56 @@ class _FormMobileViewState extends ConsumerState<FormDesktopView> {
           fixedSize: const Size(56, 56),
           shape: const CircleBorder(),
         ),
-        onSelected: (value) {
+        onSelected: (value) async {
           switch (value) {
             case FormToolbarOptions.FormFields:
               setState(() {
-                _showFloatingFieldsBar = !(_showFloatingFieldsBar);
+                _showFloatingFieldsBar = !_showFloatingFieldsBar;
+
+                if (_showFloatingFieldsBar) {
+                  _showFloatingSettingsBar = false;
+                }
               });
+              break;
+            case FormToolbarOptions.Reset:
+              await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Reset Form'),
+                  icon: Icon(Icons.refresh),
+                  content: Text('Are you sure you want to reset the form?'),
+                  actions: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: cs.onError),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: cs.error,
+                        textStyle: TextStyle(color: cs.onError),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        _resetForm();
+                        // Add your reset logic here
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Reset', style: TextStyle(color: cs.onError)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: cs.primary,
+                        textStyle: TextStyle(color: cs.onPrimary),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+              break;
+            case FormToolbarOptions.Save:
+              await _createForm();
               break;
           }
         },
@@ -89,21 +802,51 @@ class _FormMobileViewState extends ConsumerState<FormDesktopView> {
               children: [
                 Icon(Mdi.formSelect, color: sem.textMuted),
                 const SizedBox(width: 8),
-                Text('Form Fields'),
+                const Text('Form Fields'),
               ],
+            ),
+          ),
+          PopupMenuItem(
+            value: FormToolbarOptions.Reset,
+            child: Container(
+              // color: cs.error,
+              width: double.infinity,
+              // 3. Make it stretch horizontally
+              height: kMinInteractiveDimension,
+              // 4. Matches standard menu item height
+              child: Row(
+                children: [
+                  Icon(Mdi.restart, color: cs.error),
+                  const SizedBox(width: 8),
+                  Text('Reset', style: TextStyle(color: cs.error)),
+                ],
+              ),
+            ),
+          ),
+          PopupMenuItem(
+            value: FormToolbarOptions.Save,
+            child: Container(
+              // color: cs.primary,
+              width: double.infinity,
+              // 3. Make it stretch horizontally
+              height: kMinInteractiveDimension,
+              // 4. Matches standard menu item height
+              child: Row(
+                children: [
+                  Icon(Mdi.contentSave, color: cs.primary),
+                  const SizedBox(width: 8),
+                  Text('Save', style: TextStyle(color: cs.primary)),
+                ],
+              ),
             ),
           ),
         ],
       ),
+
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // SAFE NULL-CHECK: Safeguard boolean states before reading them inside the Stack layout template
-          final showFields = _showFloatingFieldsBar;
-          final showSettings = _showFloatingSettingsBar;
-
           return Stack(
             children: [
-              // Base Layer: Page layout content
               Row(
                 children: [
                   Expanded(
@@ -116,30 +859,82 @@ class _FormMobileViewState extends ConsumerState<FormDesktopView> {
                             padding: EdgeInsets.all(wide ? 24 : 16),
                             child: Center(
                               child: ConstrainedBox(
-                                constraints: BoxConstraints(
+                                constraints: const BoxConstraints(
                                   maxWidth: 1440,
-                                  maxHeight:
-                                  MediaQuery.sizeOf(context).height * 0.89,
                                 ),
-                                child: Row(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.stretch,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        color: cs.surfaceContainerHighest,
-                                        padding: const EdgeInsets.all(16),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                child: Card(
+                                  child: Container(
+                                    constraints: BoxConstraints(
+                                      minHeight:
+                                          MediaQuery.sizeOf(context).height *
+                                          0.75,
+                                    ),
+                                    padding: const EdgeInsets.all(24),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Form name
+                                        Row(
                                           children: [
-                                            const Text('Block 2'),
-                                            const SizedBox(height: 16),
+                                            Expanded(
+                                              child: Text(
+                                                _createFormRequest.name,
+                                                style: Theme.of(
+                                                  context,
+                                                ).textTheme.titleLarge,
+                                              ),
+                                            ),
+                                            IconButton(
+                                              tooltip: 'Edit form details',
+                                              onPressed: _editFormDetails,
+                                              icon: const Icon(Icons.edit),
+                                            ),
                                           ],
                                         ),
-                                      ),
+
+                                        const SizedBox(height: 8),
+
+                                        // Form description
+                                        Text(
+                                          _createFormRequest
+                                                      .description
+                                                      ?.isNotEmpty ==
+                                                  true
+                                              ? _createFormRequest.description!
+                                              : 'Add a description for your form.',
+                                          maxLines: _isExpanded ? null : 2,
+                                          overflow: _isExpanded
+                                              ? TextOverflow.visible
+                                              : TextOverflow.ellipsis,
+                                        ),
+
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: TextButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                _isExpanded = !_isExpanded;
+                                              });
+                                            },
+                                            child: Text(
+                                              _isExpanded
+                                                  ? 'Show less'
+                                                  : 'Show more',
+                                            ),
+                                          ),
+                                        ),
+
+                                        const Divider(height: 24),
+
+                                        _buildPageSelector(cs),
+
+                                        const SizedBox(height: 20),
+
+                                        _buildPageEditor(cs, sem),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -151,9 +946,11 @@ class _FormMobileViewState extends ConsumerState<FormDesktopView> {
                 ],
               ),
 
-              // Top Floating Overlay Layer with active boundaries checking
-              if (showFields) _buildFieldsFloatingBar(cs, constraints),
-              if (showSettings) _buildSettingsFloatingBar(cs, constraints),
+              if (_showFloatingFieldsBar)
+                _buildFieldsFloatingBar(cs, constraints),
+
+              if (_showFloatingSettingsBar)
+                _buildSettingsFloatingBar(cs, constraints),
             ],
           );
         },
@@ -161,118 +958,325 @@ class _FormMobileViewState extends ConsumerState<FormDesktopView> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // PAGE SELECTOR
+  // ---------------------------------------------------------------------------
+
+  Widget _buildPageSelector(ColorScheme cs) {
+    return Row(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final page in _pages)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(page.title),
+                      selected: page.id == _selectedPageId,
+                      onSelected: (_) => _selectPage(page.id),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+
+        IconButton(
+          tooltip: 'Add page',
+          onPressed: _addPage,
+          icon: const Icon(Icons.add),
+        ),
+
+        IconButton(
+          tooltip: 'Rename page',
+          onPressed: _showRenamePageDialog,
+          icon: const Icon(Icons.edit_outlined),
+        ),
+
+        IconButton(
+          tooltip: 'Delete selected page',
+          onPressed: _pages.length > 1 ? _deleteSelectedPage : null,
+          icon: const Icon(Icons.delete_outline),
+        ),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // PAGE EDITOR WITH DRAG AND DROP
+  // ---------------------------------------------------------------------------
+
+  Widget _buildPageEditor(ColorScheme cs, AppSemanticColors sem) {
+    final page = _selectedPage;
+
+    if (page == null) {
+      return const Center(child: Text('Select or create a page.'));
+    }
+
+    final fields = _sortedFields(page);
+
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  page.title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              Text(
+                '${fields.length} fields',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          if (fields.isEmpty)
+            _buildEmptyFieldsState(cs)
+          else
+            ReorderableListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              buildDefaultDragHandles: false,
+              itemCount: fields.length,
+              onReorder: _reorderFields,
+
+              itemBuilder: (context, index) {
+                final field = fields[index];
+
+                return Padding(
+                  key: ValueKey(field.id),
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Drag handle
+                      ReorderableDragStartListener(
+                        index: index,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 12,
+                          ),
+                          child: Tooltip(
+                            message: 'Drag to reorder',
+                            child: Icon(
+                              Icons.drag_indicator,
+                              color: cs.onSurfaceVariant,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Form field
+                      Expanded(
+                        child: FormFieldWidget(
+                          key: ValueKey('${field.id}-widget'),
+                          formFieldSchema: field,
+                        ),
+                      ),
+
+                      // Edit
+                      IconButton(
+                        tooltip: 'Edit field',
+                        onPressed: () {
+                          _openEditField(field.orderNumber);
+                        },
+                        icon: Icon(Icons.edit, color: cs.primary),
+                      ),
+
+                      // Delete
+                      IconButton(
+                        tooltip: 'Remove field',
+                        onPressed: () {
+                          _deleteField(field.orderNumber);
+                        },
+                        icon: Icon(Icons.delete_outline, color: cs.error),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyFieldsState(ColorScheme cs) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.dynamic_form, size: 36, color: cs.onSurfaceVariant),
+          const SizedBox(height: 12),
+          const Text('This page has no fields yet.'),
+          const SizedBox(height: 4),
+          Text(
+            'Open the Form Fields toolbar to add a field.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // FLOATING FORM FIELDS TOOLBAR
+  // ---------------------------------------------------------------------------
+
   Widget _buildFieldsFloatingBar(ColorScheme cs, BoxConstraints constraints) {
-    final showFields = _showFloatingFieldsBar;
-    if (!showFields) return const SizedBox.shrink();
-
-    // The button needs ~20px of extra room to stick out without hit-test clipping
-    const double buttonOverhang = 20.0;
-
     final screenSize = MediaQuery.sizeOf(context);
 
-    final floatingFieldsWidth = screenSize.width * 0.3;
-    final floatingFieldsHeight = screenSize.width * 0.6;
+    final width = (screenSize.width * 0.32).clamp(250.0, 380.0);
+
+    final height = (screenSize.height * 0.80).clamp(250.0, 380.0);
+
+    final maxTop = (constraints.maxHeight - height).clamp(0.0, double.infinity);
+
+    final maxLeft = (constraints.maxWidth - width).clamp(0.0, double.infinity);
 
     return Positioned(
-      top: _floatingFieldsTop,
-      left: _floatingFieldsLeft,
+      top: _floatingFieldsTop.clamp(0.0, maxTop),
+      left: _floatingFieldsLeft.clamp(0.0, maxLeft),
+
       child: GestureDetector(
         onPanUpdate: (details) {
           setState(() {
-            // Adjust constraints to account for the new layout breathing space wrapper
             _floatingFieldsTop = (_floatingFieldsTop + details.delta.dy).clamp(
               0.0,
-              constraints.maxHeight - floatingFieldsHeight,
+              maxTop,
             );
+
             _floatingFieldsLeft = (_floatingFieldsLeft + details.delta.dx)
-                .clamp(0.0, constraints.maxWidth - floatingFieldsWidth);
+                .clamp(0.0, maxLeft);
           });
         },
-        child: AnimatedScale(
-          scale: showFields ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOutBack,
-          // FIXED wrapper container ensures the close button is inside the parent box boundaries
-          child: Container(
-            width: floatingFieldsWidth,
-            height: floatingFieldsHeight,
-            padding: const EdgeInsets.only(
-              top: buttonOverhang,
-              right: buttonOverhang,
-            ),
-            color: Colors.transparent,
-            // Invisible layout padding zone
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // Reserve space for the overlapping button.
-                Padding(
-                  padding: const EdgeInsets.only(top: 12, right: 12),
-                  child: Card(
-                    margin: EdgeInsets.zero,
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    color: cs.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Icon(
-                                Icons.drag_indicator,
-                                size: 18,
-                                color: cs.onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Form Fields',
-                                style: TextStyle(
-                                  color: cs.onPrimaryContainer,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
 
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: Material(
-                      color: cs.error,
-                      shape: const CircleBorder(),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: () {
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Card(
+            elevation: 8,
+            color: cs.primaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.drag_indicator, color: cs.onPrimaryContainer),
+                      const SizedBox(width: 8),
+
+                      Expanded(
+                        child: Text(
+                          'Form Fields',
+                          style: TextStyle(
+                            color: cs.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+
+                      IconButton(
+                        tooltip: 'Close',
+                        onPressed: () {
                           setState(() {
                             _showFloatingFieldsBar = false;
                           });
                         },
-                        child: Center(
-                          child: Icon(Icons.close, color: cs.onError, size: 20),
-                        ),
+                        icon: Icon(Icons.close, color: cs.onPrimaryContainer),
+                      ),
+                    ],
+                  ),
+
+                  const Divider(),
+
+                  // Scrollable field selection
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: _formFields.expand((field) {
+                          return [
+                            ListTile(
+                              dense: true,
+
+                              leading: Text(
+                                String.fromCharCode(
+                                  field.leadingIcon?.codePoint ?? 0,
+                                ),
+                                style: TextStyle(
+                                  fontFamily: field.leadingIcon?.fontFamily,
+                                  color: cs.onPrimaryContainer,
+                                ),
+                              ),
+
+                              title: Text(
+                                field.title ?? '',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: cs.onPrimaryContainer,
+                                ),
+                              ),
+
+                              subtitle: Text(
+                                field.subtitle ?? '',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: cs.onPrimaryContainer,
+                                ),
+                              ),
+
+                              trailing: Tooltip(
+                                message: field.trailingTooltip ?? '',
+                                child: Text(
+                                  String.fromCharCode(
+                                    field.trailingIcon?.codePoint ?? 0,
+                                  ),
+                                  style: TextStyle(
+                                    fontFamily: field.trailingIcon?.fontFamily,
+                                    color: cs.onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+
+                              onTap: () {
+                                _addField(
+                                  field.fieldType ?? FormFieldType.Text,
+                                );
+                              },
+                            ),
+
+                            Divider(
+                              color: cs.onPrimaryContainer.withValues(
+                                alpha: 0.5,
+                              ),
+                            ),
+                          ];
+                        }).toList(),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -280,116 +1284,154 @@ class _FormMobileViewState extends ConsumerState<FormDesktopView> {
     );
   }
 
-  // Floating Bar 2: Form Settings
-  Widget _buildSettingsFloatingBar(ColorScheme cs, BoxConstraints constraints) {
-    final showSettings = _showFloatingSettingsBar;
-    // The button needs ~20px of extra room to stick out without hit-test clipping
-    const double buttonOverhang = 20.0;
+  // ---------------------------------------------------------------------------
+  // FLOATING PAGE SETTINGS TOOLBAR
+  // ---------------------------------------------------------------------------
 
+  Widget _buildSettingsFloatingBar(ColorScheme cs, BoxConstraints constraints) {
     final screenSize = MediaQuery.sizeOf(context);
 
-    final floatingSettingsWidth = screenSize.width * 0.3;
-    final floatingSettingsHeight = screenSize.width * 0.6;
+    final width = (screenSize.width * 0.32).clamp(250.0, 380.0);
+
+    const height = 260.0;
+
+    final maxTop = (constraints.maxHeight - height).clamp(0.0, double.infinity);
+
+    final maxLeft = (constraints.maxWidth - width).clamp(0.0, double.infinity);
 
     return Positioned(
-      top: _floatingSettingsTop,
-      right: _floatingSettingsLeft,
+      top: _floatingSettingsTop.clamp(0.0, maxTop),
+      right: _floatingSettingsLeft.clamp(0.0, maxLeft),
+
       child: GestureDetector(
         onPanUpdate: (details) {
           setState(() {
             _floatingSettingsTop = (_floatingSettingsTop + details.delta.dy)
-                .clamp(0.0, constraints.maxHeight - floatingSettingsHeight);
+                .clamp(0.0, maxTop);
+
             _floatingSettingsLeft = (_floatingSettingsLeft + details.delta.dx)
-                .clamp(0.0, constraints.maxWidth - floatingSettingsWidth);
+                .clamp(0.0, maxLeft);
           });
         },
-        child: AnimatedScale(
-          scale: showSettings ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOutBack,
-          child: Container(
-            width: floatingSettingsWidth,
-            height: floatingSettingsHeight,
-            padding: const EdgeInsets.only(
-              top: buttonOverhang,
-              right: buttonOverhang,
-            ),
-            color: Colors.transparent,
-            // Invisible layout padding zone
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // Reserve space for the overlapping button.
-                Padding(
-                  padding: const EdgeInsets.only(top: 12, right: 12),
-                  child: Card(
-                    margin: EdgeInsets.zero,
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    color: cs.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Icon(
-                                Icons.drag_indicator,
-                                size: 18,
-                                color: cs.onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Field Settings',
-                                style: TextStyle(
-                                  color: cs.onPrimaryContainer,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
 
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: Material(
-                      color: cs.error,
-                      shape: const CircleBorder(),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: () {
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: Card(
+            elevation: 8,
+            color: cs.tertiaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.drag_indicator, color: cs.onTertiaryContainer),
+                      const SizedBox(width: 8),
+
+                      Expanded(
+                        child: Text(
+                          'Page Settings',
+                          style: TextStyle(
+                            color: cs.onTertiaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+
+                      IconButton(
+                        tooltip: 'Close',
+                        onPressed: () {
                           setState(() {
                             _showFloatingSettingsBar = false;
                           });
                         },
-                        child: Center(
-                          child: Icon(Icons.close, color: cs.onError, size: 20),
-                        ),
+                        icon: Icon(Icons.close, color: cs.onTertiaryContainer),
                       ),
-                    ),
+                    ],
                   ),
-                ),
-              ],
+
+                  const Divider(),
+
+                  TextFormField(
+                    key: ValueKey(_selectedFieldForEdit?.id),
+                    initialValue: _selectedFieldForEdit?.title ?? '',
+                    keyboardType: TextInputType.text,
+                    decoration: _buildInputDecoration(
+                      label: 'Field Title',
+                      cs: cs,
+                      hintText: _selectedFieldForEdit?.hintText,
+                      prefixIcon: Icons.title,
+                    ),
+                    onChanged: (value) {
+                      _selectedFieldForEdit = _selectedFieldForEdit?.copyWith(
+                        title: value,
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  ElevatedButton(
+                    onPressed: _selectedOrderNumber == null
+                        ? null
+                        : () {
+                            _updateField(_selectedOrderNumber!);
+                          },
+                    child: const Text('Save'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // INPUT DECORATION
+  // ---------------------------------------------------------------------------
+
+  InputDecoration _buildInputDecoration({
+    required ColorScheme cs,
+    String? hintText,
+    required IconData prefixIcon,
+    Widget? suffixIcon,
+    required String label,
+  }) {
+    return InputDecoration(
+      label: Text(label),
+      hintText: hintText,
+      hintStyle: TextStyle(
+        color: cs.onSurface.withValues(alpha: 0.6),
+        fontSize: 14,
+      ),
+      prefixIcon: Icon(
+        prefixIcon,
+        color: cs.onSurface.withValues(alpha: 0.6),
+        size: 20,
+      ),
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: cs.inversePrimary.withValues(alpha: 0.05),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.1)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.onSurface.withValues(alpha: 0.1)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.primary, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: cs.error, width: 2),
       ),
     );
   }
