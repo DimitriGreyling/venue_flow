@@ -808,22 +808,36 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
           ),
           PopupMenuItem(
             value: FormToolbarOptions.Reset,
-            child: Row(
-              children: [
-                Icon(Mdi.restart, color: sem.textMuted),
-                const SizedBox(width: 8),
-                const Text('Reset'),
-              ],
+            child: Container(
+              // color: cs.error,
+              width: double.infinity,
+              // 3. Make it stretch horizontally
+              height: kMinInteractiveDimension,
+              // 4. Matches standard menu item height
+              child: Row(
+                children: [
+                  Icon(Mdi.restart, color: cs.error),
+                  const SizedBox(width: 8),
+                  Text('Reset', style: TextStyle(color: cs.error)),
+                ],
+              ),
             ),
           ),
           PopupMenuItem(
             value: FormToolbarOptions.Save,
-            child: Row(
-              children: [
-                Icon(Mdi.contentSave, color: sem.textMuted),
-                const SizedBox(width: 8),
-                const Text('Save'),
-              ],
+            child: Container(
+              // color: cs.primary,
+              width: double.infinity,
+              // 3. Make it stretch horizontally
+              height: kMinInteractiveDimension,
+              // 4. Matches standard menu item height
+              child: Row(
+                children: [
+                  Icon(Mdi.contentSave, color: cs.primary),
+                  const SizedBox(width: 8),
+                  Text('Save', style: TextStyle(color: cs.primary)),
+                ],
+              ),
             ),
           ),
         ],
