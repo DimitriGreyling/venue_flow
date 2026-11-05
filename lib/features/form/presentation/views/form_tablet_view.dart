@@ -68,7 +68,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   List<FormFieldData> _formFields = [
     FormFieldData(
       fieldType: FormFieldType.Text,
-      leadingIcon: Icons.text_fields,
+      leadingIcon: Icons.text_fields.,
       title: 'Text Field',
       subtitle: 'Single-line text input',
       trailingIcon: Icons.add,

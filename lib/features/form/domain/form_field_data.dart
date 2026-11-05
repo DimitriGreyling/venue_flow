@@ -13,10 +13,10 @@ part 'form_field_data.g.dart';
 @freezed
 abstract class FormFieldData with _$FormFieldData {
   const factory FormFieldData({
-    String? leadingIcon,
+    int? leadingIcon,
     String? title,
     String? subtitle,
-    String? trailingIcon,
+    int? trailingIcon,
     String? trailingTooltip,
     FormFieldType? fieldType,
     // @JsonKey(includeFromJson: false, includeToJson: false)
