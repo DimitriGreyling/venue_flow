@@ -46,7 +46,19 @@ GoRouter router(Ref ref) {
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/venues', builder: (_, __) => const VenueScreen()),
       GoRoute(path: '/dashboard', builder: (_, __) => const DashboardScreen()),
-      GoRoute(path: '/forms', builder: (_, __) => const FormTableScreen()),
+      GoRoute(
+        path: '/forms',
+        builder: (_, __) => const FormTableScreen(),
+        routes: [
+          GoRoute(
+            path: ':formId',
+            builder: (_, state) {
+              final formId = state.pathParameters['formId']!;
+              return FormScreen(formId: formId);
+            },
+          ),
+        ],
+      ),
       GoRoute(path: '/invoices', builder: (_, __) => const InvoiceScreen()),
       GoRoute(
         path: '/appointments',

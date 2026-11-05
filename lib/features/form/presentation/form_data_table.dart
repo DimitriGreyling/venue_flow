@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:venue_flow_app/features/form/data/form_controller.dart';
 import '../../../core/domain/paged_response.dart';
@@ -89,13 +90,15 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
                                             //   ),
                                             // );
 
-                                            if (!mounted) return;
+                                            // if (!mounted) return;
+                                            //
+                                            // widget.requiresRefresh?.call(true);
+                                            //
+                                            // ref.invalidate(
+                                            //   formDetailsProvider(form.id),
+                                            // );
 
-                                            widget.requiresRefresh?.call(true);
-
-                                            ref.invalidate(
-                                              formDetailsProvider(form.id),
-                                            );
+                                            context.push('/forms/${form.id}');
                                           },
                                           tooltip: 'Edit ${form.name}',
                                           icon: Icon(
