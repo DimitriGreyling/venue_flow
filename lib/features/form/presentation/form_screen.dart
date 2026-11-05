@@ -10,9 +10,10 @@ import 'package:venue_flow_app/features/form/presentation/views/form_desktop_vie
 import '../../../core/theme/theme_x.dart';
 
 class FormScreen extends ConsumerStatefulWidget {
-  const FormScreen({super.key, required this.formId});
+  const FormScreen({super.key, this.formId, this.isAdd = false});
 
-  final String formId;
+  final String? formId;
+  final bool isAdd;
 
   @override
   ConsumerState<FormScreen> createState() => _FormScreenState();

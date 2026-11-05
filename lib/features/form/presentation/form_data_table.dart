@@ -80,24 +80,6 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
                                       children: [
                                         IconButton(
                                           onPressed: () async {
-                                            // await EditCustomerDialog.show(
-                                            //   context,
-                                            //   customer: UpdateCustomer(
-                                            //     userId: customer.userId,
-                                            //     firstName: customer.firstName,
-                                            //     lastName: customer.lastName,
-                                            //     email: customer.email,
-                                            //   ),
-                                            // );
-
-                                            // if (!mounted) return;
-                                            //
-                                            // widget.requiresRefresh?.call(true);
-                                            //
-                                            // ref.invalidate(
-                                            //   formDetailsProvider(form.id),
-                                            // );
-
                                             context.push('/forms/${form.id}');
                                           },
                                           tooltip: 'Edit ${form.name}',

@@ -1,14 +1,13 @@
 import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:venue_flow_app/features/form/data/form_controller.dart';
 
 import '../../../../../core/domain/paged_response.dart';
 import '../../../../../core/theme/theme_x.dart';
 import '../../../../../core/widgets/side_nav.dart';
 import '../../../../../core/widgets/top_bar.dart';
-import '../../../../customers/presentation/customer_controller.dart';
-import '../../../../customers/presentation/dialogs/add_customer_dialog.dart';
 import '../../../domain/form_list_id.dart';
 import '../../form_data_table.dart';
 
@@ -54,9 +53,8 @@ class _TableTabletViewState extends ConsumerState<TableTabletView> {
   }
 
   Future<void> _refresh() async {
-    print('Triggered refresh');
-    ref.invalidate(customerControllerProvider);
-    ref.invalidate(customerDetailsProvider);
+    ref.invalidate(formControllerProvider);
+    ref.invalidate(formDetailsProvider);
     await _fetchForms();
   }
 
@@ -88,11 +86,11 @@ class _TableTabletViewState extends ConsumerState<TableTabletView> {
                       borderRadius: BorderRadius.circular(50),
                       child: CircleAvatar(
                         child: IconButton(
+                          tooltip: 'Add form',
                           onPressed: () async {
-                            await AddCustomerDialog.show(context);
-                            _refresh();
+                            context.push('/forms/add');
                           },
-                          icon: Icon(Mdi.accountPlusOutline),
+                          icon: Icon(Mdi.filePlus),
                         ),
                       ),
                     ),
@@ -106,7 +104,7 @@ class _TableTabletViewState extends ConsumerState<TableTabletView> {
                           onPressed: () {
                             _refresh();
                           },
-                          tooltip: 'Refresh',
+                          tooltip: 'Refresh table',
                           icon: Icon(Mdi.refresh),
                         ),
                       ),

@@ -57,6 +57,12 @@ GoRouter router(Ref ref) {
               return FormScreen(formId: formId);
             },
           ),
+          GoRoute(
+            path: 'add',
+            builder: (_, state) {
+              return FormScreen(isAdd: true);
+            },
+          ),
         ],
       ),
       GoRoute(path: '/invoices', builder: (_, __) => const InvoiceScreen()),
