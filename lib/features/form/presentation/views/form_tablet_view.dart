@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:venue_flow_app/core/domain/icon_feature.dart';
 
@@ -32,6 +36,12 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   final Uuid _uuid = const Uuid();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  static const String _draftStorageKey =
+      'venue_flow_form_builder_draft_v1';
+
+  Timer? _draftSaveTimer;
+
+  bool _isRestoringDraft = false;
 
   CreateFormRequest _createFormRequest = CreateFormRequest(
     name: 'Form Name',
@@ -146,11 +156,108 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   void initState() {
     super.initState();
 
-    _initializeFieldIds();
+    _restoreDraft();
+  }
+
+  Future<void> _restoreDraft() async {
+    _isRestoringDraft = true;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final savedDraft = prefs.getString(_draftStorageKey);
+
+      if (savedDraft != null) {
+        final Map<String, dynamic> data =
+        jsonDecode(savedDraft) as Map<String, dynamic>;
+
+        final requestJson = Map<String, dynamic>.from(
+          data['request'] as Map,
+        );
+
+        final restoredRequest =
+        CreateFormRequest.fromJson(requestJson);
+
+        final pages = restoredRequest.schema?.pages ?? [];
+
+        final savedPageId = data['selectedPageId'] as String?;
+
+        final selectedPageExists = pages.any(
+              (page) => page.id == savedPageId,
+        );
+
+        if (mounted) {
+          setState(() {
+            _createFormRequest = restoredRequest;
+
+            if (selectedPageExists) {
+              _selectedPageId = savedPageId!;
+            } else if (pages.isNotEmpty) {
+              _selectedPageId = pages.first.id;
+            }
+          });
+        }
+      }
+
+      _initializeFieldIds();
+
+      _isRestoringDraft = false;
+
+      // Save the restored state, including any newly generated IDs.
+      _scheduleDraftSave();
+    } catch (e, stackTrace) {
+      debugPrint('Failed to restore form draft: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      _isRestoringDraft = false;
+
+      _initializeFieldIds();
+    }
+  }
+
+  void _scheduleDraftSave() {
+    if (_isRestoringDraft) return;
+
+    _draftSaveTimer?.cancel();
+
+    _draftSaveTimer = Timer(
+      const Duration(milliseconds: 50),
+        _saveDraft,
+    );
+  }
+
+  Future<void> _saveDraft() async {
+    if (_isRestoringDraft) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final draft = {
+        'request': _createFormRequest.toJson(),
+        'selectedPageId': _selectedPageId,
+      };
+
+      await prefs.setString(
+        _draftStorageKey,
+        jsonEncode(draft),
+      );
+
+      debugPrint('Form draft autosaved.');
+    } catch (e, stackTrace) {
+      debugPrint('Failed to save form draft: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<void> _clearDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.remove(_draftStorageKey);
   }
 
   @override
   void dispose() {
+    _draftSaveTimer?.cancel();
     super.dispose();
   }
 
@@ -208,6 +315,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     setState(() {
       _createFormRequest = request;
     });
+    _scheduleDraftSave();
   }
 
   void _updateSchema(FormSchema schema) {
@@ -218,6 +326,16 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   // PAGE MANAGEMENT
   // ---------------------------------------------------------------------------
 
+  // void _selectPage(String pageId) {
+  //   if (pageId == _selectedPageId) return;
+  //
+  //   setState(() {
+  //     _selectedPageId = pageId;
+  //     _selectedFieldForEdit = null;
+  //     _selectedOrderNumber = null;
+  //   });
+  // }
+
   void _selectPage(String pageId) {
     if (pageId == _selectedPageId) return;
 
@@ -226,6 +344,8 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       _selectedFieldForEdit = null;
       _selectedOrderNumber = null;
     });
+
+    _scheduleDraftSave();
   }
 
   void _addPage() {
@@ -240,6 +360,8 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     setState(() {
       _selectedPageId = newPage.id;
     });
+
+    _scheduleDraftSave();
   }
 
   void _renameSelectedPage(String title) {
@@ -483,8 +605,9 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       context,
       formFieldSchema: field,
       onFormFieldSchemaChanged: (value) {
+
         if (value == null) return;
-print('Form field updated: ${value.toJson()}');
+
         _selectedFieldForEdit = value;
         _updateField(orderNumber);
       },
@@ -504,8 +627,6 @@ print('Form field updated: ${value.toJson()}');
         else
           field,
     ];
-
-    print('Updating field with order number $orderNumber: ${updatedField.toJson()}');
 
     _updateSchema(
       _schema.copyWith(

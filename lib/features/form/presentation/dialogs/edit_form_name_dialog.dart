@@ -82,6 +82,15 @@ class _EditFormNameDialogState extends ConsumerState<EditFormNameDialog>
           content: const Text('Form name updated successfully'),
         ),
       );
+
+      widget.onFormDescriptionChanged?.call(_formDescriptionController.text);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: sem.success,
+          content: const Text('Form description updated successfully'),
+        ),
+      );
+
       Navigator.of(context).pop(true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
