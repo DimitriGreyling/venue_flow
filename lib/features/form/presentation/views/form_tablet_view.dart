@@ -484,7 +484,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       formFieldSchema: field,
       onFormFieldSchemaChanged: (value) {
         if (value == null) return;
-
+print('Form field updated: ${value.toJson()}');
         _selectedFieldForEdit = value;
         _updateField(orderNumber);
       },
@@ -504,6 +504,8 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
         else
           field,
     ];
+
+    print('Updating field with order number $orderNumber: ${updatedField.toJson()}');
 
     _updateSchema(
       _schema.copyWith(

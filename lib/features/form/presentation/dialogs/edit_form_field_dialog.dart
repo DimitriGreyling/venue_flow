@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/core/theme/app_theme.dart';
 import 'package:venue_flow_app/features/form/domain/form_field_schema.dart';
 import '../../../../core/enums/form_field_type.dart';
 import '../../../../core/theme/theme_x.dart' show ThemeX;
@@ -39,21 +40,24 @@ class EditFormFieldDialog extends ConsumerStatefulWidget {
 class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
     with TickerProviderStateMixin {
   //form keys
-  final _formNameFormKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _formFieldTitle = TextEditingController();
   final TextEditingController _formFieldHintText = TextEditingController();
   final TextEditingController _formFieldType = TextEditingController();
 
   bool _isSaving = false;
+  bool _isRequiredField = false;
 
   @override
   void initState() {
     super.initState();
 
+    _isRequiredField = widget.formFieldSchema.isRequired ?? false;
     _formFieldTitle.text = widget.formFieldSchema.title ?? '';
     _formFieldHintText.text = widget.formFieldSchema.hintText ?? '';
     _formFieldType.text = widget.formFieldSchema.fieldType.name;
+    print('EditFormFieldDialog initialized with field: ${_formFieldType.text}');
   }
 
   @override
@@ -61,12 +65,14 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
     _formFieldTitle.dispose();
     _formFieldHintText.dispose();
     _formFieldType.dispose();
-    _formNameFormKey.currentState?.dispose();
+    _formKey.currentState?.dispose();
     super.dispose();
   }
 
   void _save({required ColorScheme cs, required dynamic sem}) async {
     try {
+      if (!_formKey.currentState!.validate()) return;
+
       if (_isSaving) return;
 
       setState(() {
@@ -77,6 +83,10 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
         widget.formFieldSchema.copyWith(
           title: _formFieldTitle.text,
           hintText: _formFieldHintText.text,
+          fieldType: FormFieldType.values.firstWhere(
+            (type) => type.name == _formFieldType.text,
+          ),
+          isRequired: _isRequiredField,
         ),
       );
       ScaffoldMessenger.of(context).showSnackBar(
@@ -133,53 +143,9 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
                 const SizedBox(height: 16),
                 Expanded(
                   child: SingleChildScrollView(
-                    child: Form(
-                      key: _formNameFormKey,
-                      child: Column(
-                        children: [
-                          DropdownMenu(
-                            dropdownMenuEntries: FormFieldType.values
-                                .map(
-                                  (type) => DropdownMenuEntry(
-                                    value: type.name,
-                                    label: type.name,
-                                  ),
-                                )
-                                .toList(),
-                            label: Text('Form Field Type'),
-                            controller: _formFieldType,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _formFieldTitle,
-                            decoration: const InputDecoration(
-                              labelText: 'Form Name',
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter a form name';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _formFieldHintText,
-                            decoration: const InputDecoration(
-                              labelText: 'Form Hint Text',
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter a form hint text';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: _buildForm(cs: cs, sem: sem,dialogWidth: dialogWidth),
                     ),
                   ),
                 ),
@@ -221,6 +187,89 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildForm({
+    required ColorScheme cs,
+    required AppSemanticColors sem,
+    double? dialogWidth,
+  }) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: FormField<String>(
+                  validator: (_) {
+                    if (_formFieldType.text.trim().isEmpty) {
+                      return 'Please select a form field type';
+                    }
+
+                    return null;
+                  },
+                  builder: (state) {
+                    return DropdownMenu<String>(
+                      width: dialogWidth,
+                      dropdownMenuEntries: FormFieldType.values
+                          .map(
+                            (type) => DropdownMenuEntry<String>(
+                              value: type.name,
+                              label: type.name,
+                            ),
+                          )
+                          .toList(),
+                      label: const Text('Form Field Type *'),
+                      controller: _formFieldType,
+                      onSelected: (value) {
+                        state.didChange(value);
+                        state.validate();
+                      },
+                      errorText: state.errorText,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _formFieldTitle,
+            decoration: const InputDecoration(
+              labelText: 'Form Name *',
+              border: OutlineInputBorder(),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter a form name';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _formFieldHintText,
+            decoration: const InputDecoration(
+              labelText: 'Form Hint Text',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          CheckboxListTile(
+            value: _isRequiredField,
+            onChanged: (value) {
+              setState(() {
+                _isRequiredField = value ?? false;
+              });
+            },
+            title: const Text('Required Field'),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ],
       ),
     );
   }

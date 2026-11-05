@@ -182,6 +182,7 @@ class _FormFieldWidgetState extends ConsumerState<FormFieldWidget> {
     return InputDecoration(
       label: Text(label),
       hintText: hintText,
+      floatingLabelBehavior: FloatingLabelBehavior.always,
       hintStyle: TextStyle(
         color: cs.onSurface.withValues(alpha: 0.6),
         fontSize: 14,
