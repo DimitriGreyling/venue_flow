@@ -10,7 +10,10 @@ import 'package:venue_flow_app/features/form/presentation/views/form_desktop_vie
 import '../../../core/theme/theme_x.dart';
 
 class FormScreen extends ConsumerStatefulWidget {
-  const FormScreen({super.key});
+  const FormScreen({super.key, this.formId, this.isAdd = false});
+
+  final String? formId;
+  final bool isAdd;
 
   @override
   ConsumerState<FormScreen> createState() => _FormScreenState();
@@ -53,7 +56,6 @@ class _FormScreenState extends ConsumerState<FormScreen> {
 
       _isPositionsInitialized = true;
     }
-
     //Display mobile of desktop view based on the screen size
     return Responsive(
       loadMobile: form_mobile_view.loadLibrary,
