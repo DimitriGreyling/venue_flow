@@ -7,6 +7,7 @@ import '../../../core/domain/paged_response.dart';
 import '../domain/create_form_request.dart';
 import '../domain/form_list_id.dart';
 import '../domain/form_list_item.dart';
+import '../domain/form_version.dart';
 import 'form_repository.dart';
 
 part 'form_controller.g.dart';
@@ -16,7 +17,9 @@ class FormController extends _$FormController {
   @override
   FutureOr<void> build() {}
 
-  Future<CreateFormResponse> createForm({required CreateFormRequest request}) async {
+  Future<CreateFormResponse> createForm({
+    required CreateFormRequest request,
+  }) async {
     final respository = ref.watch(formRepositoryProvider);
     return await respository.createForm(request: request);
   }
@@ -29,11 +32,16 @@ class FormController extends _$FormController {
     return await respository.getForms(page: page, pageSize: pageSize);
   }
 
-  Future<FormListItem> getFormById({
-    required String formId,
-  }) async {
+  Future<FormListItem> getFormById({required String formId}) async {
     final respository = ref.watch(formRepositoryProvider);
     return await respository.getFormById(formId: formId);
+  }
+
+  Future<List<FormVersion>> loadFormVersionsById({
+    required String formId,
+  }) async {
+    final repository = ref.watch(formRepositoryProvider);
+    return await repository.loadFormVersionsById(formId: formId);
   }
 }
 

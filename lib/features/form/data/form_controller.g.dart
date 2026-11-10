@@ -33,7 +33,7 @@ final class FormControllerProvider
   FormController create() => FormController();
 }
 
-String _$formControllerHash() => r'e594518de5673e8eaf041da4baba0fab2fa08bc4';
+String _$formControllerHash() => r'fffdb59591d902d6440007104c8e46b92b6fe192';
 
 abstract class _$FormController extends $AsyncNotifier<void> {
   FutureOr<void> build();

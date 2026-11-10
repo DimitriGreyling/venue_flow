@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:venue_flow_app/core/widgets/responsive.dart';
+import 'package:venue_flow_app/features/form/data/form_controller.dart';
+import 'package:venue_flow_app/features/form/domain/form_version.dart';
 import 'package:venue_flow_app/features/form/presentation/views/form_mobile_view.dart'
     deferred as form_mobile_view;
 import 'package:venue_flow_app/features/form/presentation/views/form_tablet_view.dart'
@@ -35,6 +38,33 @@ class _FormScreenState extends ConsumerState<FormScreen> {
   bool _showFloatingFieldsBar = false;
   bool _showFloatingSettingsBar = false;
 
+  List<FormVersion> _formVersions = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadForm();
+  }
+
+  Future<void> _loadForm() async {
+    if (widget.formId == null) return;
+    setState(() {
+      _isLoading = true;
+    });
+    final respository = ref.watch(formControllerProvider.notifier);
+
+    final response = await respository.loadFormVersionsById(
+      formId: widget.formId!,
+    );
+    print('Loaded values : ${response}');
+
+    _formVersions = response;
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -61,9 +91,32 @@ class _FormScreenState extends ConsumerState<FormScreen> {
       loadMobile: form_mobile_view.loadLibrary,
       loadTablet: form_tablet_view.loadLibrary,
       loadDesktop: form_desktop_view.loadLibrary,
-      mobile: (_) => form_mobile_view.FormMobileView(),
-      tablet: (_) => form_tablet_view.FormTabletView(),
-      desktop: (_) => form_desktop_view.FormDesktopView(),
+      mobile: (_) => Skeletonizer(
+        enabled: _isLoading,
+        effect: ShimmerEffect(
+          baseColor: cs.surfaceContainerLow,
+          highlightColor: cs.surface,
+        ),
+        child: form_mobile_view.FormMobileView(),
+      ),
+      tablet: (_) => Skeletonizer(
+        enabled: _isLoading,
+        effect: ShimmerEffect(
+          baseColor: cs.surfaceContainerLow,
+          highlightColor: cs.surface,
+        ),
+        child: form_tablet_view.FormTabletView(
+          formVersions: _formVersions,
+        ),
+      ),
+      desktop: (_) => Skeletonizer(
+        enabled: _isLoading,
+        effect: ShimmerEffect(
+          baseColor: cs.surfaceContainerLow,
+          highlightColor: cs.surface,
+        ),
+        child: form_desktop_view.FormDesktopView(),
+      ),
     );
   }
 }
