@@ -85,12 +85,13 @@ class _TableTabletViewState extends ConsumerState<TableTabletView> {
                       elevation: 2,
                       borderRadius: BorderRadius.circular(50),
                       child: CircleAvatar(
+                        backgroundColor: cs.primary,
                         child: IconButton(
                           tooltip: 'Add form',
                           onPressed: () async {
                             context.push('/forms/add');
                           },
-                          icon: Icon(Mdi.filePlus),
+                          icon: Icon(Mdi.filePlus,color: cs.onPrimary,),
                         ),
                       ),
                     ),
@@ -105,7 +106,7 @@ class _TableTabletViewState extends ConsumerState<TableTabletView> {
                             _refresh();
                           },
                           tooltip: 'Refresh table',
-                          icon: Icon(Mdi.refresh),
+                          icon: Icon(Mdi.refresh,color: cs.onTertiary,),
                         ),
                       ),
                     ),

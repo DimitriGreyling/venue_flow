@@ -86,8 +86,17 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
                                 cellCount: widget.columns.length,
                                 buildCells: (form) => [
                                   DataCell(Text(form.name)),
-                                  DataCell(Text(form.description ?? '')),
-                                  DataCell(Text(form.formType ?? '')),
+                                  DataCell(
+                                    Text(
+                                      form.description != null &&
+                                              form.description != ''
+                                          ? form.description!
+                                          : 'Not provided',
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(form.formType ?? 'Not provided'),
+                                  ),
                                   DataCell(
                                     Row(
                                       mainAxisSize: MainAxisSize.min,

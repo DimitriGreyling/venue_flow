@@ -53,8 +53,8 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
 class AppTheme {
   // Brand colors from design.md
-  static const _primary = Color(0xFF1E1B4B); // Deep Navy Base
-  static const _primaryContainer = Color(0xFFE0E7FF); // Faint Indigo Tint
+  static const _primary = Color(0xFF2E2A72); // Deep Navy Base
+  static const _primaryContainer = Color(0xFFEEF0F2); // Faint Indigo Tint
   static const _secondary = Color(0xFF4F46E5); // Vibrant Indigo Action
   static const _secondaryContainer = Color(0xFFEEF2FF); // Soft Inactive Surface
   static const _tertiary = Color(0xFFD97706); // Professional Amber Accent
@@ -141,7 +141,7 @@ class AppTheme {
     inverseSurface: Color(0xFF2E3132),
     onInverseSurface: Color(0xFFF0F1F2),
     inversePrimary: Color(0xFFC3C0FF),
-    surfaceTint: Color(0xFF4D44E3),
+    surfaceTint: Colors.transparent, //Color(0xFF4D44E3),
   );
 
   static final ColorScheme _darkScheme = const ColorScheme(
@@ -215,6 +215,12 @@ class AppTheme {
       scaffoldBackgroundColor: bg,
       fontFamily: 'Inter',
       extensions: [extension],
+
+      dialogTheme: DialogThemeData(
+        surfaceTintColor: Colors.transparent, // Blocks the blue elevation tint overlay
+        backgroundColor: _primaryContainer,
+        elevation: 2// Forces your exact clean surface background
+      ),
 
       appBarTheme: AppBarTheme(
         centerTitle: false,
