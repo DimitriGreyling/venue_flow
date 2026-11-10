@@ -48,9 +48,22 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
     return SizedBox(
       height: widget.constraints.maxHeight * 0.8,
       width: widget.constraints.maxWidth,
-      child: Card(
-        elevation: 2,
-        // clipBehavior: Clip.antiAlias,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              // Extremely soft shadow
+              blurRadius: 10,
+              // Makes the shadow smooth
+              spreadRadius: 0,
+              // Prevents it from looking harsh
+              offset: const Offset(0, 4), // Pushes the shadow down slightly
+            ),
+          ],
+        ),
         child: Column(
           children: [
             Expanded(
@@ -142,8 +155,8 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
             Skeletonizer(
               enabled: true,
               effect: ShimmerEffect(
-                baseColor: cs.surfaceContainerLow,
-                highlightColor: cs.surface,
+                baseColor: cs.surfaceContainer,
+                highlightColor: cs.surfaceContainerLow,
               ),
               child: const Text('Loading placeholder'),
             ),
