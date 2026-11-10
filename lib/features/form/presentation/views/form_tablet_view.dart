@@ -29,9 +29,11 @@ import 'package:venue_flow_app/features/form/presentation/widgets/form_field_wid
 import '../../data/form_controller.dart';
 
 class FormTabletView extends ConsumerStatefulWidget {
-  const FormTabletView({super.key, this.formVersions});
+  const FormTabletView({super.key, this.selectedFormVersion, this.formId,this.latestVersion});
 
-  final List<FormVersion>? formVersions;
+  final FormVersion? selectedFormVersion;
+  final int? latestVersion;
+  final String? formId;
 
   @override
   ConsumerState<FormTabletView> createState() => _FormTabletViewState();
@@ -161,9 +163,9 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     super.initState();
 
     // Check that the list is NOT null AND contains at least one item
-    if (widget.formVersions != null && widget.formVersions!.isNotEmpty) {
+    if (widget.selectedFormVersion != null) {
       // Safely extract the string, ensuring it isn't empty or blank
-      final rawJson = widget.formVersions!.first.schemaJson;
+      final rawJson = widget.selectedFormVersion!.schemaJson;
 
       if (rawJson != null && rawJson.trim().isNotEmpty) {
         try {
@@ -265,6 +267,34 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     _draftSaveTimer = Timer(const Duration(milliseconds: 50), _saveDraft);
   }
 
+  Future<void> _updateDraft() async {
+    if (_isRestoringDraft) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final formController = ref.read(formControllerProvider.notifier);
+
+      await formController.addNewFormVersion(
+        formId: widget.formId ?? '',
+        formVersion: FormVersion(
+          id: widget.formId ?? '',
+          formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
+          createdAt: DateTime.now(),
+          reviewedAt: DateTime.now(),
+          schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
+          status: 'DRAFT',
+          submittedAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          versionNumber: widget.latestVersion != null ? widget.latestVersion!+1 : 1,
+        ),
+      );
+    } catch (e, stackTrace) {
+      debugPrint('Failed to save form draft: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
   Future<void> _saveDraft() async {
     if (_isRestoringDraft) return;
 
@@ -292,6 +322,11 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   }
 
   Future<void> _createForm() async {
+    if (widget.selectedFormVersion != null) {
+      await _updateDraft();
+      return;
+    }
+
     final formController = ref.read(formControllerProvider.notifier);
 
     try {
@@ -386,16 +421,6 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   // ---------------------------------------------------------------------------
   // PAGE MANAGEMENT
   // ---------------------------------------------------------------------------
-
-  // void _selectPage(String pageId) {
-  //   if (pageId == _selectedPageId) return;
-  //
-  //   setState(() {
-  //     _selectedPageId = pageId;
-  //     _selectedFieldForEdit = null;
-  //     _selectedOrderNumber = null;
-  //   });
-  // }
 
   void _selectPage(String pageId) {
     if (pageId == _selectedPageId) return;

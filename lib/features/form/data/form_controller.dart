@@ -43,6 +43,18 @@ class FormController extends _$FormController {
     final repository = ref.watch(formRepositoryProvider);
     return await repository.loadFormVersionsById(formId: formId);
   }
+
+  ///
+  /// Add a new form version to an existing form
+  ///
+  Future<FormVersion> addNewFormVersion({
+    required String formId,
+    required FormVersion formVersion,
+  }) async {
+    final repository = ref.watch(formRepositoryProvider);
+
+    return await repository.addNewFormVersion(formId: formId, formVersion: formVersion);
+  }
 }
 
 @riverpod

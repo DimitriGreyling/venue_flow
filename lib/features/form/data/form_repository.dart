@@ -34,7 +34,7 @@ class FormRepository {
     print('FormRepository.getForms response: ${response}');
     return PagedResponse<FormListId>.fromJson(
       response.data as Map<String, dynamic>,
-          (json) => FormListId.fromJson(json as Map<String, dynamic>),
+      (json) => FormListId.fromJson(json as Map<String, dynamic>),
     );
   }
 
@@ -43,8 +43,9 @@ class FormRepository {
     return FormListItem.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<List<FormVersion>> loadFormVersionsById(
-      {required String formId}) async {
+  Future<List<FormVersion>> loadFormVersionsById({
+    required String formId,
+  }) async {
     final response = await _dio.get('/forms/$formId/versions');
     final data = response.data;
 
@@ -64,6 +65,21 @@ class FormRepository {
     }
 
     return items.map((item) => FormVersion.fromJson(item)).toList();
+  }
+
+  ///
+  /// Add a new form version to an existing form
+  ///
+  Future<FormVersion> addNewFormVersion({
+    required String formId,
+    required FormVersion formVersion,
+  }) async {
+    final response = await _dio.post(
+      '/forms/$formId/form-version',
+      data: formVersion.toJson(),
+    );
+
+    return FormVersion.fromJson(response.data);
   }
 }
 
