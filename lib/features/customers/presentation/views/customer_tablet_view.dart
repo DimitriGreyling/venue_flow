@@ -56,7 +56,6 @@ class _CustomerTabletViewState extends ConsumerState<CustomerTabletView> {
   }
 
   Future<void> _refresh() async {
-    print('Triggered refresh');
     ref.invalidate(customerControllerProvider);
     ref.invalidate(customerDetailsProvider);
     await _fetchCustomers();

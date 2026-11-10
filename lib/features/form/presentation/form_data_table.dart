@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:venue_flow_app/features/form/data/form_controller.dart';
+import 'package:venue_flow_app/features/form/presentation/dialogs/delete_form_dialog.dart';
 import '../../../core/domain/paged_response.dart';
 import '../domain/form_list_id.dart';
 import '../domain/form_list_item.dart';
@@ -90,20 +91,21 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
                                         ),
                                         IconButton(
                                           onPressed: () async {
-                                            // await DeleteCustomerDialog.show(
-                                            //   context,
-                                            //   customer,
-                                            // );
+                                            await DeleteFormDialog.show(
+                                              context,
+                                              form,
+                                            );
 
                                             if (!mounted) return;
 
                                             widget.requiresRefresh?.call(true);
 
-                                            // ref.invalidate(
-                                            //   customerDetailsProvider(
-                                            //     customer.userId,
-                                            //   ),
-                                            // );
+                                            ref.invalidate(
+                                              formDetailsProvider(form.id),
+                                            );
+                                            ref.invalidate(
+                                              formControllerProvider,
+                                            );
                                           },
                                           tooltip: 'Remove ${form.name}',
                                           icon: Icon(

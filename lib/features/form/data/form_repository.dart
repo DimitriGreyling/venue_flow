@@ -81,6 +81,15 @@ class FormRepository {
 
     return FormVersion.fromJson(response.data);
   }
+
+  ///
+  /// Remove a selected form
+  ///
+  Future<String> deleteForm({required String formId}) async {
+    final response = await _dio.delete('/forms/$formId');
+
+    return response.data;
+  }
 }
 
 @riverpod
