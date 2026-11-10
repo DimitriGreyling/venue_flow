@@ -305,7 +305,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
         );
       }
 
-      if(widget.refreshUI != null){
+      if (widget.refreshUI != null) {
         widget.refreshUI?.call(true);
       }
     } catch (e, stackTrace) {
@@ -509,7 +509,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     });
   }
 
-  Future<void> _showRenamePageDialog() async {
+  Future<void> _showRenamePageDialog({required ColorScheme cs}) async {
     final page = _selectedPage;
     if (page == null) return;
 
@@ -529,15 +529,47 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
             },
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(controller.text);
-              },
-              child: const Text('Save'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              // Aligns both buttons cleanly to the right side
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      // Removes solid background
+                      shadowColor: Colors.transparent,
+                      // Removes shadow elevation
+                      side: BorderSide(color: cs.error, width: 1.5),
+                      // Adds outline
+                      foregroundColor: cs.onError, // Text colour
+                    ),
+                    child: Text('Cancel', style: TextStyle(color: cs.error)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Adds a fixed horizontal gap between the two buttons
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop(controller.text);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      // Removes solid background
+                      shadowColor: Colors.transparent,
+                      // Removes shadow elevation
+                      side: BorderSide(color: cs.secondary, width: 1.5),
+                      // Adds outline
+                      foregroundColor: cs.onSecondary, // Text colour
+                    ),
+                    child: Text('Save', style: TextStyle(color: cs.secondary)),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -978,7 +1010,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                             IconButton(
                                               tooltip: 'Edit form details',
                                               onPressed: _editFormDetails,
-                                              icon: const Icon(Icons.edit),
+                                              icon: Icon(
+                                                Icons.edit,
+                                                color: cs.secondary,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -1064,6 +1099,9 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
+                      color: page.id == _selectedPageId
+                          ? WidgetStateProperty.all(cs.primary)
+                          : WidgetStateProperty.all(cs.primaryContainer),
                       label: Text(page.title),
                       selected: page.id == _selectedPageId,
                       onSelected: (_) => _selectPage(page.id),
@@ -1077,19 +1115,21 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
         IconButton(
           tooltip: 'Add page',
           onPressed: _addPage,
-          icon: const Icon(Icons.add),
+          icon: Icon(Icons.add, color: cs.primary),
         ),
 
         IconButton(
           tooltip: 'Rename page',
-          onPressed: _showRenamePageDialog,
-          icon: const Icon(Icons.edit_outlined),
+          onPressed: () {
+            _showRenamePageDialog(cs: cs);
+          },
+          icon: Icon(Icons.edit_outlined, color: cs.secondary),
         ),
 
         IconButton(
           tooltip: 'Delete selected page',
           onPressed: _pages.length > 1 ? _deleteSelectedPage : null,
-          icon: const Icon(Icons.delete_outline),
+          icon: Icon(Icons.delete_outline, color: cs.error),
         ),
       ],
     );
@@ -1161,7 +1201,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                             message: 'Drag to reorder',
                             child: Icon(
                               Icons.drag_indicator,
-                              color: cs.onSurfaceVariant,
+                              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
                               size: 24,
                             ),
                           ),
@@ -1182,7 +1222,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                         onPressed: () {
                           _openEditField(field.orderNumber);
                         },
-                        icon: Icon(Icons.edit, color: cs.primary),
+                        icon: Icon(Icons.edit, color: cs.secondary),
                       ),
 
                       // Delete
@@ -1191,7 +1231,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                         onPressed: () {
                           _deleteField(field.orderNumber);
                         },
-                        icon: Icon(Icons.delete_outline, color: cs.error),
+                        icon: Icon(Icons.delete, color: cs.error),
                       ),
                     ],
                   ),
@@ -1265,7 +1305,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
           height: height,
           child: Card(
             elevation: 8,
-            color: cs.primaryContainer,
+            color: cs.secondaryContainer,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -1273,14 +1313,17 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.drag_indicator, color: cs.onPrimaryContainer),
+                      Icon(
+                        Icons.drag_indicator,
+                        color: cs.onSurface.withValues(alpha: 0.6),
+                      ),
                       const SizedBox(width: 8),
 
                       Expanded(
                         child: Text(
                           'Form Fields',
                           style: TextStyle(
-                            color: cs.onPrimaryContainer,
+                            color: cs.onSurface,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1293,7 +1336,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                             _showFloatingFieldsBar = false;
                           });
                         },
-                        icon: Icon(Icons.close, color: cs.onPrimaryContainer),
+                        icon: Icon(Icons.close, color: cs.error),
                       ),
                     ],
                   ),
@@ -1315,7 +1358,8 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                 ),
                                 style: TextStyle(
                                   fontFamily: field.leadingIcon?.fontFamily,
-                                  color: cs.onPrimaryContainer,
+                                  color: cs.onSurface.withValues(alpha: 0.5),
+                                  fontSize: 20
                                 ),
                               ),
 
@@ -1323,7 +1367,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                 field.title ?? '',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: cs.onPrimaryContainer,
+                                  color: cs.onSurface,
                                 ),
                               ),
 
@@ -1331,7 +1375,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                 field.subtitle ?? '',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w500,
-                                  color: cs.onPrimaryContainer,
+                                  color: cs.onSurface.withValues(alpha: 0.5),
                                 ),
                               ),
 
@@ -1343,7 +1387,8 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                   ),
                                   style: TextStyle(
                                     fontFamily: field.trailingIcon?.fontFamily,
-                                    color: cs.onPrimaryContainer,
+                                    color: cs.secondary,
+                                      fontSize: 25
                                   ),
                                 ),
                               ),
@@ -1355,11 +1400,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                               },
                             ),
 
-                            Divider(
-                              color: cs.onPrimaryContainer.withValues(
-                                alpha: 0.5,
-                              ),
-                            ),
+                            Divider(color: cs.onSurface.withValues(alpha: 0.3)),
                           ];
                         }).toList(),
                       ),

@@ -24,6 +24,7 @@ class EditFormFieldDialog extends ConsumerStatefulWidget {
     ValueChanged<FormFieldSchema>? onFormFieldSchemaChanged,
   }) {
     return showDialog<bool>(
+      barrierDismissible: false,
       context: context,
       builder: (_) => EditFormFieldDialog(
         formFieldSchema: formFieldSchema!,
@@ -135,9 +136,16 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
             child: Column(
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Edit Form Hint Text', style: textTheme.titleLarge),
+                    Text('Edit Form Field', style: textTheme.titleLarge),
+                    IconButton(
+                      tooltip: 'Close remove form',
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(Icons.close,color: cs.error,),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -157,29 +165,39 @@ class _EditFormFieldDialogState extends ConsumerState<EditFormFieldDialog>
                   children: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: cs.error,
-                        foregroundColor: cs.onError,
+                        backgroundColor: Colors.transparent,
+                        // Removes solid background
+                        shadowColor: Colors.transparent,
+                        // Removes shadow elevation
+                        side: BorderSide(color: cs.error, width: 1.5),
+                        // Adds outline
+                        foregroundColor: cs.onError, // Text colour
                       ),
                       onPressed: _isSaving
                           ? null
                           : () => Navigator.of(context).pop(false),
-                      child: const Text('Cancel'),
+                      child: Text('Cancel', style: TextStyle(color: cs.error)),
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: cs.primary,
-                        foregroundColor: cs.onPrimary,
+                        backgroundColor: Colors.transparent,
+                        // Removes solid background
+                        shadowColor: Colors.transparent,
+                        // Removes shadow elevation
+                        side: BorderSide(color: cs.primary, width: 1.5),
+                        // Adds outline
+                        foregroundColor: cs.onPrimary, // Text colour
                       ),
                       onPressed: _isSaving
                           ? null
                           : () => _save(cs: cs, sem: sem),
                       child: _isSaving
                           ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Save'),
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                          : Text('Update',style: TextStyle(color: cs.primary)),
                     ),
                   ],
                 ),

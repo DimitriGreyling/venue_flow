@@ -56,7 +56,6 @@ class _CustomerTabletViewState extends ConsumerState<CustomerTabletView> {
   }
 
   Future<void> _refresh() async {
-    print('Triggered refresh');
     ref.invalidate(customerControllerProvider);
     ref.invalidate(customerDetailsProvider);
     await _fetchCustomers();
@@ -89,12 +88,13 @@ class _CustomerTabletViewState extends ConsumerState<CustomerTabletView> {
                       elevation: 2,
                       borderRadius: BorderRadius.circular(50),
                       child: CircleAvatar(
+                        backgroundColor: cs.primary,
                         child: IconButton(
                           onPressed: () async {
                             await AddCustomerDialog.show(context);
                             _refresh();
                           },
-                          icon: Icon(Mdi.accountPlusOutline),
+                          icon: Icon(Mdi.accountPlusOutline,color: cs.onPrimary,),
                         ),
                       ),
                     ),
@@ -109,7 +109,7 @@ class _CustomerTabletViewState extends ConsumerState<CustomerTabletView> {
                             _refresh();
                           },
                           tooltip: 'Refresh',
-                          icon: Icon(Mdi.refresh),
+                          icon: Icon(Mdi.refresh,color: cs.onTertiary,),
                         ),
                       ),
                     ),

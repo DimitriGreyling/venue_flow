@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:venue_flow_app/features/form/data/form_controller.dart';
+import 'package:venue_flow_app/features/form/presentation/dialogs/delete_form_dialog.dart';
 import '../../../core/domain/paged_response.dart';
 import '../domain/form_list_id.dart';
 import '../domain/form_list_item.dart';
@@ -47,9 +48,22 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
     return SizedBox(
       height: widget.constraints.maxHeight * 0.8,
       width: widget.constraints.maxWidth,
-      child: Card(
-        elevation: 2,
-        // clipBehavior: Clip.antiAlias,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              // Extremely soft shadow
+              blurRadius: 10,
+              // Makes the shadow smooth
+              spreadRadius: 0,
+              // Prevents it from looking harsh
+              offset: const Offset(0, 4), // Pushes the shadow down slightly
+            ),
+          ],
+        ),
         child: Column(
           children: [
             Expanded(
@@ -72,8 +86,17 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
                                 cellCount: widget.columns.length,
                                 buildCells: (form) => [
                                   DataCell(Text(form.name)),
-                                  DataCell(Text(form.description ?? '')),
-                                  DataCell(Text(form.formType ?? '')),
+                                  DataCell(
+                                    Text(
+                                      form.description != null &&
+                                              form.description != ''
+                                          ? form.description!
+                                          : 'Not provided',
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(form.formType ?? 'Not provided'),
+                                  ),
                                   DataCell(
                                     Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -90,20 +113,21 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
                                         ),
                                         IconButton(
                                           onPressed: () async {
-                                            // await DeleteCustomerDialog.show(
-                                            //   context,
-                                            //   customer,
-                                            // );
+                                            await DeleteFormDialog.show(
+                                              context,
+                                              form,
+                                            );
 
                                             if (!mounted) return;
 
                                             widget.requiresRefresh?.call(true);
 
-                                            // ref.invalidate(
-                                            //   customerDetailsProvider(
-                                            //     customer.userId,
-                                            //   ),
-                                            // );
+                                            ref.invalidate(
+                                              formDetailsProvider(form.id),
+                                            );
+                                            ref.invalidate(
+                                              formControllerProvider,
+                                            );
                                           },
                                           tooltip: 'Remove ${form.name}',
                                           icon: Icon(
@@ -140,8 +164,8 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
             Skeletonizer(
               enabled: true,
               effect: ShimmerEffect(
-                baseColor: cs.surfaceContainerLow,
-                highlightColor: cs.surface,
+                baseColor: cs.surfaceContainer,
+                highlightColor: cs.surfaceContainerLow,
               ),
               child: const Text('Loading placeholder'),
             ),

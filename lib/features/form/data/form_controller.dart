@@ -53,7 +53,19 @@ class FormController extends _$FormController {
   }) async {
     final repository = ref.watch(formRepositoryProvider);
 
-    return await repository.addNewFormVersion(formId: formId, formVersion: formVersion);
+    return await repository.addNewFormVersion(
+      formId: formId,
+      formVersion: formVersion,
+    );
+  }
+
+  ///
+  /// Remove a selected form
+  ///
+  Future<String> deleteForm({required String formId}) async {
+    final repository = ref.watch(formRepositoryProvider);
+
+    return await repository.deleteForm(formId: formId);
   }
 }
 

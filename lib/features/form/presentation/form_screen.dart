@@ -51,7 +51,6 @@ class _FormScreenState extends ConsumerState<FormScreen> {
   }
 
   Future<void> _loadForm() async {
-print('Widget variables ${widget.formId} ${widget.isAdd}');
     if (widget.formId == null || widget.isAdd) return;
 
     setState(() {
@@ -120,8 +119,10 @@ print('Widget variables ${widget.formId} ${widget.isAdd}');
         mobile: (_) => Skeletonizer(
           enabled: _isLoading,
           effect: ShimmerEffect(
-            baseColor: cs.surfaceContainerLow,
-            highlightColor: cs.surface,
+            // A clean, modern Material 3 contrast pair
+            baseColor: cs.surfaceContainerHigh,
+            highlightColor: cs.surfaceContainerLow,
+            duration: const Duration(milliseconds: 1500),
           ),
           child: form_mobile_view.FormMobileView(
             formVersions: _formVersions,
@@ -131,8 +132,10 @@ print('Widget variables ${widget.formId} ${widget.isAdd}');
         tablet: (_) => Skeletonizer(
           enabled: _isLoading,
           effect: ShimmerEffect(
-            baseColor: cs.surfaceContainerLow,
-            highlightColor: cs.surface,
+            // A clean, modern Material 3 contrast pair
+            baseColor: cs.surfaceContainerHigh,
+            highlightColor: cs.surfaceContainerLow,
+            duration: const Duration(milliseconds: 1500),
           ),
           child: form_tablet_view.FormTabletView(
             selectedFormVersion: _selectedVersion,
@@ -146,8 +149,10 @@ print('Widget variables ${widget.formId} ${widget.isAdd}');
         desktop: (_) => Skeletonizer(
           enabled: _isLoading,
           effect: ShimmerEffect(
-            baseColor: cs.surfaceContainerLow,
-            highlightColor: cs.surface,
+            // A clean, modern Material 3 contrast pair
+            baseColor: cs.surfaceContainerHigh,
+            highlightColor: cs.surfaceContainerLow,
+            duration: const Duration(milliseconds: 1500),
           ),
           child: form_desktop_view.FormDesktopView(formVersions: _formVersions),
         ),

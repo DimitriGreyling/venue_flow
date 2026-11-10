@@ -47,9 +47,9 @@ class _NavTileState extends State<NavTile> {
                 return;
               }
               // Adjust route execution based on requirements
-              if (route != '/dashboard') {
+              // if (route != '/dashboard') {
                 context.go(route);
-              }
+              // }
             },
             child: Container(
               decoration: BoxDecoration(

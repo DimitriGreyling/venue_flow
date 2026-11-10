@@ -373,17 +373,14 @@ class _LoginDesktopViewState extends ConsumerState<LoginDesktopView>
                                                 ? null
                                                 : _handleSignIn,
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: const Color(
-                                                0xFF4F46E5,
-                                              ),
-                                              foregroundColor: Colors.white,
+                                              backgroundColor: cs.primary,
+                                              foregroundColor: cs.onPrimary,
                                               elevation: 6,
                                               shadowColor: const Color(
                                                 0xFF4F46E5,
-                                              ).withOpacity(0.4),
+                                              ).withValues(alpha: 0.4),
                                               shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
+                                                borderRadius: BorderRadius.circular(12),
                                               ),
                                             ),
                                             child: isLoading

@@ -53,34 +53,67 @@ class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
 class AppTheme {
   // Brand colors from design.md
-  static const _primary = Color(0xFF3525CD);
-  static const _primaryContainer = Color(0xFF4F46E5);
-  static const _secondary = Color(0xFF6161FF);
-  static const _secondaryContainer = Color(0xFF5F5FFD);
-  static const _tertiary = Color(0xFFA54100);
+  static const _primary = Color(0xFF2E2A72); // Deep Navy Base
+  static const _primaryContainer = Color(0xFFEEF0F2); // Faint Indigo Tint
+  static const _secondary = Color(0xFF4F46E5); // Vibrant Indigo Action
+  static const _secondaryContainer = Color(0xFFEEF2FF); // Soft Inactive Surface
+  static const _tertiary = Color(0xFFD97706); // Professional Amber Accent
   static const _error = Color(0xFFEF4444);
 
-  // Surfaces
-  static const _background = Color(0xFFF8F9FA);
-  static const _surface = Color(0xFFF8F9FA);
-  static const _surfaceContainerLow = Color(0xFFF3F4F5);
-  static const _surfaceContainer = Color(0xFFEDEEEF);
+  //Dark colors
+  static const _primaryDark = Color(0xFF93C5FD); // Soft Sky Indigo
+  static const _primaryContainerDark = Color(0xFF1E3A8A); // Deep Midnight Blue
+  static const _secondaryDark = Color(0xFFC7D2FE); // Muted Lavender Gray
+  static const _secondaryContainerDark = Color(
+    0xFF312E81,
+  ); // Low-Glow Deep Purple
+  static const _tertiaryDark = Color(0xFFFBBF24); // Soft Amber Highlight
+  static const _backgroundDark        = Color(0xFF0B0D12);
+  static const _surfaceDark           = Color(0xFF0F121A);
+  static const _surfaceContainerLowDark   = Color(0xFF161A24); // Shimmer Highlight
+  static const _surfaceContainerDark      = Color(0xFF1D2230); // Shimmer Base Bone
+  static const _surfaceContainerHighDark  = Color(0xFF252B3D);
+
+
+  // Light Surfaces
+  static const _backgroundLight = Color(0xFFF8F9FA);
+  static const _surfaceLight = Color(0xFFF8F9FA);
+  static const _surfaceContainerLowLight = Color(0xFFF1F3F5);
+  static const _surfaceContainerLight = Color(0xFFE9ECEF);
+  static const _surfaceContainerHighLight = Color(0xFFDEE2E6);
+
+  // Dark Surfaces
+  // static const _backgroundDark = Color(0xFF0F1115);
+  // static const _surfaceDark = Color(0xFF161920);
 
   // Text/outline
-  static const _onSurface = Color(0xFF191C1D);
-  static const _onSurfaceVariant = Color(0xFF464555);
-  static const _outline = Color(0xFF777587);
-  static const _outlineVariant = Color(0xFFC7C4D8);
+  static const _onSurfaceLight = Color(0xFF191C1D);
+  static const _onSurfaceDark = Color(0xFFE2E2E5);
+  static const _onSurfaceVariantLight = Color(0xFF464555);
+  static const _onSurfaceVariantDark = Color(0xFFC7C5D8);
+  static const _outlineLight = Color(0xFF777587);
+  static const _outlineDark = Color(0xFF918F9C);
 
-  // Semantic extras
-  static const _textMain = Color(0xFF111827);
-  static const _textMuted = Color(0xFF6B7280);
-  static const _success = Color(0xFF10B981);
-  static const _warning = Color(0xFFF59E0B);
-  static const _info = Color(0xFF3B82F6);
-  static const _borderSubtle = Color(0xFFE5E7EB);
+  // Semantic extras (Light)
+  static const _textMainLight = Color(0xFF111827);
+  static const _textMutedLight = Color(0xFF6B7280);
+  static const _successLight = Color(0xFF10B981);
+  static const _warningLight = Color(0xFFF59E0B);
+  static const _infoLight = Color(0xFF3B82F6);
+  static const _borderSubtleLight = Color(0xFFE5E7EB);
 
-  static ColorScheme _lightScheme = const ColorScheme(
+  // Semantic extras (Dark)
+  static const _textMainDark = Color(0xFFF9FAFB);
+  static const _textMutedDark = Color(0xFF9CA3AF);
+  static const _successDark = Color(0xFF34D399);
+  static const _warningDark = Color(0xFFFBBF24);
+  static const _infoDark = Color(0xFF60A5FA);
+  static const _borderSubtleDark = Color(0xFF374151);
+
+  static final ColorScheme _lightScheme = const ColorScheme(
+    surfaceContainer: _surfaceContainerLight,
+    surfaceContainerHigh: _surfaceContainerHighLight,
+    surfaceContainerLow: _surfaceContainerLowLight,
     brightness: Brightness.light,
     primary: _primary,
     onPrimary: Colors.white,
@@ -98,158 +131,205 @@ class AppTheme {
     onError: Colors.white,
     errorContainer: Color(0xFFFFDAD6),
     onErrorContainer: Color(0xFF93000A),
-    surface: _surface,
-    onSurface: _onSurface,
-    onSurfaceVariant: _onSurfaceVariant,
-    outline: _outline,
-    outlineVariant: _outlineVariant,
+    surface: _surfaceLight,
+    onSurface: _onSurfaceLight,
+    onSurfaceVariant: _onSurfaceVariantLight,
+    outline: _outlineLight,
+    outlineVariant: _borderSubtleLight,
     shadow: Colors.black,
     scrim: Colors.black,
     inverseSurface: Color(0xFF2E3132),
     onInverseSurface: Color(0xFFF0F1F2),
     inversePrimary: Color(0xFFC3C0FF),
+    surfaceTint: Colors.transparent, //Color(0xFF4D44E3),
+  );
+
+  static final ColorScheme _darkScheme = const ColorScheme(
+    surfaceContainer: _surfaceContainerDark,
+    surfaceContainerHigh: _surfaceContainerHighDark,
+    surfaceContainerLow: _surfaceContainerLowDark,
+    brightness: Brightness.dark,
+    primary: _primaryDark,
+    onPrimary: Colors.white,
+    primaryContainer: _primaryContainerDark,
+    onPrimaryContainer: Color(0xFFE0E0FF),
+    secondary: _secondaryDark,
+    onSecondary: Colors.white,
+    secondaryContainer: _secondaryContainerDark,
+    onSecondaryContainer: Color(0xFFFFFBFF),
+    tertiary: _tertiaryDark,
+    onTertiary: Colors.white,
+    tertiaryContainer: Color(0xFFA44100),
+    onTertiaryContainer: Color(0xFFFFD2BE),
+    error: _error,
+    onError: Colors.white,
+    errorContainer: Color(0xFF93000A),
+    onErrorContainer: Color(0xFFFFDAD6),
+    surface: _surfaceDark,
+    onSurface: _onSurfaceDark,
+    onSurfaceVariant: _onSurfaceVariantDark,
+    outline: _outlineDark,
+    outlineVariant: _borderSubtleDark,
+    shadow: Colors.black,
+    scrim: Colors.black,
+    inverseSurface: Color(0xFFF0F1F2),
+    onInverseSurface: Color(0xFF2E3132),
+    inversePrimary: _primary,
     surfaceTint: Color(0xFF4D44E3),
   );
 
-  static ThemeData get light {
-    final s = _lightScheme;
+  static ThemeData get light => _buildTheme(
+    _lightScheme,
+    _backgroundLight,
+    const AppSemanticColors(
+      textMain: _textMainLight,
+      textMuted: _textMutedLight,
+      success: _successLight,
+      warning: _warningLight,
+      info: _infoLight,
+      borderSubtle: _borderSubtleLight,
+    ),
+  );
 
+  static ThemeData get dark => _buildTheme(
+    _darkScheme,
+    _backgroundDark,
+    const AppSemanticColors(
+      textMain: _textMainDark,
+      textMuted: _textMutedDark,
+      success: _successDark,
+      warning: _warningDark,
+      info: _infoDark,
+      borderSubtle: _borderSubtleDark,
+    ),
+  );
+
+  static ThemeData _buildTheme(
+    ColorScheme s,
+    Color bg,
+    AppSemanticColors extension,
+  ) {
     return ThemeData(
       useMaterial3: true,
       colorScheme: s,
-      scaffoldBackgroundColor: _background,
+      scaffoldBackgroundColor: bg,
       fontFamily: 'Inter',
-      extensions: const [
-        AppSemanticColors(
-          textMain: _textMain,
-          textMuted: _textMuted,
-          success: _success,
-          warning: _warning,
-          info: _info,
-          borderSubtle: _borderSubtle,
-        ),
-      ],
+      extensions: [extension],
+
+      dialogTheme: DialogThemeData(
+        surfaceTintColor: Colors.transparent, // Blocks the blue elevation tint overlay
+        backgroundColor: _primaryContainer,
+        elevation: 2// Forces your exact clean surface background
+      ),
 
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: s.surface,
-        foregroundColor: _textMain,
-        titleTextStyle: const TextStyle(
+        foregroundColor: extension.textMain,
+        titleTextStyle: TextStyle(
           fontFamily: 'Inter',
           fontSize: 20,
-          // headline-md-ish desktop
           fontWeight: FontWeight.w600,
           height: 1.4,
-          color: _textMain,
+          color: extension.textMain,
         ),
       ),
 
-      // Typography mapped from design.md
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         displayLarge: TextStyle(
           fontFamily: 'Inter',
           fontSize: 32,
           fontWeight: FontWeight.w700,
           height: 1.25,
-          // 40/32
           letterSpacing: -0.64,
-          // -0.02em * 32
-          color: _textMain,
+          color: extension.textMain,
         ),
         headlineLarge: TextStyle(
           fontFamily: 'Inter',
           fontSize: 24,
           fontWeight: FontWeight.w600,
           height: 1.333,
-          // 32/24
           letterSpacing: -0.24,
-          color: _textMain,
+          color: extension.textMain,
         ),
         headlineMedium: TextStyle(
           fontFamily: 'Inter',
           fontSize: 20,
           fontWeight: FontWeight.w600,
           height: 1.4,
-          // 28/20
-          color: _textMain,
+          color: extension.textMain,
         ),
         bodyLarge: TextStyle(
           fontFamily: 'Inter',
           fontSize: 16,
           fontWeight: FontWeight.w400,
           height: 1.5,
-          // 24/16
-          color: _textMain,
+          color: extension.textMain,
         ),
         bodyMedium: TextStyle(
           fontFamily: 'Inter',
           fontSize: 14,
           fontWeight: FontWeight.w400,
           height: 1.428,
-          // 20/14
-          color: _textMain,
+          color: extension.textMain,
         ),
         bodySmall: TextStyle(
           fontFamily: 'Inter',
           fontSize: 13,
           fontWeight: FontWeight.w400,
           height: 1.384,
-          // 18/13
-          color: _textMain,
+          color: extension.textMain,
         ),
         labelMedium: TextStyle(
           fontFamily: 'Inter',
           fontSize: 12,
           fontWeight: FontWeight.w600,
           height: 1.333,
-          // 16/12
           letterSpacing: 0.6,
-          // 0.05em * 12
-          color: _textMuted,
+          color: extension.textMuted,
         ),
         labelSmall: TextStyle(
           fontFamily: 'Inter',
           fontSize: 11,
           fontWeight: FontWeight.w500,
           height: 1.273,
-          // 14/11
-          color: _textMuted,
+          color: extension.textMuted,
         ),
       ),
 
       cardTheme: CardThemeData(
         elevation: 0,
-        color: Colors.white,
+        color: s.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8), // default rounded
-          side: const BorderSide(color: _borderSubtle, width: 1),
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: extension.borderSubtle, width: 1),
         ),
       ),
 
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: s.surface,
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 12,
           vertical: 12,
         ),
-        labelStyle: const TextStyle(
+        labelStyle: TextStyle(
           fontFamily: 'Inter',
           fontSize: 11,
           fontWeight: FontWeight.w500,
           height: 1.273,
-          color: _textMuted,
+          color: extension.textMuted,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _borderSubtle),
+          borderSide: BorderSide(color: extension.borderSubtle),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _borderSubtle),
+          borderSide: BorderSide(color: extension.borderSubtle),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -278,265 +358,18 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(44),
-          foregroundColor: s.primary,
-          side: BorderSide(color: s.primary.withValues(alpha: 0.35)),
+          foregroundColor: s.brightness == Brightness.light
+              ? s.primary
+              : extension.textMain,
+          side: BorderSide(color: extension.borderSubtle, width: 1),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      ),
-
-      chipTheme: ChipThemeData(
-        shape: const StadiumBorder(),
-        side: BorderSide.none,
-        labelStyle: const TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.3,
-        ),
-        backgroundColor: _surfaceContainer,
-        selectedColor: s.primaryContainer.withValues(alpha: 0.18),
-      ),
-
-      tabBarTheme: TabBarThemeData(
-        labelColor: _textMain,
-        unselectedLabelColor: _textMuted,
-        indicator: UnderlineTabIndicator(
-          borderSide: BorderSide(color: s.primary, width: 2),
-        ),
-        labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-      ),
-
-      dividerTheme: const DividerThemeData(
-        color: _borderSubtle,
-        thickness: 1,
-        space: 1,
-      ),
-
-      snackBarTheme: SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: s.inverseSurface,
-        contentTextStyle: TextStyle(color: s.onInverseSurface),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: s.primary,
-        foregroundColor: s.onPrimary,
-      ),
-
-      progressIndicatorTheme: ProgressIndicatorThemeData(color: s.primary),
-    );
-  }
-
-  static ThemeData get dark {
-    const scheme = ColorScheme(
-      brightness: Brightness.dark,
-
-      // Brand
-      primary: Color(0xFFC0C1FF),
-      onPrimary: Color(0xFF1000A9),
-      primaryContainer: Color(0xFF8083FF),
-      onPrimaryContainer: Color(0xFF0D0096),
-
-      secondary: Color(0xFFC3C0FF),
-      onSecondary: Color(0xFF1D00A5),
-      secondaryContainer: Color(0xFF3626CE),
-      onSecondaryContainer: Color(0xFFB3B1FF),
-
-      tertiary: Color(0xFF7BD0FF),
-      onTertiary: Color(0xFF00354A),
-      tertiaryContainer: Color(0xFF009BD1),
-      onTertiaryContainer: Color(0xFF002D40),
-
-      error: Color(0xFFFFB4AB),
-      onError: Color(0xFF690005),
-      errorContainer: Color(0xFF93000A),
-      onErrorContainer: Color(0xFFFFDAD6),
-
-      // Surfaces
-      surface: Color(0xFF0B1326),
-      onSurface: Color(0xFFDAE2FD),
-      onSurfaceVariant: Color(0xFFC7C4D7),
-
-      outline: Color(0xFF908FA0),
-      outlineVariant: Color(0xFF464554),
-
-      inverseSurface: Color(0xFFDAE2FD),
-      onInverseSurface: Color(0xFF283044),
-      inversePrimary: Color(0xFF494BD6),
-
-      shadow: Colors.black,
-      scrim: Colors.black,
-      surfaceTint: Color(0xFFC0C1FF),
-    );
-
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: scheme,
-      scaffoldBackgroundColor: const Color(0xFF0F172A),
-      fontFamily: 'Inter',
-
-      // Keep your extension if you already added it
-      extensions: const [
-        AppSemanticColors(
-          textMain: Color(0xFFF8FAFC),
-          textMuted: Color(0xFF94A3B8),
-          success: Color(0xFF10B981),
-          warning: Color(0xFFF59E0B),
-          info: Color(0xFF38BDF8),
-          borderSubtle: Color(0xFF334155),
-        ),
-      ],
-
-      appBarTheme: const AppBarTheme(
-        centerTitle: false,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        backgroundColor: Color(0xFF0B1326),
-        foregroundColor: Color(0xFFF8FAFC),
-        titleTextStyle: TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          height: 1.4,
-          color: Color(0xFFF8FAFC),
-        ),
-      ),
-
-      cardTheme: CardThemeData(
-        elevation: 0,
-        color: const Color(0xFF1E293B),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: const BorderSide(color: Color(0xFF334155), width: 1),
-        ),
-      ),
-
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: const Color(0xFF0F172A),
-        // recessed input
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 12,
-        ),
-        hintStyle: const TextStyle(
-          fontFamily: 'Inter',
-          color: Color(0xFF64748B),
-        ),
-        labelStyle: const TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          height: 1.27,
-          color: Color(0xFF94A3B8),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFF43F5E)),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFF43F5E), width: 1.2),
-        ),
-      ),
-
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(44),
-          backgroundColor: const Color(0xFF6366F1),
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           textStyle: const TextStyle(
             fontFamily: 'Inter',
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
         ),
-      ),
-
-      // "Secondary button" style from your spec
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          minimumSize: const Size.fromHeight(44),
-          backgroundColor: const Color(0xFF1E293B),
-          foregroundColor: const Color(0xFFF8FAFC),
-          side: const BorderSide(color: Color(0xFF334155)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      ),
-
-      chipTheme: ChipThemeData(
-        shape: const StadiumBorder(),
-        side: BorderSide.none,
-        labelStyle: const TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFFF8FAFC),
-        ),
-        backgroundColor: const Color(0xFF334155),
-        selectedColor: const Color(0xFF243144),
-      ),
-
-      checkboxTheme: CheckboxThemeData(
-        fillColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected))
-            return const Color(0xFF6366F1);
-          return const Color(0xFF0F172A);
-        }),
-        checkColor: const WidgetStatePropertyAll(Colors.white),
-        side: const BorderSide(color: Color(0xFF334155)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-      ),
-
-      radioTheme: const RadioThemeData(
-        fillColor: WidgetStatePropertyAll(Color(0xFF6366F1)),
-      ),
-
-      dividerTheme: const DividerThemeData(
-        color: Color(0xFF334155),
-        thickness: 1,
-        space: 1,
-      ),
-
-      tabBarTheme: const TabBarThemeData(
-        labelColor: Color(0xFFF8FAFC),
-        unselectedLabelColor: Color(0xFF94A3B8),
-        indicator: UnderlineTabIndicator(
-          borderSide: BorderSide(color: Color(0xFF6366F1), width: 2),
-        ),
-        labelStyle: TextStyle(fontWeight: FontWeight.w600),
-      ),
-
-      snackBarTheme: SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF1E293B),
-        contentTextStyle: const TextStyle(color: Color(0xFFF8FAFC)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: Color(0xFF6366F1),
-        foregroundColor: Colors.white,
-      ),
-
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: Color(0xFF6366F1),
       ),
     );
   }

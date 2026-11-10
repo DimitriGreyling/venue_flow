@@ -174,11 +174,11 @@ class _AppointmentTabletScreenState
                 shape: BoxShape.circle,
               ),
               todayDecoration: BoxDecoration(
-                color: cs.secondary.withValues(alpha: 0.3),
+                color: cs.primary.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
               selectedDecoration: BoxDecoration(
-                color: cs.secondaryFixed,
+                color: cs.secondary,
                 shape: BoxShape.circle,
               ),
             ),
