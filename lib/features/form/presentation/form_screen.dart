@@ -51,7 +51,9 @@ class _FormScreenState extends ConsumerState<FormScreen> {
   }
 
   Future<void> _loadForm() async {
-    if (widget.formId == null) return;
+print('Widget variables ${widget.formId} ${widget.isAdd}');
+    if (widget.formId == null || widget.isAdd) return;
+
     setState(() {
       _isLoading = true;
     });
@@ -136,6 +138,9 @@ class _FormScreenState extends ConsumerState<FormScreen> {
             selectedFormVersion: _selectedVersion,
             formId: widget.formId,
             latestVersion: _latestVersion,
+            refreshUI: (value) {
+              _loadForm();
+            },
           ),
         ),
         desktop: (_) => Skeletonizer(

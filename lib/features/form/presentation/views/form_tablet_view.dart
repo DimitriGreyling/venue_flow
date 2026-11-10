@@ -34,11 +34,13 @@ class FormTabletView extends ConsumerStatefulWidget {
     this.selectedFormVersion,
     this.formId,
     this.latestVersion,
+    this.refreshUI,
   });
 
   final FormVersion? selectedFormVersion;
   final int? latestVersion;
   final String? formId;
+  final ValueChanged<void>? refreshUI;
 
   @override
   ConsumerState<FormTabletView> createState() => _FormTabletViewState();
@@ -238,7 +240,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
       // Wrap initialization in a try-catch or safe condition check
       // to prevent it from crashing the entire draft restoration loop
-      if (_createFormRequest.schema?.pages?.isNotEmpty ?? false) {
+      if (_createFormRequest.schema?.pages.isNotEmpty ?? false) {
         try {
           _initializeFieldIds();
         } catch (e) {
@@ -303,7 +305,9 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
         );
       }
 
-      Navigator.of(context).pop();
+      if(widget.refreshUI != null){
+        widget.refreshUI?.call(true);
+      }
     } catch (e, stackTrace) {
       debugPrint('Failed to save form draft: $e');
       debugPrintStack(stackTrace: stackTrace);
