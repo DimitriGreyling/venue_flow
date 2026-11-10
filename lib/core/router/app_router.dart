@@ -50,17 +50,19 @@ GoRouter router(Ref ref) {
         path: '/forms',
         builder: (_, __) => const FormTableScreen(),
         routes: [
+          // 1. Static routes go first!
+          GoRoute(
+            path: 'add',
+            builder: (_, state) {
+              return const FormScreen(isAdd: true);
+            },
+          ),
+          // 2. Wildcards/Parameters go last
           GoRoute(
             path: ':formId',
             builder: (_, state) {
               final formId = state.pathParameters['formId']!;
               return FormScreen(formId: formId);
-            },
-          ),
-          GoRoute(
-            path: 'add',
-            builder: (_, state) {
-              return FormScreen(isAdd: true);
             },
           ),
         ],

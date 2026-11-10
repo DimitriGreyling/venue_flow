@@ -20,6 +20,7 @@ import 'package:venue_flow_app/features/form/domain/form_field_data.dart';
 import 'package:venue_flow_app/features/form/domain/form_field_schema.dart';
 import 'package:venue_flow_app/features/form/domain/form_page_schema.dart';
 import 'package:venue_flow_app/features/form/domain/form_schema.dart';
+import 'package:venue_flow_app/features/form/domain/form_version.dart';
 
 import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_field_dialog.dart';
 import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name_dialog.dart';
@@ -28,7 +29,18 @@ import 'package:venue_flow_app/features/form/presentation/widgets/form_field_wid
 import '../../data/form_controller.dart';
 
 class FormTabletView extends ConsumerStatefulWidget {
-  const FormTabletView({super.key});
+  const FormTabletView({
+    super.key,
+    this.selectedFormVersion,
+    this.formId,
+    this.latestVersion,
+    this.refreshUI,
+  });
+
+  final FormVersion? selectedFormVersion;
+  final int? latestVersion;
+  final String? formId;
+  final ValueChanged<void>? refreshUI;
 
   @override
   ConsumerState<FormTabletView> createState() => _FormTabletViewState();
@@ -157,7 +169,32 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   void initState() {
     super.initState();
 
-    _restoreDraft();
+    // Check that the list is NOT null AND contains at least one item
+    if (widget.selectedFormVersion != null) {
+      // Safely extract the string, ensuring it isn't empty or blank
+      final rawJson = widget.selectedFormVersion!.schemaJson;
+
+      if (rawJson != null && rawJson.trim().isNotEmpty) {
+        try {
+          final schemaObject = FormSchema.fromJson(jsonDecode(rawJson));
+
+          setState(() {
+            _createFormRequest = _createFormRequest.copyWith(
+              schema: schemaObject,
+            );
+          });
+          _updateRequest(_createFormRequest);
+        } catch (e) {
+          // If parsing fails, fall back to restoring draft
+          _restoreDraft();
+        }
+      } else {
+        _restoreDraft();
+      }
+    } else {
+      // If formVersions is null or completely empty, safely restore the draft
+      _restoreDraft();
+    }
   }
 
   Future<void> _restoreDraft() async {
@@ -165,41 +202,56 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
-
       final savedDraft = prefs.getString(_draftStorageKey);
 
-      if (savedDraft != null) {
+      if (savedDraft != null && savedDraft.isNotEmpty) {
         final Map<String, dynamic> data =
             jsonDecode(savedDraft) as Map<String, dynamic>;
 
-        final requestJson = Map<String, dynamic>.from(data['request'] as Map);
+        if (data.containsKey('request') && data['request'] is Map) {
+          final requestJson = Map<String, dynamic>.from(data['request'] as Map);
+          final restoredRequest = CreateFormRequest.fromJson(requestJson);
 
-        final restoredRequest = CreateFormRequest.fromJson(requestJson);
+          // Safely extract pages and guarantee it's not empty before picking a fallback
+          final pages = restoredRequest.schema?.pages ?? [];
+          final savedPageId = data['selectedPageId'] as String?;
 
-        final pages = restoredRequest.schema?.pages ?? [];
+          final selectedPageExists =
+              savedPageId != null &&
+              pages.any((page) => page.id == savedPageId);
 
-        final savedPageId = data['selectedPageId'] as String?;
+          if (mounted) {
+            setState(() {
+              _createFormRequest = restoredRequest;
 
-        final selectedPageExists = pages.any((page) => page.id == savedPageId);
-
-        if (mounted) {
-          setState(() {
-            _createFormRequest = restoredRequest;
-
-            if (selectedPageExists) {
-              _selectedPageId = savedPageId!;
-            } else if (pages.isNotEmpty) {
-              _selectedPageId = pages.first.id;
-            }
-          });
+              if (selectedPageExists) {
+                _selectedPageId = savedPageId;
+              } else if (pages.isNotEmpty) {
+                // Hardened Guard: Double check the list actually has items before calling .first
+                _selectedPageId = pages.first.id;
+              } else {
+                // Fallback: Default to empty string or null if no pages exist yet
+                _selectedPageId = '';
+              }
+            });
+          }
         }
       }
 
-      _initializeFieldIds();
+      // Wrap initialization in a try-catch or safe condition check
+      // to prevent it from crashing the entire draft restoration loop
+      if (_createFormRequest.schema?.pages.isNotEmpty ?? false) {
+        try {
+          _initializeFieldIds();
+        } catch (e) {
+          debugPrint('Warning: _initializeFieldIds encountered an error: $e');
+          // Fallback or safe initialization method if needed
+        }
+      }
 
       _isRestoringDraft = false;
 
-      // Save the restored state, including any newly generated IDs.
+      // Save the restored state safely
       _scheduleDraftSave();
     } catch (e, stackTrace) {
       debugPrint('Failed to restore form draft: $e');
@@ -207,7 +259,10 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
       _isRestoringDraft = false;
 
-      _initializeFieldIds();
+      // Hardened Guard: Only initialize if the current state can support it safely
+      if (_createFormRequest.schema?.pages.isNotEmpty ?? false) {
+        _initializeFieldIds();
+      }
     }
   }
 
@@ -217,6 +272,46 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
     _draftSaveTimer?.cancel();
 
     _draftSaveTimer = Timer(const Duration(milliseconds: 50), _saveDraft);
+  }
+
+  Future<void> _updateDraft() async {
+    if (_isRestoringDraft) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final formController = ref.read(formControllerProvider.notifier);
+
+      await formController.addNewFormVersion(
+        formId: widget.formId ?? '',
+        formVersion: FormVersion(
+          id: widget.formId ?? '',
+          formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
+          createdAt: DateTime.now(),
+          reviewedAt: DateTime.now(),
+          schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
+          status: 'DRAFT',
+          submittedAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          versionNumber: widget.latestVersion != null
+              ? widget.latestVersion! + 1
+              : 1,
+        ),
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Form version created successfully!')),
+        );
+      }
+
+      if(widget.refreshUI != null){
+        widget.refreshUI?.call(true);
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Failed to save form draft: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 
   Future<void> _saveDraft() async {
@@ -246,6 +341,11 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   }
 
   Future<void> _createForm() async {
+    if (widget.selectedFormVersion != null) {
+      await _updateDraft();
+      return;
+    }
+
     final formController = ref.read(formControllerProvider.notifier);
 
     try {
@@ -340,16 +440,6 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   // ---------------------------------------------------------------------------
   // PAGE MANAGEMENT
   // ---------------------------------------------------------------------------
-
-  // void _selectPage(String pageId) {
-  //   if (pageId == _selectedPageId) return;
-  //
-  //   setState(() {
-  //     _selectedPageId = pageId;
-  //     _selectedFieldForEdit = null;
-  //     _selectedOrderNumber = null;
-  //   });
-  // }
 
   void _selectPage(String pageId) {
     if (pageId == _selectedPageId) return;

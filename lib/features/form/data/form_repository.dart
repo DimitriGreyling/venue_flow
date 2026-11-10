@@ -4,6 +4,7 @@ import 'package:venue_flow_app/core/domain/paged_response.dart';
 import 'package:venue_flow_app/features/form/domain/create_form_request.dart';
 import 'package:venue_flow_app/features/form/domain/create_form_response.dart';
 import 'package:venue_flow_app/features/form/domain/form_list_item.dart';
+import 'package:venue_flow_app/features/form/domain/form_version.dart';
 
 import '../../../core/network/dio_client.dart';
 import '../domain/form_list_id.dart';
@@ -40,6 +41,45 @@ class FormRepository {
   Future<FormListItem> getFormById({required String formId}) async {
     final response = await _dio.get('/forms/${formId}');
     return FormListItem.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  Future<List<FormVersion>> loadFormVersionsById({
+    required String formId,
+  }) async {
+    final response = await _dio.get('/forms/$formId/versions');
+    final data = response.data;
+
+    // Supports either a direct JSON array or a common wrapped response.
+    final List<dynamic> items;
+
+    if (data is List) {
+      items = data;
+    } else if (data is Map<String, dynamic> && data['items'] is List) {
+      items = data['items'] as List<dynamic>;
+    } else if (data is Map<String, dynamic> && data['data'] is List) {
+      items = data['data'] as List<dynamic>;
+    } else {
+      throw const FormatException(
+        'Unexpected appointments API response format.',
+      );
+    }
+
+    return items.map((item) => FormVersion.fromJson(item)).toList();
+  }
+
+  ///
+  /// Add a new form version to an existing form
+  ///
+  Future<FormVersion> addNewFormVersion({
+    required String formId,
+    required FormVersion formVersion,
+  }) async {
+    final response = await _dio.post(
+      '/forms/$formId/form-version',
+      data: formVersion.toJson(),
+    );
+
+    return FormVersion.fromJson(response.data);
   }
 }
 
