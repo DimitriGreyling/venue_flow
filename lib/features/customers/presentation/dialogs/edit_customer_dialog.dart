@@ -163,34 +163,76 @@ class _EditCustomerDialogState extends ConsumerState<EditCustomerDialog>
 
                 const SizedBox(height: 16),
 
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //   children: [
+                //     ElevatedButton(
+                //       style: ElevatedButton.styleFrom(
+                //         backgroundColor: cs.error,
+                //         foregroundColor: cs.onError,
+                //       ),
+                //       onPressed: _isSaving
+                //           ? null
+                //           : () => Navigator.of(context).pop(false),
+                //       child: const Text('Cancel'),
+                //     ),
+                //     ElevatedButton(
+                //       style: ElevatedButton.styleFrom(
+                //         backgroundColor: cs.primary,
+                //         foregroundColor: cs.onPrimary,
+                //       ),
+                //       onPressed: _isSaving
+                //           ? null
+                //           : () => _save(cs: cs, sem: sem),
+                //       child: _isSaving
+                //           ? const SizedBox(
+                //               width: 16,
+                //               height: 16,
+                //               child: CircularProgressIndicator(strokeWidth: 2),
+                //             )
+                //           : const Text('Save'),
+                //     ),
+                //   ],
+                // ),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: cs.error,
-                        foregroundColor: cs.onError,
+                        backgroundColor: Colors.transparent,
+                        // Removes solid background
+                        shadowColor: Colors.transparent,
+                        // Removes shadow elevation
+                        side: BorderSide(color: cs.error, width: 1.5),
+                        // Adds outline
+                        foregroundColor: cs.onError, // Text colour
                       ),
                       onPressed: _isSaving
                           ? null
                           : () => Navigator.of(context).pop(false),
-                      child: const Text('Cancel'),
+                      child: Text('Cancel', style: TextStyle(color: cs.error)),
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: cs.primary,
-                        foregroundColor: cs.onPrimary,
+                        backgroundColor: Colors.transparent,
+                        // Removes solid background
+                        shadowColor: Colors.transparent,
+                        // Removes shadow elevation
+                        side: BorderSide(color: cs.primary, width: 1.5),
+                        // Adds outline
+                        foregroundColor: cs.onPrimary, // Text colour
                       ),
                       onPressed: _isSaving
                           ? null
                           : () => _save(cs: cs, sem: sem),
                       child: _isSaving
                           ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Save'),
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                          : Text('Update',style: TextStyle(color: cs.primary)),
                     ),
                   ],
                 ),

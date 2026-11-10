@@ -18,6 +18,7 @@ class DeleteFormDialog extends ConsumerStatefulWidget {
 
   static Future<bool?> show(BuildContext context, FormListItem formListItem) {
     return showDialog<bool>(
+      barrierDismissible: false,
       context: context,
       builder: (_) => DeleteFormDialog(formListItem: formListItem),
     );
@@ -102,7 +103,19 @@ class _DeleteCustomerDialogState extends ConsumerState<DeleteFormDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Remove Customer', style: textTheme.headlineSmall),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Remove Form', style: textTheme.headlineSmall),
+                    IconButton(
+                      tooltip: 'Close remove form',
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(Icons.close, color: cs.error),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
 
                 Flexible(
@@ -125,18 +138,28 @@ class _DeleteCustomerDialogState extends ConsumerState<DeleteFormDialog> {
                   children: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: cs.error,
-                        foregroundColor: cs.onError,
+                        backgroundColor: Colors.transparent,
+                        // Removes solid background
+                        shadowColor: Colors.transparent,
+                        // Removes shadow elevation
+                        side: BorderSide(color: cs.error, width: 1.5),
+                        // Adds outline
+                        foregroundColor: cs.onError, // Text colour
                       ),
                       onPressed: _isSaving
                           ? null
                           : () => Navigator.of(context).pop(false),
-                      child: const Text('Cancel'),
+                      child: Text('Cancel', style: TextStyle(color: cs.error)),
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: cs.primary,
-                        foregroundColor: cs.onPrimary,
+                        backgroundColor: Colors.transparent,
+                        // Removes solid background
+                        shadowColor: Colors.transparent,
+                        // Removes shadow elevation
+                        side: BorderSide(color: cs.primary, width: 1.5),
+                        // Adds outline
+                        foregroundColor: cs.onPrimary, // Text colour
                       ),
                       onPressed: _isSaving
                           ? null
@@ -147,7 +170,7 @@ class _DeleteCustomerDialogState extends ConsumerState<DeleteFormDialog> {
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Save'),
+                          : Text('Remove',style: TextStyle(color: cs.primary)),
                     ),
                   ],
                 ),
