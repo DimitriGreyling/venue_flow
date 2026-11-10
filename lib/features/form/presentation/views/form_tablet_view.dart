@@ -29,7 +29,12 @@ import 'package:venue_flow_app/features/form/presentation/widgets/form_field_wid
 import '../../data/form_controller.dart';
 
 class FormTabletView extends ConsumerStatefulWidget {
-  const FormTabletView({super.key, this.selectedFormVersion, this.formId,this.latestVersion});
+  const FormTabletView({
+    super.key,
+    this.selectedFormVersion,
+    this.formId,
+    this.latestVersion,
+  });
 
   final FormVersion? selectedFormVersion;
   final int? latestVersion;
@@ -286,9 +291,19 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
           status: 'DRAFT',
           submittedAt: DateTime.now(),
           updatedAt: DateTime.now(),
-          versionNumber: widget.latestVersion != null ? widget.latestVersion!+1 : 1,
+          versionNumber: widget.latestVersion != null
+              ? widget.latestVersion! + 1
+              : 1,
         ),
       );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Form version created successfully!')),
+        );
+      }
+
+      Navigator.of(context).pop();
     } catch (e, stackTrace) {
       debugPrint('Failed to save form draft: $e');
       debugPrintStack(stackTrace: stackTrace);
