@@ -257,7 +257,7 @@ class _AddCustomerDialogState extends ConsumerState<AddCustomerDialog>
                         // Removes shadow elevation
                         side: BorderSide(color: cs.primary, width: 1.5),
                         // Adds outline
-                        foregroundColor: cs.onPrimary, // Text colour
+                        foregroundColor: cs.primary, // Text colour
                       ),
                       onPressed: _isSaving
                           ? null

@@ -218,22 +218,22 @@ class _LoginTabletViewState extends ConsumerState<LoginTabletView>
                         child: ElevatedButton(
                           onPressed: isLoading ? null : _handleSignIn,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4F46E5),
-                            foregroundColor: Colors.white,
+                            backgroundColor: cs.primary,
+                            foregroundColor: cs.onPrimary,
                             elevation: 6,
                             shadowColor: const Color(
                               0xFF4F46E5,
-                            ).withOpacity(0.4),
+                            ).withValues(alpha: 0.4),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           child: isLoading
-                              ? const SizedBox(
+                              ? SizedBox(
                             width: 24,
                             height: 24,
                             child: CircularProgressIndicator(
-                              color: Colors.white,
+                              color: cs.onPrimary,
                               strokeWidth: 2.5,
                             ),
                           )
