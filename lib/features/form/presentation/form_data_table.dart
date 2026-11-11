@@ -54,7 +54,7 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withValues(alpha: 0.1),
               // Extremely soft shadow
               blurRadius: 10,
               // Makes the shadow smooth

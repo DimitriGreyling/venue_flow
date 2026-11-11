@@ -31,7 +31,6 @@ class FormRepository {
       '/forms',
       queryParameters: {'page': page, 'pageSize': pageSize},
     );
-    print('FormRepository.getForms response: ${response}');
     return PagedResponse<FormListId>.fromJson(
       response.data as Map<String, dynamic>,
       (json) => FormListId.fromJson(json as Map<String, dynamic>),

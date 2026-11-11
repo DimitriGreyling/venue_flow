@@ -56,10 +56,13 @@ class _CustomerDataTableState extends ConsumerState<CustomerDataTable> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05), // Extremely soft shadow
-              blurRadius: 10,                        // Makes the shadow smooth
-              spreadRadius: 0,                       // Prevents it from looking harsh
-              offset: const Offset(0, 4),            // Pushes the shadow down slightly
+              color: Colors.black.withValues(alpha: 0.1),
+              // Extremely soft shadow
+              blurRadius: 10,
+              // Makes the shadow smooth
+              spreadRadius: 0,
+              // Prevents it from looking harsh
+              offset: const Offset(0, 4), // Pushes the shadow down slightly
             ),
           ],
         ),
@@ -79,77 +82,78 @@ class _CustomerDataTableState extends ConsumerState<CustomerDataTable> {
                       rows: widget.isLoading
                           ? _buildLoadingRows(cs)
                           : widget.customers.items.map((customer) {
-                        return buildAsyncDataRow<Customer>(
-                          cs: cs,
-                          value: ref.watch(
-                            customerDetailsProvider(customer.userId),
-                          ),
-                          cellCount: widget.columns.length,
-                          buildCells: (customer) => [
-                            DataCell(Text(customer.fullName)),
-                            DataCell(Text(customer.email ?? '')),
-                            DataCell(Text(customer.email ?? '')),
-                            DataCell(
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    onPressed: () async {
-                                      await EditCustomerDialog.show(
-                                        context,
-                                        customer: UpdateCustomer(
-                                          userId: customer.userId,
-                                          firstName: customer.firstName,
-                                          lastName: customer.lastName,
-                                          email: customer.email,
+                              return buildAsyncDataRow<Customer>(
+                                cs: cs,
+                                value: ref.watch(
+                                  customerDetailsProvider(customer.userId),
+                                ),
+                                cellCount: widget.columns.length,
+                                buildCells: (customer) => [
+                                  DataCell(Text(customer.fullName)),
+                                  DataCell(Text(customer.email ?? '')),
+                                  DataCell(Text(customer.email ?? '')),
+                                  DataCell(
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          onPressed: () async {
+                                            await EditCustomerDialog.show(
+                                              context,
+                                              customer: UpdateCustomer(
+                                                userId: customer.userId,
+                                                firstName: customer.firstName,
+                                                lastName: customer.lastName,
+                                                email: customer.email,
+                                              ),
+                                            );
+
+                                            if (!mounted) return;
+
+                                            widget.requiresRefresh?.call(true);
+
+                                            ref.invalidate(
+                                              customerDetailsProvider(
+                                                customer.userId,
+                                              ),
+                                            );
+                                          },
+                                          tooltip: 'Edit ${customer.fullName}',
+                                          icon: Icon(
+                                            Mdi.pencil,
+                                            color: cs.secondary,
+                                          ),
                                         ),
-                                      );
+                                        IconButton(
+                                          onPressed: () async {
+                                            await DeleteCustomerDialog.show(
+                                              context,
+                                              customer,
+                                            );
 
-                                      if (!mounted) return;
+                                            if (!mounted) return;
 
-                                      widget.requiresRefresh?.call(true);
+                                            widget.requiresRefresh?.call(true);
 
-                                      ref.invalidate(
-                                        customerDetailsProvider(
-                                          customer.userId,
+                                            ref.invalidate(
+                                              customerDetailsProvider(
+                                                customer.userId,
+                                              ),
+                                            );
+                                          },
+                                          tooltip:
+                                              'Remove ${customer.fullName}',
+                                          icon: Icon(
+                                            Mdi.delete,
+                                            color: cs.error,
+                                          ),
                                         ),
-                                      );
-                                    },
-                                    tooltip: 'Edit ${customer.fullName}',
-                                    icon: Icon(
-                                      Mdi.pencil,
-                                      color: cs.secondary,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    onPressed: () async {
-                                      await DeleteCustomerDialog.show(
-                                        context,
-                                        customer,
-                                      );
-
-                                      if (!mounted) return;
-
-                                      widget.requiresRefresh?.call(true);
-
-                                      ref.invalidate(
-                                        customerDetailsProvider(
-                                          customer.userId,
-                                        ),
-                                      );
-                                    },
-                                    tooltip: 'Remove ${customer.fullName}',
-                                    icon: Icon(
-                                      Mdi.delete,
-                                      color: cs.error,
+                                      ],
                                     ),
                                   ),
                                 ],
-                              ),
-                            ),
-                          ],
-                        );
-                      }).toList(),
+                              );
+                            }).toList(),
                     ),
                   ),
                 ),

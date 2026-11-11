@@ -110,55 +110,6 @@ class _FormScreenState extends ConsumerState<FormScreen> {
       _isPositionsInitialized = true;
     }
 
-    // 👈 3. Extracted the core view builder so we don't repeat the Responsive structure
-    Widget buildBody() {
-      return Responsive(
-        loadMobile: form_mobile_view.loadLibrary,
-        loadTablet: form_tablet_view.loadLibrary,
-        loadDesktop: form_desktop_view.loadLibrary,
-        mobile: (_) => Skeletonizer(
-          enabled: _isLoading,
-          effect: ShimmerEffect(
-            // A clean, modern Material 3 contrast pair
-            baseColor: cs.surfaceContainerHigh,
-            highlightColor: cs.surfaceContainerLow,
-            duration: const Duration(milliseconds: 1500),
-          ),
-          child: form_mobile_view.FormMobileView(
-            formVersions: _formVersions,
-            // Pass _selectedVersion here if your view needs to render data for that specific version
-          ),
-        ),
-        tablet: (_) => Skeletonizer(
-          enabled: _isLoading,
-          effect: ShimmerEffect(
-            // A clean, modern Material 3 contrast pair
-            baseColor: cs.surfaceContainerHigh,
-            highlightColor: cs.surfaceContainerLow,
-            duration: const Duration(milliseconds: 1500),
-          ),
-          child: form_tablet_view.FormTabletView(
-            selectedFormVersion: _selectedVersion,
-            formId: widget.formId,
-            latestVersion: _latestVersion,
-            refreshUI: (value) {
-              _loadForm();
-            },
-          ),
-        ),
-        desktop: (_) => Skeletonizer(
-          enabled: _isLoading,
-          effect: ShimmerEffect(
-            // A clean, modern Material 3 contrast pair
-            baseColor: cs.surfaceContainerHigh,
-            highlightColor: cs.surfaceContainerLow,
-            duration: const Duration(milliseconds: 1500),
-          ),
-          child: form_desktop_view.FormDesktopView(formVersions: _formVersions),
-        ),
-      );
-    }
-
     // 👈 4. Wrap with a Scaffold to provide a top navigation/action bar containing the dropdown
     return Scaffold(
       appBar: AppBar(
@@ -190,7 +141,67 @@ class _FormScreenState extends ConsumerState<FormScreen> {
             ),
         ],
       ),
-      body: buildBody(),
+      body: buildBody(cs: cs),
+    );
+  }
+
+  // 👈 3. Extracted the core view builder so we don't repeat the Responsive structure
+  Widget buildBody({required ColorScheme cs}) {
+    return Responsive(
+      loadMobile: form_mobile_view.loadLibrary,
+      loadTablet: form_tablet_view.loadLibrary,
+      loadDesktop: form_desktop_view.loadLibrary,
+      mobile: (_) => Skeletonizer(
+        enabled: _isLoading,
+        effect: ShimmerEffect(
+          // A clean, modern Material 3 contrast pair
+          baseColor: cs.surfaceContainerHigh,
+          highlightColor: cs.surfaceContainerLow,
+          duration: const Duration(milliseconds: 1500),
+        ),
+        child: form_mobile_view.FormMobileView(
+          selectedFormVersion: _selectedVersion,
+          formId: widget.formId,
+          latestVersion: _latestVersion,
+          refreshUI: (value) {
+            _loadForm();
+          },
+        ),
+      ),
+      tablet: (_) => Skeletonizer(
+        enabled: _isLoading,
+        effect: ShimmerEffect(
+          // A clean, modern Material 3 contrast pair
+          baseColor: cs.surfaceContainerHigh,
+          highlightColor: cs.surfaceContainerLow,
+          duration: const Duration(milliseconds: 1500),
+        ),
+        child: form_tablet_view.FormTabletView(
+          selectedFormVersion: _selectedVersion,
+          formId: widget.formId,
+          latestVersion: _latestVersion,
+          refreshUI: (value) {
+            _loadForm();
+          },
+        ),
+      ),
+      desktop: (_) => Skeletonizer(
+        enabled: _isLoading,
+        effect: ShimmerEffect(
+          // A clean, modern Material 3 contrast pair
+          baseColor: cs.surfaceContainerHigh,
+          highlightColor: cs.surfaceContainerLow,
+          duration: const Duration(milliseconds: 1500),
+        ),
+        child: form_desktop_view.FormDesktopView(
+          selectedFormVersion: _selectedVersion,
+          formId: widget.formId,
+          latestVersion: _latestVersion,
+          refreshUI: (value) {
+            _loadForm();
+          },
+        ),
+      ),
     );
   }
 }
