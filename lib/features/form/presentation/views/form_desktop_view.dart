@@ -10,13 +10,13 @@ import 'package:venue_flow_app/core/domain/icon_feature.dart';
 import 'package:venue_flow_app/core/enums/badge_status.dart';
 
 import 'package:venue_flow_app/core/enums/form_field_type.dart';
+import 'package:venue_flow_app/core/enums/form_type.dart';
 import 'package:venue_flow_app/core/enums/tool_bar_options.dart';
 import 'package:venue_flow_app/core/theme/app_theme.dart';
 import 'package:venue_flow_app/core/theme/theme_x.dart';
 import 'package:venue_flow_app/core/widgets/side_nav.dart';
 import 'package:venue_flow_app/core/widgets/status_badge.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
-import 'package:venue_flow_app/features/form/domain/add_form_version_request.dart';
 
 import 'package:venue_flow_app/features/form/domain/create_form_request.dart';
 import 'package:venue_flow_app/features/form/domain/form_field_data.dart';
@@ -29,8 +29,8 @@ import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_fiel
 import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name_dialog.dart';
 import 'package:venue_flow_app/features/form/presentation/widgets/form_field_widget.dart';
 
-import '../../../../core/enums/form_type.dart';
 import '../../data/form_controller.dart';
+import '../../domain/add_form_version_request.dart';
 
 class FormDesktopView extends ConsumerStatefulWidget {
   const FormDesktopView({
@@ -210,7 +210,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
 
       if (savedDraft != null && savedDraft.isNotEmpty) {
         final Map<String, dynamic> data =
-            jsonDecode(savedDraft) as Map<String, dynamic>;
+        jsonDecode(savedDraft) as Map<String, dynamic>;
 
         if (data.containsKey('request') && data['request'] is Map) {
           final requestJson = Map<String, dynamic>.from(data['request'] as Map);
@@ -222,7 +222,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
 
           final selectedPageExists =
               savedPageId != null &&
-              pages.any((page) => page.id == savedPageId);
+                  pages.any((page) => page.id == savedPageId);
 
           if (mounted) {
             setState(() {
@@ -294,7 +294,8 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
           formType: _createFormRequest.formType.toString(),
           sourceVersion: FormVersion(
             id: widget.formId ?? '',
-            formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
+            formDefinitionId:
+            widget.selectedFormVersion?.formDefinitionId ?? '',
             createdAt: DateTime.now(),
             reviewedAt: DateTime.now(),
             schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
@@ -734,7 +735,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
     if (page == null) return;
 
     final field = page.fields.firstWhere(
-      (field) => field.orderNumber == orderNumber,
+          (field) => field.orderNumber == orderNumber,
     );
 
     setState(() {
@@ -851,10 +852,10 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
       drawer: wide
           ? null
           : Drawer(
-              width: 240,
-              backgroundColor: cs.surface,
-              child: SideNav(activePath: '/forms'),
-            ),
+        width: 240,
+        backgroundColor: cs.surface,
+        child: SideNav(activePath: '/forms'),
+      ),
 
       floatingActionButton: PopupMenuButton<FormToolbarOptions>(
         tooltip: 'Toolbar',
@@ -988,22 +989,42 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                 constraints: const BoxConstraints(
                                   maxWidth: 1440,
                                 ),
-                                child: Card(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: cs.surface,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        // Extremely soft shadow
+                                        blurRadius: 10,
+                                        // Makes the shadow smooth
+                                        spreadRadius: 0,
+                                        // Prevents it from looking harsh
+                                        offset: const Offset(
+                                          0,
+                                          4,
+                                        ), // Pushes the shadow down slightly
+                                      ),
+                                    ],
+                                  ),
                                   child: Container(
                                     constraints: BoxConstraints(
                                       minHeight:
-                                          MediaQuery.sizeOf(context).height *
+                                      MediaQuery.sizeOf(context).height *
                                           0.75,
                                     ),
                                     padding: const EdgeInsets.all(24),
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         // Form name
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          MainAxisAlignment.center,
                                           children: [
                                             Expanded(
                                               child: Row(
@@ -1017,9 +1038,9 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                                   const SizedBox(width: 16),
                                                   StatusBadge(
                                                     label:
-                                                        _createFormRequest
-                                                            .formType
-                                                            ?.label ??
+                                                    _createFormRequest
+                                                        .formType
+                                                        ?.label ??
                                                         '',
                                                     status: BadgeStatus.info,
                                                   ),
@@ -1042,9 +1063,9 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                         // Form description
                                         Text(
                                           _createFormRequest
-                                                      .description
-                                                      ?.isNotEmpty ==
-                                                  true
+                                              .description
+                                              ?.isNotEmpty ==
+                                              true
                                               ? _createFormRequest.description!
                                               : 'Add a description for your form.',
                                           maxLines: _isExpanded ? null : 2,
@@ -1069,7 +1090,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                           ),
                                         ),
 
-                                        const Divider(height: 24),
+                                        const Divider(height: 10),
 
                                         _buildPageSelector(cs),
 
@@ -1419,7 +1440,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                               },
                             ),
 
-                            Divider(color: cs.onSurface.withValues(alpha: 0.3)),
+                            const Divider(),
                           ];
                         }).toList(),
                       ),
@@ -1527,8 +1548,8 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                     onPressed: _selectedOrderNumber == null
                         ? null
                         : () {
-                            _updateField(_selectedOrderNumber!);
-                          },
+                      _updateField(_selectedOrderNumber!);
+                    },
                     child: const Text('Save'),
                   ),
                 ],

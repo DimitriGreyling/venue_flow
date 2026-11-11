@@ -10,6 +10,7 @@ import 'package:venue_flow_app/core/domain/icon_feature.dart';
 import 'package:venue_flow_app/core/enums/badge_status.dart';
 
 import 'package:venue_flow_app/core/enums/form_field_type.dart';
+import 'package:venue_flow_app/core/enums/form_type.dart';
 import 'package:venue_flow_app/core/enums/tool_bar_options.dart';
 import 'package:venue_flow_app/core/theme/app_theme.dart';
 import 'package:venue_flow_app/core/theme/theme_x.dart';
@@ -28,7 +29,6 @@ import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_fiel
 import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name_dialog.dart';
 import 'package:venue_flow_app/features/form/presentation/widgets/form_field_widget.dart';
 
-import '../../../../core/enums/form_type.dart';
 import '../../data/form_controller.dart';
 import '../../domain/add_form_version_request.dart';
 
@@ -294,7 +294,8 @@ class _FormMobileViewState extends ConsumerState<FormMobileView> {
           formType: _createFormRequest.formType.toString(),
           sourceVersion: FormVersion(
             id: widget.formId ?? '',
-            formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
+            formDefinitionId:
+            widget.selectedFormVersion?.formDefinitionId ?? '',
             createdAt: DateTime.now(),
             reviewedAt: DateTime.now(),
             schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
@@ -637,7 +638,6 @@ class _FormMobileViewState extends ConsumerState<FormMobileView> {
 
       case FormFieldType.IntField:
         return 'Number field';
-
     }
   }
 
@@ -654,7 +654,6 @@ class _FormMobileViewState extends ConsumerState<FormMobileView> {
 
       case FormFieldType.IntField:
         return 'Enter a number';
-
     }
   }
 
@@ -990,7 +989,27 @@ class _FormMobileViewState extends ConsumerState<FormMobileView> {
                                 constraints: const BoxConstraints(
                                   maxWidth: 1440,
                                 ),
-                                child: Card(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: cs.surface,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        // Extremely soft shadow
+                                        blurRadius: 10,
+                                        // Makes the shadow smooth
+                                        spreadRadius: 0,
+                                        // Prevents it from looking harsh
+                                        offset: const Offset(
+                                          0,
+                                          4,
+                                        ), // Pushes the shadow down slightly
+                                      ),
+                                    ],
+                                  ),
                                   child: Container(
                                     constraints: BoxConstraints(
                                       minHeight:
@@ -1004,7 +1023,8 @@ class _FormMobileViewState extends ConsumerState<FormMobileView> {
                                       children: [
                                         // Form name
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                           children: [
                                             Expanded(
                                               child: Row(
@@ -1015,9 +1035,10 @@ class _FormMobileViewState extends ConsumerState<FormMobileView> {
                                                       context,
                                                     ).textTheme.titleLarge,
                                                   ),
-                                                  const SizedBox(width: 16,),
+                                                  const SizedBox(width: 16),
                                                   StatusBadge(
-                                                    label: _createFormRequest
+                                                    label:
+                                                    _createFormRequest
                                                         .formType
                                                         ?.label ??
                                                         '',
@@ -1069,7 +1090,7 @@ class _FormMobileViewState extends ConsumerState<FormMobileView> {
                                           ),
                                         ),
 
-                                        const Divider(height: 24),
+                                        const Divider(height: 10),
 
                                         _buildPageSelector(cs),
 
@@ -1419,7 +1440,7 @@ class _FormMobileViewState extends ConsumerState<FormMobileView> {
                               },
                             ),
 
-                            Divider(color: cs.onSurface.withValues(alpha: 0.3)),
+                            const Divider(),
                           ];
                         }).toList(),
                       ),
