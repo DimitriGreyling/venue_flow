@@ -55,7 +55,7 @@ class _VenueDataTableState extends ConsumerState<VenueDataTable> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05), // Extremely soft shadow
+              color: Colors.black.withValues(alpha: 0.1), // Extremely soft shadow
               blurRadius: 10,                        // Makes the shadow smooth
               spreadRadius: 0,                       // Prevents it from looking harsh
               offset: const Offset(0, 4),            // Pushes the shadow down slightly

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:venue_flow_app/core/domain/paged_response.dart';
 import 'package:venue_flow_app/features/customers/domain/member_response.dart';
@@ -87,11 +88,20 @@ class CustomerController extends _$CustomerController {
   }
 }
 
-@riverpod
-class CustomerDetails extends _$CustomerDetails {
-  @override
-  Future<Customer> build(String customerId) async {
-    final repository = ref.watch(customerRepositoryProvider);
-    return await repository.getMemberDetailsById(customerId);
-  }
-}
+// @riverpod
+// class CustomerDetails extends _$CustomerDetails {
+//   @override
+//   Future<Customer> build(String customerId) async {
+//     final repository = ref.watch(customerRepositoryProvider);
+//     return await repository.getMemberDetailsById(customerId);
+//   }
+// }
+
+final customerDetailsProvider = FutureProvider.family<Customer, String>((
+    ref,
+    customerId,
+    ) async {
+  final controller = ref.read(customerControllerProvider.notifier);
+
+  return controller.getMemberDetailsById(customerId);
+});

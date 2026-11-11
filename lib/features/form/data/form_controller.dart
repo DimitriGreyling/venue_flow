@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:venue_flow_app/core/enums/form_type.dart';
+import 'package:venue_flow_app/features/form/domain/add_form_version_request.dart';
 import 'package:venue_flow_app/features/form/domain/create_form_response.dart';
 
 import '../../../core/domain/paged_response.dart';
@@ -49,13 +52,13 @@ class FormController extends _$FormController {
   ///
   Future<FormVersion> addNewFormVersion({
     required String formId,
-    required FormVersion formVersion,
+    required AddFormVersionRequest addFormVersionRequest,
   }) async {
     final repository = ref.watch(formRepositoryProvider);
 
     return await repository.addNewFormVersion(
       formId: formId,
-      formVersion: formVersion,
+      addFormVersionRequest: addFormVersionRequest,
     );
   }
 
@@ -69,11 +72,21 @@ class FormController extends _$FormController {
   }
 }
 
-@riverpod
-class FormDetails extends _$FormDetails {
-  @override
-  Future<FormListItem> build(String formId) async {
-    final respository = ref.watch(formRepositoryProvider);
-    return await respository.getFormById(formId: formId);
-  }
-}
+// @riverpod
+// class FormDetails extends _$FormDetails {
+//   @override
+//   Future<FormListItem> build(String formId) async {
+//     final repository = ref.watch(formRepositoryProvider);
+//     return await repository.getFormById(formId: formId);
+//   }
+// }
+
+
+final formDetailsProvider = FutureProvider.family<FormListItem, String>((
+    ref,
+    formId,
+    ) async {
+  final controller = ref.read(formControllerProvider.notifier);
+
+  return controller.getFormById(formId: formId);
+});

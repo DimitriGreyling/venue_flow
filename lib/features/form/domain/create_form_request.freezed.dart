@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CreateFormRequest {
 
- String get name; String? get description; String? get formType; FormSchema? get schema;
+ String get name; String? get description;@EnumConverter(FormType.values) FormType? get formType; FormSchema? get schema;
 /// Create a copy of CreateFormRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $CreateFormRequestCopyWith<$Res>  {
   factory $CreateFormRequestCopyWith(CreateFormRequest value, $Res Function(CreateFormRequest) _then) = _$CreateFormRequestCopyWithImpl;
 @useResult
 $Res call({
- String name, String? description, String? formType, FormSchema? schema
+ String name, String? description,@EnumConverter(FormType.values) FormType? formType, FormSchema? schema
 });
 
 
@@ -76,7 +76,7 @@ class _$CreateFormRequestCopyWithImpl<$Res>
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,formType: freezed == formType ? _self.formType : formType // ignore: cast_nullable_to_non_nullable
-as String?,schema: freezed == schema ? _self.schema : schema // ignore: cast_nullable_to_non_nullable
+as FormType?,schema: freezed == schema ? _self.schema : schema // ignore: cast_nullable_to_non_nullable
 as FormSchema?,
   ));
 }
@@ -174,7 +174,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String? description,  String? formType,  FormSchema? schema)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String? description, @EnumConverter(FormType.values)  FormType? formType,  FormSchema? schema)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CreateFormRequest() when $default != null:
 return $default(_that.name,_that.description,_that.formType,_that.schema);case _:
@@ -195,7 +195,7 @@ return $default(_that.name,_that.description,_that.formType,_that.schema);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String? description,  String? formType,  FormSchema? schema)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String? description, @EnumConverter(FormType.values)  FormType? formType,  FormSchema? schema)  $default,) {final _that = this;
 switch (_that) {
 case _CreateFormRequest():
 return $default(_that.name,_that.description,_that.formType,_that.schema);case _:
@@ -215,7 +215,7 @@ return $default(_that.name,_that.description,_that.formType,_that.schema);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String? description,  String? formType,  FormSchema? schema)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String? description, @EnumConverter(FormType.values)  FormType? formType,  FormSchema? schema)?  $default,) {final _that = this;
 switch (_that) {
 case _CreateFormRequest() when $default != null:
 return $default(_that.name,_that.description,_that.formType,_that.schema);case _:
@@ -230,12 +230,12 @@ return $default(_that.name,_that.description,_that.formType,_that.schema);case _
 @JsonSerializable()
 
 class _CreateFormRequest implements CreateFormRequest {
-  const _CreateFormRequest({required this.name, this.description, this.formType, this.schema});
+  const _CreateFormRequest({required this.name, this.description, @EnumConverter(FormType.values) this.formType = FormType.Food, this.schema});
   factory _CreateFormRequest.fromJson(Map<String, dynamic> json) => _$CreateFormRequestFromJson(json);
 
 @override final  String name;
 @override final  String? description;
-@override final  String? formType;
+@override@JsonKey()@EnumConverter(FormType.values) final  FormType? formType;
 @override final  FormSchema? schema;
 
 /// Create a copy of CreateFormRequest
@@ -273,7 +273,7 @@ abstract mixin class _$CreateFormRequestCopyWith<$Res> implements $CreateFormReq
   factory _$CreateFormRequestCopyWith(_CreateFormRequest value, $Res Function(_CreateFormRequest) _then) = __$CreateFormRequestCopyWithImpl;
 @override @useResult
 $Res call({
- String name, String? description, String? formType, FormSchema? schema
+ String name, String? description,@EnumConverter(FormType.values) FormType? formType, FormSchema? schema
 });
 
 
@@ -295,7 +295,7 @@ class __$CreateFormRequestCopyWithImpl<$Res>
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,formType: freezed == formType ? _self.formType : formType // ignore: cast_nullable_to_non_nullable
-as String?,schema: freezed == schema ? _self.schema : schema // ignore: cast_nullable_to_non_nullable
+as FormType?,schema: freezed == schema ? _self.schema : schema // ignore: cast_nullable_to_non_nullable
 as FormSchema?,
   ));
 }

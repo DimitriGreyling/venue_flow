@@ -7,12 +7,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:venue_flow_app/core/domain/icon_feature.dart';
+import 'package:venue_flow_app/core/enums/badge_status.dart';
 
 import 'package:venue_flow_app/core/enums/form_field_type.dart';
+import 'package:venue_flow_app/core/enums/form_type.dart';
 import 'package:venue_flow_app/core/enums/tool_bar_options.dart';
 import 'package:venue_flow_app/core/theme/app_theme.dart';
 import 'package:venue_flow_app/core/theme/theme_x.dart';
 import 'package:venue_flow_app/core/widgets/side_nav.dart';
+import 'package:venue_flow_app/core/widgets/status_badge.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
 
 import 'package:venue_flow_app/features/form/domain/create_form_request.dart';
@@ -27,11 +30,21 @@ import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name
 import 'package:venue_flow_app/features/form/presentation/widgets/form_field_widget.dart';
 
 import '../../data/form_controller.dart';
+import '../../domain/add_form_version_request.dart';
 
 class FormDesktopView extends ConsumerStatefulWidget {
-  const FormDesktopView({super.key, this.formVersions});
+  const FormDesktopView({
+    super.key,
+    this.selectedFormVersion,
+    this.formId,
+    this.latestVersion,
+    this.refreshUI,
+  });
 
-  final List<FormVersion>? formVersions;
+  final FormVersion? selectedFormVersion;
+  final int? latestVersion;
+  final String? formId;
+  final ValueChanged<void>? refreshUI;
 
   @override
   ConsumerState<FormDesktopView> createState() => _FormDesktopViewState();
@@ -161,9 +174,9 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
     super.initState();
 
     // Check that the list is NOT null AND contains at least one item
-    if (widget.formVersions != null && widget.formVersions!.isNotEmpty) {
+    if (widget.selectedFormVersion != null) {
       // Safely extract the string, ensuring it isn't empty or blank
-      final rawJson = widget.formVersions!.first.schemaJson;
+      final rawJson = widget.selectedFormVersion!.schemaJson;
 
       if (rawJson != null && rawJson.trim().isNotEmpty) {
         try {
@@ -231,7 +244,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
 
       // Wrap initialization in a try-catch or safe condition check
       // to prevent it from crashing the entire draft restoration loop
-      if (_createFormRequest.schema?.pages?.isNotEmpty ?? false) {
+      if (_createFormRequest.schema?.pages.isNotEmpty ?? false) {
         try {
           _initializeFieldIds();
         } catch (e) {
@@ -265,6 +278,52 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
     _draftSaveTimer = Timer(const Duration(milliseconds: 50), _saveDraft);
   }
 
+  Future<void> _updateDraft() async {
+    if (_isRestoringDraft) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final formController = ref.read(formControllerProvider.notifier);
+
+      await formController.addNewFormVersion(
+        formId: widget.formId ?? '',
+        addFormVersionRequest: AddFormVersionRequest(
+          name: _createFormRequest.name,
+          description: _createFormRequest.description ?? '',
+          formType: _createFormRequest.formType.toString(),
+          sourceVersion: FormVersion(
+            id: widget.formId ?? '',
+            formDefinitionId:
+            widget.selectedFormVersion?.formDefinitionId ?? '',
+            createdAt: DateTime.now(),
+            reviewedAt: DateTime.now(),
+            schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
+            status: 'DRAFT',
+            submittedAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            versionNumber: widget.latestVersion != null
+                ? widget.latestVersion! + 1
+                : 1,
+          ),
+        ),
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Form version created successfully!')),
+        );
+      }
+
+      if (widget.refreshUI != null) {
+        widget.refreshUI?.call(true);
+      }
+    } catch (e, stackTrace) {
+      debugPrint('Failed to save form draft: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
   Future<void> _saveDraft() async {
     if (_isRestoringDraft) return;
 
@@ -292,6 +351,11 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
   }
 
   Future<void> _createForm() async {
+    if (widget.selectedFormVersion != null) {
+      await _updateDraft();
+      return;
+    }
+
     final formController = ref.read(formControllerProvider.notifier);
 
     try {
@@ -319,6 +383,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
   @override
   void dispose() {
     _draftSaveTimer?.cancel();
+    _clearDraft();
     super.dispose();
   }
 
@@ -386,16 +451,6 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
   // ---------------------------------------------------------------------------
   // PAGE MANAGEMENT
   // ---------------------------------------------------------------------------
-
-  // void _selectPage(String pageId) {
-  //   if (pageId == _selectedPageId) return;
-  //
-  //   setState(() {
-  //     _selectedPageId = pageId;
-  //     _selectedFieldForEdit = null;
-  //     _selectedOrderNumber = null;
-  //   });
-  // }
 
   void _selectPage(String pageId) {
     if (pageId == _selectedPageId) return;
@@ -465,7 +520,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
     });
   }
 
-  Future<void> _showRenamePageDialog() async {
+  Future<void> _showRenamePageDialog({required ColorScheme cs}) async {
     final page = _selectedPage;
     if (page == null) return;
 
@@ -485,15 +540,47 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
             },
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(controller.text);
-              },
-              child: const Text('Save'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              // Aligns both buttons cleanly to the right side
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      // Removes solid background
+                      shadowColor: Colors.transparent,
+                      // Removes shadow elevation
+                      side: BorderSide(color: cs.error, width: 1.5),
+                      // Adds outline
+                      foregroundColor: cs.onError, // Text colour
+                    ),
+                    child: Text('Cancel', style: TextStyle(color: cs.error)),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Adds a fixed horizontal gap between the two buttons
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop(controller.text);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      // Removes solid background
+                      shadowColor: Colors.transparent,
+                      // Removes shadow elevation
+                      side: BorderSide(color: cs.secondary, width: 1.5),
+                      // Adds outline
+                      foregroundColor: cs.onSecondary, // Text colour
+                    ),
+                    child: Text('Save', style: TextStyle(color: cs.secondary)),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -551,9 +638,6 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
 
       case FormFieldType.IntField:
         return 'Number field';
-
-      default:
-        return 'New field';
     }
   }
 
@@ -570,9 +654,6 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
 
       case FormFieldType.IntField:
         return 'Enter a number';
-
-      default:
-        return '';
     }
   }
 
@@ -666,8 +747,6 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
       context,
       formFieldSchema: field,
       onFormFieldSchemaChanged: (value) {
-        if (value == null) return;
-
         _selectedFieldForEdit = value;
         _updateField(orderNumber);
       },
@@ -710,15 +789,17 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
       context,
       formName: _createFormRequest.name,
       formDescription: _createFormRequest.description ?? '',
-      onFormNameChanged: (value) {
-        if (value == null || value.trim().isEmpty) return;
-
-        _updateRequest(_createFormRequest.copyWith(name: value.trim()));
-      },
-      onFormDescriptionChanged: (value) {
+      formType: _createFormRequest.formType,
+      onChanged: (value) {
         if (value == null) return;
 
-        _updateRequest(_createFormRequest.copyWith(description: value));
+        _updateRequest(
+          _createFormRequest.copyWith(
+            name: value.name!.trim(),
+            description: value.description?.trim(),
+            formType: value.type,
+          ),
+        );
       },
     );
   }
@@ -908,7 +989,27 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                 constraints: const BoxConstraints(
                                   maxWidth: 1440,
                                 ),
-                                child: Card(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: cs.surface,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        // Extremely soft shadow
+                                        blurRadius: 10,
+                                        // Makes the shadow smooth
+                                        spreadRadius: 0,
+                                        // Prevents it from looking harsh
+                                        offset: const Offset(
+                                          0,
+                                          4,
+                                        ), // Pushes the shadow down slightly
+                                      ),
+                                    ],
+                                  ),
                                   child: Container(
                                     constraints: BoxConstraints(
                                       minHeight:
@@ -922,19 +1023,37 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                       children: [
                                         // Form name
                                         Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                           children: [
                                             Expanded(
-                                              child: Text(
-                                                _createFormRequest.name,
-                                                style: Theme.of(
-                                                  context,
-                                                ).textTheme.titleLarge,
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    _createFormRequest.name,
+                                                    style: Theme.of(
+                                                      context,
+                                                    ).textTheme.titleLarge,
+                                                  ),
+                                                  const SizedBox(width: 16),
+                                                  StatusBadge(
+                                                    label:
+                                                    _createFormRequest
+                                                        .formType
+                                                        ?.label ??
+                                                        '',
+                                                    status: BadgeStatus.info,
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                             IconButton(
                                               tooltip: 'Edit form details',
                                               onPressed: _editFormDetails,
-                                              icon: const Icon(Icons.edit),
+                                              icon: Icon(
+                                                Icons.edit,
+                                                color: cs.secondary,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -971,7 +1090,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                           ),
                                         ),
 
-                                        const Divider(height: 24),
+                                        const Divider(height: 10),
 
                                         _buildPageSelector(cs),
 
@@ -1020,6 +1139,9 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
+                      color: page.id == _selectedPageId
+                          ? WidgetStateProperty.all(cs.primary)
+                          : WidgetStateProperty.all(cs.primaryContainer),
                       label: Text(page.title),
                       selected: page.id == _selectedPageId,
                       onSelected: (_) => _selectPage(page.id),
@@ -1033,19 +1155,21 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
         IconButton(
           tooltip: 'Add page',
           onPressed: _addPage,
-          icon: const Icon(Icons.add),
+          icon: Icon(Icons.add, color: cs.primary),
         ),
 
         IconButton(
           tooltip: 'Rename page',
-          onPressed: _showRenamePageDialog,
-          icon: const Icon(Icons.edit_outlined),
+          onPressed: () {
+            _showRenamePageDialog(cs: cs);
+          },
+          icon: Icon(Icons.edit_outlined, color: cs.secondary),
         ),
 
         IconButton(
           tooltip: 'Delete selected page',
           onPressed: _pages.length > 1 ? _deleteSelectedPage : null,
-          icon: const Icon(Icons.delete_outline),
+          icon: Icon(Icons.delete_outline, color: cs.error),
         ),
       ],
     );
@@ -1117,7 +1241,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                             message: 'Drag to reorder',
                             child: Icon(
                               Icons.drag_indicator,
-                              color: cs.onSurfaceVariant,
+                              color: cs.onSurfaceVariant.withValues(alpha: 0.5),
                               size: 24,
                             ),
                           ),
@@ -1138,7 +1262,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                         onPressed: () {
                           _openEditField(field.orderNumber);
                         },
-                        icon: Icon(Icons.edit, color: cs.primary),
+                        icon: Icon(Icons.edit, color: cs.secondary),
                       ),
 
                       // Delete
@@ -1147,7 +1271,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                         onPressed: () {
                           _deleteField(field.orderNumber);
                         },
-                        icon: Icon(Icons.delete_outline, color: cs.error),
+                        icon: Icon(Icons.delete, color: cs.error),
                       ),
                     ],
                   ),
@@ -1221,7 +1345,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
           height: height,
           child: Card(
             elevation: 8,
-            color: cs.primaryContainer,
+            color: cs.secondaryContainer,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -1229,14 +1353,17 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.drag_indicator, color: cs.onPrimaryContainer),
+                      Icon(
+                        Icons.drag_indicator,
+                        color: cs.onSurface.withValues(alpha: 0.6),
+                      ),
                       const SizedBox(width: 8),
 
                       Expanded(
                         child: Text(
                           'Form Fields',
                           style: TextStyle(
-                            color: cs.onPrimaryContainer,
+                            color: cs.onSurface,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -1249,7 +1376,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                             _showFloatingFieldsBar = false;
                           });
                         },
-                        icon: Icon(Icons.close, color: cs.onPrimaryContainer),
+                        icon: Icon(Icons.close, color: cs.error),
                       ),
                     ],
                   ),
@@ -1271,7 +1398,8 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                 ),
                                 style: TextStyle(
                                   fontFamily: field.leadingIcon?.fontFamily,
-                                  color: cs.onPrimaryContainer,
+                                  color: cs.onSurface.withValues(alpha: 0.5),
+                                  fontSize: 20,
                                 ),
                               ),
 
@@ -1279,7 +1407,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                 field.title ?? '',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: cs.onPrimaryContainer,
+                                  color: cs.onSurface,
                                 ),
                               ),
 
@@ -1287,7 +1415,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                 field.subtitle ?? '',
                                 style: TextStyle(
                                   fontWeight: FontWeight.w500,
-                                  color: cs.onPrimaryContainer,
+                                  color: cs.onSurface.withValues(alpha: 0.5),
                                 ),
                               ),
 
@@ -1299,7 +1427,8 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                   ),
                                   style: TextStyle(
                                     fontFamily: field.trailingIcon?.fontFamily,
-                                    color: cs.onPrimaryContainer,
+                                    color: cs.secondary,
+                                    fontSize: 25,
                                   ),
                                 ),
                               ),
@@ -1311,11 +1440,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                               },
                             ),
 
-                            Divider(
-                              color: cs.onPrimaryContainer.withValues(
-                                alpha: 0.5,
-                              ),
-                            ),
+                            const Divider(),
                           ];
                         }).toList(),
                       ),

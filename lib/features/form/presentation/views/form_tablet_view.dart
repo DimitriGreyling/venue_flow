@@ -7,12 +7,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:venue_flow_app/core/domain/icon_feature.dart';
+import 'package:venue_flow_app/core/enums/badge_status.dart';
 
 import 'package:venue_flow_app/core/enums/form_field_type.dart';
+import 'package:venue_flow_app/core/enums/form_type.dart';
 import 'package:venue_flow_app/core/enums/tool_bar_options.dart';
 import 'package:venue_flow_app/core/theme/app_theme.dart';
 import 'package:venue_flow_app/core/theme/theme_x.dart';
 import 'package:venue_flow_app/core/widgets/side_nav.dart';
+import 'package:venue_flow_app/core/widgets/status_badge.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
 
 import 'package:venue_flow_app/features/form/domain/create_form_request.dart';
@@ -27,6 +30,7 @@ import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name
 import 'package:venue_flow_app/features/form/presentation/widgets/form_field_widget.dart';
 
 import '../../data/form_controller.dart';
+import '../../domain/add_form_version_request.dart';
 
 class FormTabletView extends ConsumerStatefulWidget {
   const FormTabletView({
@@ -284,18 +288,24 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
       await formController.addNewFormVersion(
         formId: widget.formId ?? '',
-        formVersion: FormVersion(
-          id: widget.formId ?? '',
-          formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
-          createdAt: DateTime.now(),
-          reviewedAt: DateTime.now(),
-          schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
-          status: 'DRAFT',
-          submittedAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          versionNumber: widget.latestVersion != null
-              ? widget.latestVersion! + 1
-              : 1,
+        addFormVersionRequest: AddFormVersionRequest(
+          name: _createFormRequest.name,
+          description: _createFormRequest.description ?? '',
+          formType: _createFormRequest.formType.toString(),
+          sourceVersion: FormVersion(
+            id: widget.formId ?? '',
+            formDefinitionId:
+                widget.selectedFormVersion?.formDefinitionId ?? '',
+            createdAt: DateTime.now(),
+            reviewedAt: DateTime.now(),
+            schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
+            status: 'DRAFT',
+            submittedAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            versionNumber: widget.latestVersion != null
+                ? widget.latestVersion! + 1
+                : 1,
+          ),
         ),
       );
 
@@ -373,6 +383,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   @override
   void dispose() {
     _draftSaveTimer?.cancel();
+    _clearDraft();
     super.dispose();
   }
 
@@ -627,9 +638,6 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
       case FormFieldType.IntField:
         return 'Number field';
-
-      default:
-        return 'New field';
     }
   }
 
@@ -646,9 +654,6 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
       case FormFieldType.IntField:
         return 'Enter a number';
-
-      default:
-        return '';
     }
   }
 
@@ -742,8 +747,6 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       context,
       formFieldSchema: field,
       onFormFieldSchemaChanged: (value) {
-        if (value == null) return;
-
         _selectedFieldForEdit = value;
         _updateField(orderNumber);
       },
@@ -786,15 +789,17 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       context,
       formName: _createFormRequest.name,
       formDescription: _createFormRequest.description ?? '',
-      onFormNameChanged: (value) {
-        if (value == null || value.trim().isEmpty) return;
-
-        _updateRequest(_createFormRequest.copyWith(name: value.trim()));
-      },
-      onFormDescriptionChanged: (value) {
+      formType: _createFormRequest.formType,
+      onChanged: (value) {
         if (value == null) return;
 
-        _updateRequest(_createFormRequest.copyWith(description: value));
+        _updateRequest(
+          _createFormRequest.copyWith(
+            name: value.name!.trim(),
+            description: value.description?.trim(),
+            formType: value.type,
+          ),
+        );
       },
     );
   }
@@ -984,7 +989,27 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                 constraints: const BoxConstraints(
                                   maxWidth: 1440,
                                 ),
-                                child: Card(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: cs.surface,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        // Extremely soft shadow
+                                        blurRadius: 10,
+                                        // Makes the shadow smooth
+                                        spreadRadius: 0,
+                                        // Prevents it from looking harsh
+                                        offset: const Offset(
+                                          0,
+                                          4,
+                                        ), // Pushes the shadow down slightly
+                                      ),
+                                    ],
+                                  ),
                                   child: Container(
                                     constraints: BoxConstraints(
                                       minHeight:
@@ -998,13 +1023,28 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                       children: [
                                         // Form name
                                         Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Expanded(
-                                              child: Text(
-                                                _createFormRequest.name,
-                                                style: Theme.of(
-                                                  context,
-                                                ).textTheme.titleLarge,
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    _createFormRequest.name,
+                                                    style: Theme.of(
+                                                      context,
+                                                    ).textTheme.titleLarge,
+                                                  ),
+                                                  const SizedBox(width: 16),
+                                                  StatusBadge(
+                                                    label:
+                                                        _createFormRequest
+                                                            .formType
+                                                            ?.label ??
+                                                        '',
+                                                    status: BadgeStatus.info,
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                             IconButton(
@@ -1050,7 +1090,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                           ),
                                         ),
 
-                                        const Divider(height: 24),
+                                        const Divider(height: 10),
 
                                         _buildPageSelector(cs),
 
@@ -1359,7 +1399,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                 style: TextStyle(
                                   fontFamily: field.leadingIcon?.fontFamily,
                                   color: cs.onSurface.withValues(alpha: 0.5),
-                                  fontSize: 20
+                                  fontSize: 20,
                                 ),
                               ),
 
@@ -1388,7 +1428,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                   style: TextStyle(
                                     fontFamily: field.trailingIcon?.fontFamily,
                                     color: cs.secondary,
-                                      fontSize: 25
+                                    fontSize: 25,
                                   ),
                                 ),
                               ),
@@ -1400,7 +1440,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                               },
                             ),
 
-                            Divider(color: cs.onSurface.withValues(alpha: 0.3)),
+                            const Divider(),
                           ];
                         }).toList(),
                       ),

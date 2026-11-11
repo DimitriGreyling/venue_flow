@@ -3,9 +3,11 @@ import 'package:flutter_mdi_icons/flutter_mdi_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:venue_flow_app/core/widgets/status_badge.dart';
 import 'package:venue_flow_app/features/form/data/form_controller.dart';
 import 'package:venue_flow_app/features/form/presentation/dialogs/delete_form_dialog.dart';
 import '../../../core/domain/paged_response.dart';
+import '../../../core/enums/badge_status.dart';
 import '../domain/form_list_id.dart';
 import '../domain/form_list_item.dart';
 
@@ -32,14 +34,7 @@ class FormDataTable extends ConsumerStatefulWidget {
 }
 
 class _FormDataTableState extends ConsumerState<FormDataTable> {
-  final formDetailsProvider = FutureProvider.family<FormListItem, String>((
-    ref,
-    formId,
-  ) async {
-    final controller = ref.read(formControllerProvider.notifier);
 
-    return controller.getFormById(formId: formId);
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +49,7 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Colors.black.withValues(alpha: 0.1),
               // Extremely soft shadow
               blurRadius: 10,
               // Makes the shadow smooth
@@ -87,15 +82,28 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
                                 buildCells: (form) => [
                                   DataCell(Text(form.name)),
                                   DataCell(
-                                    Text(
-                                      form.description != null &&
-                                              form.description != ''
-                                          ? form.description!
-                                          : 'Not provided',
+                                    SizedBox(
+                                      width: 200,
+                                      child: Tooltip(
+                                        message: form.description?.isNotEmpty == true
+                                            ? form.description!
+                                            : 'Not provided',
+                                        child: Text(
+                                          form.description?.isNotEmpty == true
+                                              ? form.description!
+                                              : 'Not provided',
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          softWrap: true,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   DataCell(
-                                    Text(form.formType ?? 'Not provided'),
+                                    StatusBadge(
+                                      label: form.formType ?? '',
+                                      status: BadgeStatus.info,
+                                    ),
                                   ),
                                   DataCell(
                                     Row(

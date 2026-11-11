@@ -33,7 +33,7 @@ final class FormControllerProvider
   FormController create() => FormController();
 }
 
-String _$formControllerHash() => r'40ecd4be5911930be82d29d321ed79457e18d283';
+String _$formControllerHash() => r'e01cf13f6ef2114e50d4888fd5514bec78e964e6';
 
 abstract class _$FormController extends $AsyncNotifier<void> {
   FutureOr<void> build();
@@ -50,94 +50,5 @@ abstract class _$FormController extends $AsyncNotifier<void> {
               Object?
             >;
     return element.handleCreate(ref, build);
-  }
-}
-
-@ProviderFor(FormDetails)
-final formDetailsProvider = FormDetailsFamily._();
-
-final class FormDetailsProvider
-    extends $AsyncNotifierProvider<FormDetails, FormListItem> {
-  FormDetailsProvider._({
-    required FormDetailsFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'formDetailsProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$formDetailsHash();
-
-  @override
-  String toString() {
-    return r'formDetailsProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  FormDetails create() => FormDetails();
-
-  @override
-  bool operator ==(Object other) {
-    return other is FormDetailsProvider && other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
-}
-
-String _$formDetailsHash() => r'55f4a3662c934c14f5502900ecc01b5fb29d391b';
-
-final class FormDetailsFamily extends $Family
-    with
-        $ClassFamilyOverride<
-          FormDetails,
-          AsyncValue<FormListItem>,
-          FormListItem,
-          FutureOr<FormListItem>,
-          String
-        > {
-  FormDetailsFamily._()
-    : super(
-        retry: null,
-        name: r'formDetailsProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  FormDetailsProvider call(String formId) =>
-      FormDetailsProvider._(argument: formId, from: this);
-
-  @override
-  String toString() => r'formDetailsProvider';
-}
-
-abstract class _$FormDetails extends $AsyncNotifier<FormListItem> {
-  late final _$args = ref.$arg as String;
-  String get formId => _$args;
-
-  FutureOr<FormListItem> build(String formId);
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<AsyncValue<FormListItem>, FormListItem>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<AsyncValue<FormListItem>, FormListItem>,
-              AsyncValue<FormListItem>,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, () => build(_$args));
   }
 }

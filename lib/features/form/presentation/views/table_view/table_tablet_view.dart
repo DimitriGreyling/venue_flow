@@ -53,7 +53,7 @@ class _TableTabletViewState extends ConsumerState<TableTabletView> {
   }
 
   Future<void> _refresh() async {
-    ref.invalidate(formControllerProvider);
+    ref.invalidate(formControllerProvider,asReload: true);
     ref.invalidate(formDetailsProvider);
     await _fetchForms();
   }

@@ -6,7 +6,9 @@ import 'package:venue_flow_app/features/form/domain/create_form_response.dart';
 import 'package:venue_flow_app/features/form/domain/form_list_item.dart';
 import 'package:venue_flow_app/features/form/domain/form_version.dart';
 
+import '../../../core/enums/form_type.dart';
 import '../../../core/network/dio_client.dart';
+import '../domain/add_form_version_request.dart';
 import '../domain/form_list_id.dart';
 
 part 'form_repository.g.dart';
@@ -31,7 +33,6 @@ class FormRepository {
       '/forms',
       queryParameters: {'page': page, 'pageSize': pageSize},
     );
-    print('FormRepository.getForms response: ${response}');
     return PagedResponse<FormListId>.fromJson(
       response.data as Map<String, dynamic>,
       (json) => FormListId.fromJson(json as Map<String, dynamic>),
@@ -72,11 +73,11 @@ class FormRepository {
   ///
   Future<FormVersion> addNewFormVersion({
     required String formId,
-    required FormVersion formVersion,
+    required AddFormVersionRequest addFormVersionRequest,
   }) async {
     final response = await _dio.post(
       '/forms/$formId/form-version',
-      data: formVersion.toJson(),
+      data: addFormVersionRequest.toJson(),
     );
 
     return FormVersion.fromJson(response.data);
