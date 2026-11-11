@@ -34,8 +34,6 @@ class FormDataTable extends ConsumerStatefulWidget {
 }
 
 class _FormDataTableState extends ConsumerState<FormDataTable> {
-
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -85,7 +83,8 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
                                     SizedBox(
                                       width: 200,
                                       child: Tooltip(
-                                        message: form.description?.isNotEmpty == true
+                                        message:
+                                            form.description?.isNotEmpty == true
                                             ? form.description!
                                             : 'Not provided',
                                         child: Text(
@@ -111,7 +110,10 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
                                       children: [
                                         IconButton(
                                           onPressed: () async {
-                                            context.push('/forms/${form.id}');
+                                            context.push(
+                                              '/forms/${form.id}',
+                                              extra: form,
+                                            );
                                           },
                                           tooltip: 'Edit ${form.name}',
                                           icon: Icon(

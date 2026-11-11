@@ -9,6 +9,7 @@ import '../../features/auth/data/auth_session.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/customers/presentation/customer_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
+import '../../features/form/domain/form_list_item.dart';
 import '../../features/form/presentation/form_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/invoice/presentation/invoice_screen.dart';
@@ -62,7 +63,9 @@ GoRouter router(Ref ref) {
             path: ':formId',
             builder: (_, state) {
               final formId = state.pathParameters['formId']!;
-              return FormScreen(formId: formId);
+              final formDetails = state.extra as FormListItem?;
+
+              return FormScreen(formId: formId,formDetails:formDetails);
             },
           ),
         ],
