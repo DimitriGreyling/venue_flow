@@ -31,6 +31,7 @@ import 'package:venue_flow_app/features/form/presentation/widgets/form_field_wid
 
 import '../../data/form_controller.dart';
 import '../../domain/add_form_version_request.dart';
+import '../../domain/form_list_item.dart';
 
 class FormTabletView extends ConsumerStatefulWidget {
   const FormTabletView({
@@ -39,12 +40,14 @@ class FormTabletView extends ConsumerStatefulWidget {
     this.formId,
     this.latestVersion,
     this.refreshUI,
+    this.formDetails,
   });
 
   final FormVersion? selectedFormVersion;
   final int? latestVersion;
   final String? formId;
   final ValueChanged<void>? refreshUI;
+  final FormListItem? formDetails;
 
   @override
   ConsumerState<FormTabletView> createState() => _FormTabletViewState();
@@ -172,27 +175,39 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   @override
   void initState() {
     super.initState();
-
+print('Selected ${widget.formDetails}');
+    print('Selected2 ${widget.selectedFormVersion}');
     // Check that the list is NOT null AND contains at least one item
     if (widget.selectedFormVersion != null) {
       // Safely extract the string, ensuring it isn't empty or blank
       final rawJson = widget.selectedFormVersion!.schemaJson;
-
+      print('Selected3 ${rawJson}');
       if (rawJson != null && rawJson.trim().isNotEmpty) {
         try {
           final schemaObject = FormSchema.fromJson(jsonDecode(rawJson));
 
           setState(() {
+            print('Form type ${widget.formDetails?.formType}');
             _createFormRequest = _createFormRequest.copyWith(
+              name: widget.formDetails?.name ?? 'Form Name',
+              description:
+                  widget.formDetails?.description ?? 'Form Description',
+              formType: FormType.values.firstWhere(
+                (x) => x.label == widget.formDetails?.formType || x.name == widget.formDetails?.formType,
+              ),
               schema: schemaObject,
             );
+            print('request details ${_createFormRequest}');
           });
+
           _updateRequest(_createFormRequest);
         } catch (e) {
+          print('Error $e');
           // If parsing fails, fall back to restoring draft
           _restoreDraft();
         }
       } else {
+        print('Else triggered');
         _restoreDraft();
       }
     } else {

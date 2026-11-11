@@ -11,11 +11,18 @@ import 'package:venue_flow_app/features/form/presentation/views/form_tablet_view
 import 'package:venue_flow_app/features/form/presentation/views/form_desktop_view.dart'
     deferred as form_desktop_view;
 import '../../../core/theme/theme_x.dart';
+import '../domain/form_list_item.dart';
 
 class FormScreen extends ConsumerStatefulWidget {
-  const FormScreen({super.key, this.formId, this.isAdd = false});
+  const FormScreen({
+    super.key,
+    this.formId,
+    this.isAdd = false,
+    this.formDetails,
+  });
 
   final String? formId;
+  final FormListItem? formDetails;
   final bool isAdd;
 
   @override
@@ -180,6 +187,7 @@ class _FormScreenState extends ConsumerState<FormScreen> {
           selectedFormVersion: _selectedVersion,
           formId: widget.formId,
           latestVersion: _latestVersion,
+          formDetails: widget.formDetails,
           refreshUI: (value) {
             _loadForm();
           },
