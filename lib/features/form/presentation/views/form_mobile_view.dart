@@ -28,7 +28,9 @@ import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_fiel
 import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name_dialog.dart';
 import 'package:venue_flow_app/features/form/presentation/widgets/form_field_widget.dart';
 
+import '../../../../core/enums/form_type.dart';
 import '../../data/form_controller.dart';
+import '../../domain/add_form_version_request.dart';
 
 class FormMobileView extends ConsumerStatefulWidget {
   const FormMobileView({
@@ -286,18 +288,23 @@ class _FormMobileViewState extends ConsumerState<FormMobileView> {
 
       await formController.addNewFormVersion(
         formId: widget.formId ?? '',
-        formVersion: FormVersion(
-          id: widget.formId ?? '',
-          formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
-          createdAt: DateTime.now(),
-          reviewedAt: DateTime.now(),
-          schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
-          status: 'DRAFT',
-          submittedAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          versionNumber: widget.latestVersion != null
-              ? widget.latestVersion! + 1
-              : 1,
+        addFormVersionRequest: AddFormVersionRequest(
+          name: _createFormRequest.name,
+          description: _createFormRequest.description ?? '',
+          formType: _createFormRequest.formType.toString(),
+          sourceVersion: FormVersion(
+            id: widget.formId ?? '',
+            formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
+            createdAt: DateTime.now(),
+            reviewedAt: DateTime.now(),
+            schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
+            status: 'DRAFT',
+            submittedAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            versionNumber: widget.latestVersion != null
+                ? widget.latestVersion! + 1
+                : 1,
+          ),
         ),
       );
 

@@ -227,8 +227,8 @@ return $default(_that.name,_that.description,_that.formType,_that.schema);case _
 }
 
 /// @nodoc
-
 @JsonSerializable()
+
 class _CreateFormRequest implements CreateFormRequest {
   const _CreateFormRequest({required this.name, this.description, @EnumConverter(FormType.values) this.formType = FormType.Food, this.schema});
   factory _CreateFormRequest.fromJson(Map<String, dynamic> json) => _$CreateFormRequestFromJson(json);

@@ -16,6 +16,7 @@ import 'package:venue_flow_app/core/theme/theme_x.dart';
 import 'package:venue_flow_app/core/widgets/side_nav.dart';
 import 'package:venue_flow_app/core/widgets/status_badge.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
+import 'package:venue_flow_app/features/form/domain/add_form_version_request.dart';
 
 import 'package:venue_flow_app/features/form/domain/create_form_request.dart';
 import 'package:venue_flow_app/features/form/domain/form_field_data.dart';
@@ -28,6 +29,7 @@ import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_fiel
 import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name_dialog.dart';
 import 'package:venue_flow_app/features/form/presentation/widgets/form_field_widget.dart';
 
+import '../../../../core/enums/form_type.dart';
 import '../../data/form_controller.dart';
 
 class FormDesktopView extends ConsumerStatefulWidget {
@@ -208,7 +210,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
 
       if (savedDraft != null && savedDraft.isNotEmpty) {
         final Map<String, dynamic> data =
-        jsonDecode(savedDraft) as Map<String, dynamic>;
+            jsonDecode(savedDraft) as Map<String, dynamic>;
 
         if (data.containsKey('request') && data['request'] is Map) {
           final requestJson = Map<String, dynamic>.from(data['request'] as Map);
@@ -220,7 +222,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
 
           final selectedPageExists =
               savedPageId != null &&
-                  pages.any((page) => page.id == savedPageId);
+              pages.any((page) => page.id == savedPageId);
 
           if (mounted) {
             setState(() {
@@ -286,18 +288,23 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
 
       await formController.addNewFormVersion(
         formId: widget.formId ?? '',
-        formVersion: FormVersion(
-          id: widget.formId ?? '',
-          formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
-          createdAt: DateTime.now(),
-          reviewedAt: DateTime.now(),
-          schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
-          status: 'DRAFT',
-          submittedAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          versionNumber: widget.latestVersion != null
-              ? widget.latestVersion! + 1
-              : 1,
+        addFormVersionRequest: AddFormVersionRequest(
+          name: _createFormRequest.name,
+          description: _createFormRequest.description ?? '',
+          formType: _createFormRequest.formType.toString(),
+          sourceVersion: FormVersion(
+            id: widget.formId ?? '',
+            formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
+            createdAt: DateTime.now(),
+            reviewedAt: DateTime.now(),
+            schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
+            status: 'DRAFT',
+            submittedAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            versionNumber: widget.latestVersion != null
+                ? widget.latestVersion! + 1
+                : 1,
+          ),
         ),
       );
 
@@ -630,7 +637,6 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
 
       case FormFieldType.IntField:
         return 'Number field';
-
     }
   }
 
@@ -647,7 +653,6 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
 
       case FormFieldType.IntField:
         return 'Enter a number';
-
     }
   }
 
@@ -729,7 +734,7 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
     if (page == null) return;
 
     final field = page.fields.firstWhere(
-          (field) => field.orderNumber == orderNumber,
+      (field) => field.orderNumber == orderNumber,
     );
 
     setState(() {
@@ -846,10 +851,10 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
       drawer: wide
           ? null
           : Drawer(
-        width: 240,
-        backgroundColor: cs.surface,
-        child: SideNav(activePath: '/forms'),
-      ),
+              width: 240,
+              backgroundColor: cs.surface,
+              child: SideNav(activePath: '/forms'),
+            ),
 
       floatingActionButton: PopupMenuButton<FormToolbarOptions>(
         tooltip: 'Toolbar',
@@ -987,17 +992,18 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                   child: Container(
                                     constraints: BoxConstraints(
                                       minHeight:
-                                      MediaQuery.sizeOf(context).height *
+                                          MediaQuery.sizeOf(context).height *
                                           0.75,
                                     ),
                                     padding: const EdgeInsets.all(24),
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         // Form name
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Expanded(
                                               child: Row(
@@ -1008,11 +1014,12 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                                       context,
                                                     ).textTheme.titleLarge,
                                                   ),
-                                                  const SizedBox(width: 16,),
+                                                  const SizedBox(width: 16),
                                                   StatusBadge(
-                                                    label: _createFormRequest
-                                                        .formType
-                                                        ?.label ??
+                                                    label:
+                                                        _createFormRequest
+                                                            .formType
+                                                            ?.label ??
                                                         '',
                                                     status: BadgeStatus.info,
                                                   ),
@@ -1035,9 +1042,9 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                                         // Form description
                                         Text(
                                           _createFormRequest
-                                              .description
-                                              ?.isNotEmpty ==
-                                              true
+                                                      .description
+                                                      ?.isNotEmpty ==
+                                                  true
                                               ? _createFormRequest.description!
                                               : 'Add a description for your form.',
                                           maxLines: _isExpanded ? null : 2,
@@ -1520,8 +1527,8 @@ class _FormDesktopViewState extends ConsumerState<FormDesktopView> {
                     onPressed: _selectedOrderNumber == null
                         ? null
                         : () {
-                      _updateField(_selectedOrderNumber!);
-                    },
+                            _updateField(_selectedOrderNumber!);
+                          },
                     child: const Text('Save'),
                   ),
                 ],

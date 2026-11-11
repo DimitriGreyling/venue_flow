@@ -10,6 +10,7 @@ import 'package:venue_flow_app/core/domain/icon_feature.dart';
 import 'package:venue_flow_app/core/enums/badge_status.dart';
 
 import 'package:venue_flow_app/core/enums/form_field_type.dart';
+import 'package:venue_flow_app/core/enums/form_type.dart';
 import 'package:venue_flow_app/core/enums/tool_bar_options.dart';
 import 'package:venue_flow_app/core/theme/app_theme.dart';
 import 'package:venue_flow_app/core/theme/theme_x.dart';
@@ -29,6 +30,7 @@ import 'package:venue_flow_app/features/form/presentation/dialogs/edit_form_name
 import 'package:venue_flow_app/features/form/presentation/widgets/form_field_widget.dart';
 
 import '../../data/form_controller.dart';
+import '../../domain/add_form_version_request.dart';
 
 class FormTabletView extends ConsumerStatefulWidget {
   const FormTabletView({
@@ -286,18 +288,23 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
       await formController.addNewFormVersion(
         formId: widget.formId ?? '',
-        formVersion: FormVersion(
-          id: widget.formId ?? '',
-          formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
-          createdAt: DateTime.now(),
-          reviewedAt: DateTime.now(),
-          schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
-          status: 'DRAFT',
-          submittedAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          versionNumber: widget.latestVersion != null
-              ? widget.latestVersion! + 1
-              : 1,
+        addFormVersionRequest: AddFormVersionRequest(
+          name: _createFormRequest.name,
+          description: _createFormRequest.description ?? '',
+          formType: _createFormRequest.formType.toString(),
+          sourceVersion: FormVersion(
+            id: widget.formId ?? '',
+            formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
+            createdAt: DateTime.now(),
+            reviewedAt: DateTime.now(),
+            schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
+            status: 'DRAFT',
+            submittedAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+            versionNumber: widget.latestVersion != null
+                ? widget.latestVersion! + 1
+                : 1,
+          ),
         ),
       );
 
