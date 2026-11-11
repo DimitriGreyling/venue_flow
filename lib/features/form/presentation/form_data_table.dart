@@ -34,14 +34,7 @@ class FormDataTable extends ConsumerStatefulWidget {
 }
 
 class _FormDataTableState extends ConsumerState<FormDataTable> {
-  final formDetailsProvider = FutureProvider.family<FormListItem, String>((
-    ref,
-    formId,
-  ) async {
-    final controller = ref.read(formControllerProvider.notifier);
 
-    return controller.getFormById(formId: formId);
-  });
 
   @override
   Widget build(BuildContext context) {

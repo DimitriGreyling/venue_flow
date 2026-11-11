@@ -34,14 +34,7 @@ class CustomerDataTable extends ConsumerStatefulWidget {
 }
 
 class _CustomerDataTableState extends ConsumerState<CustomerDataTable> {
-  final customerDetailsProvider = FutureProvider.family<Customer, String>((
-    ref,
-    customerId,
-  ) async {
-    final controller = ref.read(customerControllerProvider.notifier);
 
-    return controller.getMemberDetailsById(customerId);
-  });
 
   @override
   Widget build(BuildContext context) {
