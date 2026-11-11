@@ -294,7 +294,8 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
           formType: _createFormRequest.formType.toString(),
           sourceVersion: FormVersion(
             id: widget.formId ?? '',
-            formDefinitionId: widget.selectedFormVersion?.formDefinitionId ?? '',
+            formDefinitionId:
+                widget.selectedFormVersion?.formDefinitionId ?? '',
             createdAt: DateTime.now(),
             reviewedAt: DateTime.now(),
             schemaJson: jsonEncode(_createFormRequest.schema?.toJson()),
@@ -637,8 +638,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
       case FormFieldType.IntField:
         return 'Number field';
-
-      }
+    }
   }
 
   String _defaultFieldHint(FormFieldType type) {
@@ -654,8 +654,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
 
       case FormFieldType.IntField:
         return 'Enter a number';
-
-      }
+    }
   }
 
   /// Reorders fields on the currently selected page.
@@ -990,7 +989,27 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                 constraints: const BoxConstraints(
                                   maxWidth: 1440,
                                 ),
-                                child: Card(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: cs.surface,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        // Extremely soft shadow
+                                        blurRadius: 10,
+                                        // Makes the shadow smooth
+                                        spreadRadius: 0,
+                                        // Prevents it from looking harsh
+                                        offset: const Offset(
+                                          0,
+                                          4,
+                                        ), // Pushes the shadow down slightly
+                                      ),
+                                    ],
+                                  ),
                                   child: Container(
                                     constraints: BoxConstraints(
                                       minHeight:
@@ -1004,7 +1023,8 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                       children: [
                                         // Form name
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Expanded(
                                               child: Row(
@@ -1015,11 +1035,12 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                                       context,
                                                     ).textTheme.titleLarge,
                                                   ),
-                                                  const SizedBox(width: 16,),
+                                                  const SizedBox(width: 16),
                                                   StatusBadge(
-                                                    label: _createFormRequest
-                                                        .formType
-                                                        ?.label ??
+                                                    label:
+                                                        _createFormRequest
+                                                            .formType
+                                                            ?.label ??
                                                         '',
                                                     status: BadgeStatus.info,
                                                   ),
@@ -1069,7 +1090,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                           ),
                                         ),
 
-                                        const Divider(height: 24),
+                                        const Divider(height: 10),
 
                                         _buildPageSelector(cs),
 
@@ -1419,7 +1440,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                               },
                             ),
 
-                            Divider(color: cs.onSurface.withValues(alpha: 0.3)),
+                            const Divider(),
                           ];
                         }).toList(),
                       ),
