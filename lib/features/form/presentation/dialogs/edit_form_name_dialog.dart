@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:venue_flow_app/core/enums/form_type.dart';
+import 'package:venue_flow_app/features/form/data/form_controller.dart';
+import 'package:venue_flow_app/features/form/domain/form_details_model.dart';
 import '../../../../core/theme/theme_x.dart' show ThemeX;
 
 ///
@@ -10,29 +13,29 @@ class EditFormNameDialog extends ConsumerStatefulWidget {
     super.key,
     this.formName,
     this.formDescription,
-    this.onFormNameChanged,
-    this.onFormDescriptionChanged,
+    this.formType,
+    this.onChanged,
   });
 
   final String? formName;
   final String? formDescription;
-  final ValueChanged<String?>? onFormNameChanged;
-  final ValueChanged<String?>? onFormDescriptionChanged;
+  final FormType? formType;
+  final ValueChanged<FormDetailsModel?>? onChanged;
 
   static Future<bool?> show(
     BuildContext context, {
     String? formName,
     String? formDescription,
-    ValueChanged<String?>? onFormNameChanged,
-    ValueChanged<String?>? onFormDescriptionChanged,
+    FormType? formType,
+    ValueChanged<FormDetailsModel?>? onChanged,
   }) {
     return showDialog<bool>(
       context: context,
       builder: (_) => EditFormNameDialog(
         formName: formName,
         formDescription: formDescription,
-        onFormNameChanged: onFormNameChanged,
-        onFormDescriptionChanged: onFormDescriptionChanged,
+        formType: formType,
+        onChanged: onChanged,
       ),
     );
   }
@@ -49,6 +52,8 @@ class _EditFormNameDialogState extends ConsumerState<EditFormNameDialog>
   final TextEditingController _formNameController = TextEditingController();
   final TextEditingController _formDescriptionController =
       TextEditingController();
+  late FormType _selectedFormType;
+
   bool _isSaving = false;
 
   @override
@@ -57,6 +62,7 @@ class _EditFormNameDialogState extends ConsumerState<EditFormNameDialog>
 
     _formNameController.text = widget.formName ?? '';
     _formDescriptionController.text = widget.formDescription ?? '';
+    _selectedFormType = widget.formType ?? FormType.Food;
   }
 
   @override
@@ -75,28 +81,23 @@ class _EditFormNameDialogState extends ConsumerState<EditFormNameDialog>
         _isSaving = true;
       });
 
-      widget.onFormNameChanged?.call(_formNameController.text);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: sem.success,
-          content: const Text('Form name updated successfully'),
-        ),
+      FormDetailsModel formDetails = FormDetailsModel();
+
+      formDetails = formDetails.copyWith(
+        name: _formNameController.text,
+        description: _formDescriptionController.text,
+        type: _selectedFormType,
       );
 
-      widget.onFormDescriptionChanged?.call(_formDescriptionController.text);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: sem.success,
-          content: const Text('Form description updated successfully'),
-        ),
-      );
+      widget.onChanged?.call(formDetails);
 
       Navigator.of(context).pop(true);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('$stackTrace');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: cs.error,
-          content: Text('Failed to update form name: $e'),
+          content: Text('Failed to update form details: $e'),
         ),
       );
     } finally {
@@ -125,9 +126,7 @@ class _EditFormNameDialogState extends ConsumerState<EditFormNameDialog>
       child: SizedBox(
         width: dialogWidth,
         child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: screenSize.height * 0.4,
-          ),
+          constraints: BoxConstraints(maxHeight: screenSize.height * 0.4),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -145,6 +144,34 @@ class _EditFormNameDialogState extends ConsumerState<EditFormNameDialog>
                       key: _formNameFormKey,
                       child: Column(
                         children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: DropdownButtonFormField<FormType>(
+                                  initialValue: _selectedFormType,
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    labelText: 'Form Type',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  items: FormType.values.map((formType) {
+                                    return DropdownMenuItem<FormType>(
+                                      value: formType,
+                                      child: Text(formType.label),
+                                    );
+                                  }).toList(),
+                                  onChanged: (FormType? newValue) {
+                                    setState(() {
+                                      _selectedFormType = newValue ?? FormType.Food;
+                                    });
+                                  },
+                                )
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
                           TextFormField(
                             controller: _formNameController,
                             decoration: const InputDecoration(
@@ -175,6 +202,7 @@ class _EditFormNameDialogState extends ConsumerState<EditFormNameDialog>
                               return null;
                             },
                           ),
+                          const SizedBox(height: 16),
                         ],
                       ),
                     ),
@@ -214,7 +242,6 @@ class _EditFormNameDialogState extends ConsumerState<EditFormNameDialog>
                 //     ),
                 //   ],
                 // ),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -248,11 +275,11 @@ class _EditFormNameDialogState extends ConsumerState<EditFormNameDialog>
                           : () => _save(cs: cs, sem: sem),
                       child: _isSaving
                           ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                          : Text('Update',style: TextStyle(color: cs.primary)),
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text('Update', style: TextStyle(color: cs.primary)),
                     ),
                   ],
                 ),

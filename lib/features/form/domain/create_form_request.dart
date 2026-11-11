@@ -1,4 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:venue_flow_app/core/converters/form_type_converter.dart';
+import 'package:venue_flow_app/core/enums/form_type.dart';
 import 'package:venue_flow_app/features/form/domain/form_schema.dart';
 import 'form_field_schema.dart';
 
@@ -11,7 +13,9 @@ abstract class CreateFormRequest with _$CreateFormRequest {
   const factory CreateFormRequest({
     required String name,
     String? description,
-    String? formType,
+    @EnumConverter(FormType.values)
+    @Default(FormType.Food)
+    FormType? formType,
     FormSchema? schema,
   }) = _CreateFormRequest;
 

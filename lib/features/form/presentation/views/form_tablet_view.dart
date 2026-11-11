@@ -7,12 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:venue_flow_app/core/domain/icon_feature.dart';
+import 'package:venue_flow_app/core/enums/badge_status.dart';
 
 import 'package:venue_flow_app/core/enums/form_field_type.dart';
 import 'package:venue_flow_app/core/enums/tool_bar_options.dart';
 import 'package:venue_flow_app/core/theme/app_theme.dart';
 import 'package:venue_flow_app/core/theme/theme_x.dart';
 import 'package:venue_flow_app/core/widgets/side_nav.dart';
+import 'package:venue_flow_app/core/widgets/status_badge.dart';
 import 'package:venue_flow_app/core/widgets/top_bar.dart';
 
 import 'package:venue_flow_app/features/form/domain/create_form_request.dart';
@@ -373,6 +375,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   @override
   void dispose() {
     _draftSaveTimer?.cancel();
+    _clearDraft();
     super.dispose();
   }
 
@@ -628,9 +631,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       case FormFieldType.IntField:
         return 'Number field';
 
-      default:
-        return 'New field';
-    }
+      }
   }
 
   String _defaultFieldHint(FormFieldType type) {
@@ -647,9 +648,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       case FormFieldType.IntField:
         return 'Enter a number';
 
-      default:
-        return '';
-    }
+      }
   }
 
   /// Reorders fields on the currently selected page.
@@ -742,8 +741,6 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       context,
       formFieldSchema: field,
       onFormFieldSchemaChanged: (value) {
-        if (value == null) return;
-
         _selectedFieldForEdit = value;
         _updateField(orderNumber);
       },
@@ -786,15 +783,17 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
       context,
       formName: _createFormRequest.name,
       formDescription: _createFormRequest.description ?? '',
-      onFormNameChanged: (value) {
-        if (value == null || value.trim().isEmpty) return;
-
-        _updateRequest(_createFormRequest.copyWith(name: value.trim()));
-      },
-      onFormDescriptionChanged: (value) {
+      formType: _createFormRequest.formType,
+      onChanged: (value) {
         if (value == null) return;
 
-        _updateRequest(_createFormRequest.copyWith(description: value));
+        _updateRequest(
+          _createFormRequest.copyWith(
+            name: value.name!.trim(),
+            description: value.description?.trim(),
+            formType: value.type,
+          ),
+        );
       },
     );
   }
@@ -998,13 +997,26 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                       children: [
                                         // Form name
                                         Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Expanded(
-                                              child: Text(
-                                                _createFormRequest.name,
-                                                style: Theme.of(
-                                                  context,
-                                                ).textTheme.titleLarge,
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    _createFormRequest.name,
+                                                    style: Theme.of(
+                                                      context,
+                                                    ).textTheme.titleLarge,
+                                                  ),
+                                                  const SizedBox(width: 16,),
+                                                  StatusBadge(
+                                                    label: _createFormRequest
+                                                        .formType
+                                                        ?.label ??
+                                                        '',
+                                                    status: BadgeStatus.info,
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                             IconButton(
@@ -1359,7 +1371,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                 style: TextStyle(
                                   fontFamily: field.leadingIcon?.fontFamily,
                                   color: cs.onSurface.withValues(alpha: 0.5),
-                                  fontSize: 20
+                                  fontSize: 20,
                                 ),
                               ),
 
@@ -1388,7 +1400,7 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
                                   style: TextStyle(
                                     fontFamily: field.trailingIcon?.fontFamily,
                                     color: cs.secondary,
-                                      fontSize: 25
+                                    fontSize: 25,
                                   ),
                                 ),
                               ),
