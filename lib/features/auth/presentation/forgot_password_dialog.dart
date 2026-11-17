@@ -150,28 +150,46 @@ class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
 
           const SizedBox(height: 24),
 
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: _isLoading ? null : _submit,
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Send reset link'),
-            ),
-          ),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        Theme.of(context).colorScheme.tertiary,
+                      ),
+                    ),
+                    onPressed: _isLoading ? null : () => Navigator.pop(context),
+                    child: Text(
+                      'Back to login',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onTertiary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
-          const SizedBox(height: 8),
+              const SizedBox(width: 16),
 
-          SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              onPressed: _isLoading ? null : () => Navigator.pop(context),
-              child: const Text('Back to login'),
-            ),
+              Expanded(
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _isLoading ? null : _submit,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Send reset link'),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
