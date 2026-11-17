@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme_x.dart';
+import '../../data/auth_controller.dart';
 import '../../data/auth_session.dart';
+import '../forgot_password_dialog.dart';
 
 class LoginMobileView extends ConsumerStatefulWidget {
   const LoginMobileView({super.key});
@@ -78,6 +80,19 @@ class _LoginMobileViewState extends ConsumerState<LoginMobileView>
     } catch (e) {
       if (!mounted) return;
     }
+  }
+
+  void _showForgotPasswordDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) => ForgotPasswordDialog(
+        onSubmit: (email) async {
+          return await ref
+              .read(authControllerProvider.notifier)
+              .sendResetPasswordEmail(email: email);
+        },
+      ),
+    );
   }
 
   @override
@@ -168,7 +183,9 @@ class _LoginMobileViewState extends ConsumerState<LoginMobileView>
                             ),
                           ),
                           InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              _showForgotPasswordDialog();
+                            },
                             child: const Text(
                               'Forgot Password?',
                               style: TextStyle(

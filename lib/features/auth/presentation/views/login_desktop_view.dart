@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme_x.dart';
+import '../../data/auth_controller.dart';
 import '../../data/auth_session.dart';
+import '../forgot_password_dialog.dart';
 
 class LoginDesktopView extends ConsumerStatefulWidget {
   const LoginDesktopView({super.key});
@@ -54,6 +56,19 @@ class _LoginDesktopViewState extends ConsumerState<LoginDesktopView>
     _passwordController.dispose();
     _animController.dispose();
     super.dispose();
+  }
+
+  void _showForgotPasswordDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) => ForgotPasswordDialog(
+        onSubmit: (email) async {
+          return await ref
+              .read(authControllerProvider.notifier)
+              .sendResetPasswordEmail(email: email);
+        },
+      ),
+    );
   }
 
   Future<void> _handleSignIn() async {
@@ -320,7 +335,9 @@ class _LoginDesktopViewState extends ConsumerState<LoginDesktopView>
                                               ),
                                             ),
                                             InkWell(
-                                              onTap: () {},
+                                              onTap: () {
+                                                _showForgotPasswordDialog();
+                                              },
                                               child: const Text(
                                                 'Forgot Password?',
                                                 style: TextStyle(
@@ -380,7 +397,8 @@ class _LoginDesktopViewState extends ConsumerState<LoginDesktopView>
                                                 0xFF4F46E5,
                                               ).withValues(alpha: 0.4),
                                               shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(12),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
                                               ),
                                             ),
                                             child: isLoading
