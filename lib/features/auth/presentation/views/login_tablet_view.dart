@@ -2,8 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:venue_flow_app/features/auth/data/auth_controller.dart';
 import '../../../../core/theme/theme_x.dart';
+import '../../data/auth_repository.dart';
 import '../../data/auth_session.dart';
+import '../forgot_password_dialog.dart';
 
 class LoginTabletView extends ConsumerStatefulWidget {
   const LoginTabletView({super.key});
@@ -54,6 +57,19 @@ class _LoginTabletViewState extends ConsumerState<LoginTabletView>
     _passwordController.dispose();
     _animController.dispose();
     super.dispose();
+  }
+
+  void _showForgotPasswordDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) => ForgotPasswordDialog(
+        onSubmit: (email) async {
+          return await ref
+              .read(authControllerProvider.notifier)
+              .sendResetPasswordEmail(email: email);
+        },
+      ),
+    );
   }
 
   Future<void> _handleSignIn() async {
@@ -168,7 +184,9 @@ class _LoginTabletViewState extends ConsumerState<LoginTabletView>
                             ),
                           ),
                           InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              _showForgotPasswordDialog();
+                            },
                             child: const Text(
                               'Forgot Password?',
                               style: TextStyle(
@@ -230,27 +248,27 @@ class _LoginTabletViewState extends ConsumerState<LoginTabletView>
                           ),
                           child: isLoading
                               ? SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              color: cs.onPrimary,
-                              strokeWidth: 2.5,
-                            ),
-                          )
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    color: cs.onPrimary,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
                               : const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Sign In',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Sign In',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Icon(Icons.arrow_forward_rounded, size: 18),
+                                  ],
                                 ),
-                              ),
-                              SizedBox(width: 8),
-                              Icon(Icons.arrow_forward_rounded, size: 18),
-                            ],
-                          ),
                         ),
                       ),
                     ],
