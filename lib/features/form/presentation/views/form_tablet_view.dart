@@ -175,19 +175,15 @@ class _FormTabletViewState extends ConsumerState<FormTabletView> {
   @override
   void initState() {
     super.initState();
-print('Selected ${widget.formDetails}');
-    print('Selected2 ${widget.selectedFormVersion}');
     // Check that the list is NOT null AND contains at least one item
     if (widget.selectedFormVersion != null) {
       // Safely extract the string, ensuring it isn't empty or blank
       final rawJson = widget.selectedFormVersion!.schemaJson;
-      print('Selected3 ${rawJson}');
       if (rawJson != null && rawJson.trim().isNotEmpty) {
         try {
           final schemaObject = FormSchema.fromJson(jsonDecode(rawJson));
 
           setState(() {
-            print('Form type ${widget.formDetails?.formType}');
             _createFormRequest = _createFormRequest.copyWith(
               name: widget.formDetails?.name ?? 'Form Name',
               description:
@@ -197,17 +193,14 @@ print('Selected ${widget.formDetails}');
               ),
               schema: schemaObject,
             );
-            print('request details ${_createFormRequest}');
           });
 
           _updateRequest(_createFormRequest);
         } catch (e) {
-          print('Error $e');
           // If parsing fails, fall back to restoring draft
           _restoreDraft();
         }
       } else {
-        print('Else triggered');
         _restoreDraft();
       }
     } else {

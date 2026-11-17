@@ -145,6 +145,22 @@ class _FormDataTableState extends ConsumerState<FormDataTable> {
                                             color: cs.error,
                                           ),
                                         ),
+                                        PopupMenuButton<String>(
+                                          onSelected: (value) {
+                                            switch (value) {
+                                              case 'SendToCustomer':
+                                                return;
+                                            }
+                                          },
+                                          itemBuilder: (context) {
+                                            return [
+                                              PopupMenuItem(
+                                                value: 'SendToCustomer',
+                                                child: Text('Send to customer'),
+                                              ),
+                                            ];
+                                          },
+                                        ),
                                       ],
                                     ),
                                   ),
