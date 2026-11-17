@@ -45,13 +45,6 @@ class _ResetPasswordTabletViewState
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Call your auth provider or repository to submit the reset request
-      // e.g., await ref.read(authRepositoryProvider).resetPassword(
-      //   email: widget.email,
-      //   token: widget.token,
-      //   newPassword: _passwordController.text,
-      // );
-
       ResetPasswordRequest request = ResetPasswordRequest(
         email: '',
         token: '',
