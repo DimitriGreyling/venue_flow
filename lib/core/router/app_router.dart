@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:venue_flow_app/features/form/presentation/form_table_screen.dart';
+import 'package:venue_flow_app/features/reset_password/presentation/reset_password_screen.dart';
 
 import '../../features/appointment/presentation/appointment_screen.dart';
 import '../../features/appointment_configuration/presentation/appointment_configuration_screen.dart';
@@ -65,7 +66,7 @@ GoRouter router(Ref ref) {
               final formId = state.pathParameters['formId']!;
               final formDetails = state.extra as FormListItem?;
 
-              return FormScreen(formId: formId,formDetails:formDetails);
+              return FormScreen(formId: formId, formDetails: formDetails);
             },
           ),
         ],
@@ -80,6 +81,18 @@ GoRouter router(Ref ref) {
         path: '/appointment-configuration',
         builder: (_, __) => const AppointmentConfigurationScreen(),
       ),
+      GoRoute(
+        path: '/set-password',
+        builder: (_, state) {
+          final email = state.uri.queryParameters['email'] ?? '';
+          final token = state.uri.queryParameters['token'] ?? '';
+
+          return ResetPasswordScreen(
+            email: email,
+            token: token,
+          );
+        },
+      ),
     ],
     redirect: (_, state) {
       final auth = ref.read(authSessionProvider);
@@ -92,7 +105,7 @@ GoRouter router(Ref ref) {
       final goingToLogin = loc == '/login';
 
       // Routes a logged-out user may visit
-      const publicRoutes = {'/home'};
+      const publicRoutes = {'/home','/set-password'};
 
       if (!isAuthed) {
         if (goingToLogin || publicRoutes.contains(loc)) return null;

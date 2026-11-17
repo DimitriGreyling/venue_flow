@@ -5,9 +5,11 @@ import 'app.dart';
 import 'core/error/error_observer.dart';
 import 'core/error/error_service.dart';
 import 'features/auth/data/auth_session.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
 //Testing
   final errors = ErrorService();
 
@@ -28,6 +30,9 @@ void main() async {
     errors.show(error, stack: stack);
     return true;
   };
+
+  // Turn on clean URLs (removes the '#' from web routing)
+  usePathUrlStrategy();
 
   runApp(UncontrolledProviderScope(container: container, child: const App()));
 }
